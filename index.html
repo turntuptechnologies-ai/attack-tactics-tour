@@ -12,7 +12,7 @@
 <meta property="og:url" content="https://turntuptechnologies-ai.github.io/attack-tactics-tour/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
 <style>
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -25,6 +25,7 @@ img{max-width:100%}
 :root{
   --bg:#e9f3ef; --panel:#fbfdfb; --fg:#1c2a2d; --muted:#5a6c6e; --line:#c9d9d4;
   --sky:#101b33; --attack:#d63f35; --defend:#2a63d4; --chip-fg:#ffffff; --seg:#3a4a6b; --seg-done:#9fb4d8;
+  --title:"Press Start 2P","DotGothic16","Zen Kaku Gothic New",monospace;
   --display:"DotGothic16","Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
   --body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
 }
@@ -43,7 +44,7 @@ body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px
   padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));
   display:flex;flex-direction:column;gap:14px}
 header{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
-h1{font-family:var(--display);font-weight:400;font-size:clamp(22px,4.4vw,34px);line-height:1.25;margin:0;text-wrap:balance}
+h1{font-family:var(--title);font-weight:400;font-size:clamp(15px,3.4vw,26px);line-height:1.5;margin:0;text-wrap:balance}
 header p{margin:0;color:var(--muted);font-size:14px}
 .stage{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;background:var(--sky);border:3px solid var(--fg);overflow:hidden}
 .stage.a{border-color:var(--attack)} .stage.d{border-color:var(--defend)}
