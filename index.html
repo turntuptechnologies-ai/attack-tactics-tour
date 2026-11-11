@@ -665,11 +665,13 @@ const XF=[
    put(imp,track([[0,H[0],H[1]],[0.8,H[0],H[1]],[2.4,0.3,5.5],[2.7,0.3,5.5],[3.7,H[0],H[1]],[7,H[0],H[1]]],t)); imp.scale.multiplyScalar(IC); if(t>=3.7) imp.rotation.y=0.6;
    for(let i=0;i<6;i++){ const f=(i+0.5)/6, m=pk[i], k=1-sm(seg(t,0.7+f*1.6,1.0+f*1.6)); m.visible=k>0.01; m.scale.set(0.34*k,0.06,0.34*k); m.position.set(lerp(H[0],0.3,f)+((i&1)?0.2:-0.2),0.04,lerp(H[1],5.5,f)); }
    put(def,track([[0,-5,5.4],[4.6,-5,5.4],[6.2,-0.6,5.3],[7,-0.6,5.3]],t,0)); },3.8],
-  [function(t){ camT=[1.5,3.8]; camS=9.5; base(6);                                                    // Obfuscated Files or Information
-   const on=sm(seg(t,0.6,1.2)); for(let i=0;i<7;i++){ const m=pk[i], a=t*5+i*0.9, s=0.34*on; m.visible=s>0.01; m.scale.set(s,s,s);
-     m.position.set(H[0]+Math.cos(a)*0.8,0.4+(i%3)*0.5+Math.sin(t*7+i)*0.1,H[1]+Math.sin(a)*0.8); m.rotation.set(t*3,t*4,0); }
-   if(t>2.2&&t<3.8){ scan.visible=true; scan.rotation.y=Math.PI/2; scan.scale.set(2.6,2.6,0.08); scan.position.set(lerp(3.8,0,seg(t,2.2,3.8)),1.3,H[1]); scan.material.opacity=0.4; }
-   if(t<4.6) ok(H[0],3.5,H[1],t,3.8); },3.9]],
+  [function(t){ camT=[1.5,3.8]; camS=9.5; base(6);                                                      // Obfuscated Files or Information
+   const sc=sm(seg(t,0.6,1.3))*(1-sm(seg(t,3.3,3.8))), k=IC*(1-sc), n=Math.floor(t*6);   // sc=1: scrambled into pieces
+   imp.scale.set(k,k,k); imp.visible=k>0.2; crown.visible=sc<0.3;
+   for(let i=0;i<7;i++){ const m=pk[i], q=0.36*sc, a=i*0.9+n*1.7*(i+1), r=0.25+0.7*sc*((i*37+n*13)%5)/4; m.visible=q>0.01; m.scale.set(q,q,q);
+     m.position.set(H[0]+Math.cos(a)*r,0.3+((i*53+n*31)%7)*0.3*sc,H[1]+Math.sin(a)*r); m.rotation.set(i,n*0.8,0); }
+   if(t>1.7&&t<3.2){ scan.visible=true; scan.rotation.y=Math.PI/2; scan.scale.set(2.8,2.8,0.08); scan.position.set(lerp(3.9,-0.1,seg(t,1.7,3.2)),1.4,H[1]); scan.material.opacity=0.4; }
+   if(t>3.8&&t<4.6) imp.position.y=Math.abs(Math.sin((t-3.8)*7))*0.35; },3.9]],
  // Defense Impairment
  [[function(t){ camT=[1.5,6.5]; camS=13; base(7);                                                     // Disable or Modify System Firewall
    if(t>0.8&&t<1.5) beam(links[0],IH(0.9),[0,1.5,6.3],0.12);
@@ -678,10 +680,13 @@ const XF=[
    if(t>2.0&&t<5.4) for(let i=0;i<5;i++){ const ph=((t-2.0)*0.5+i*0.2)%1, q=ph<0.5?ph*2:ph*2-1, u=ph<0.5?a:g, w=ph<0.5?g:b, m=pk[i];
      m.visible=true; m.scale.set(0.3,0.3,0.3); m.position.set(lerp(u[0],w[0],q),lerp(u[1],w[1],q),lerp(u[2],w[2],q)); }
    ok(0,4.1,6.9,t,5.8); },2.4],
-  [function(t){ camT=[1.2,3.8]; camS=10; base(7);                                                     // Subvert Trust Controls
-   if(t>0.6&&t<5.4){ check.visible=true; check.position.set(H[0],lerp(6,3.0,bounce(seg(t,0.6,1.3))),H[1]); check.rotation.y=0.6; check.scale.set(0.8,0.8,0.8); }
-   const dp=sm(seg(t,1.8,2.5))*(1-sm(seg(t,3.6,4.2))); sensor(lerp(0.5,H[0],dp),lerp(3.3,4.6,dp)+Math.sin(T*3)*0.1,lerp(3.5,H[1],dp));
-   if(t>2.5&&t<3.5){ const bm=beams[2]; bm.visible=true; bm.rotation.set(0,0,0); bm.position.set(H[0],4.0,H[1]); bm.scale.set(0.25,0.9,0.25); }
+  [function(t){ camT=[0.6,3.2]; camS=10.5; base(7);                                                     // Subvert Trust Controls
+   const px=-1.4, pz=2.4, st=[px,2.3,pz];
+   proc.visible=true; proc.scale.set(1.6,1.6,1.6); proc.position.set(px,0,pz); proc.rotation.y=0.6; procEye.visible=false;   // trusted, signed software
+   if(t>0.5&&t<1.0) beam(links[0],IH(1.0),st,0.07);
+   if(t<5.4){ check.visible=true; check.scale.set(0.7,0.7,0.7); check.rotation.y=0.6; arc(check,st,IH(3.0),sm(seg(t,0.9,1.9)),1.2); if(t<0.9) check.position.y+=Math.sin(t*4)*0.06; }   // its signature, stolen
+   const dp=sm(seg(t,2.2,2.9))*(1-sm(seg(t,3.6,4.2))); sensor(lerp(0.5,H[0],dp),lerp(3.3,4.7,dp)+Math.sin(T*3)*0.1,lerp(3.5,H[1],dp));
+   if(t>2.9&&t<3.5){ const bm=beams[2]; bm.visible=true; bm.rotation.set(0,0,0); bm.position.set(H[0],4.0,H[1]); bm.scale.set(0.25,0.7,0.25); }
    deny(H[0],3.1,H[1],t,5.4); },3.6]],
  // Credential Access
  [[function(t){ camT=[1.0,3.0]; camS=10; base(8);                                                     // Brute Force
@@ -840,11 +845,12 @@ const XF2=[
    const hide=sm(seg(t,1.7,2.4))*(1-sm(seg(t,5.6,6.2))); imp.scale.y*=1-0.82*hide; crown.visible=hide<0.5;
    put(def,track([[0,-5,5.4],[2.4,-5,5.4],[4.4,5.5,5.4],[4.6,5.5,5.4],[5.6,1.0,5.3],[7,1.0,5.3]],t,0)); alarm(0,1.0,2.6,5.3,t,5.6,7); },2.6],
   [function(t){ camT=[1.5,3.8]; camS=9.5; base(6);                                                      // Virtualization/Sandbox Evasion
-   const up=1-sm(seg(t,0.4,1.0))+sm(seg(t,3.0,3.6)); if(up<0.99){ field.visible=true; field.scale.set(2.2,2.2,2.2); field.position.set(H[0],1.12+up*5,H[1]); field.material.opacity=0.35; }
-   if(t>1.0&&t<3.0){ const s=IC*0.8; imp.position.y=0; imp.scale.set(s,s,s); crown.visible=false; }
-   if(t>1.8&&t<3.4) ok(H[0],3.7,H[1],t,1.8);
-   if(t>3.6&&t<4.6){ imp.position.y=Math.abs(Math.sin((t-3.6)*7))*0.4;
-     for(let i=0;i<5;i++){ const p=seg(t,3.6+i*0.15,4.4+i*0.15), m=pk[i], s=0.3*(1-p*0.6); if(p<=0||p>=1) continue; m.visible=true; m.scale.set(s,s,s); m.position.set(H[0]+Math.sin(i*2.1+p*5)*0.6,1.0+p*2.3,H[1]+Math.cos(i*2.1+p*5)*0.6); } } },3.8]],
+   const up=1-sm(seg(t,0.4,1.0))+sm(seg(t,3.2,3.7));
+   if(up<0.99){ field.visible=true; field.scale.set(2.2,2.2,2.2); field.position.set(H[0],1.12+up*5,H[1]); field.material.opacity=0.35; }
+   if(t>1.0&&t<3.3){ const s=IC*0.8; imp.position.y=0; imp.scale.set(s,s*0.5,s); crown.visible=false; }   // lies flat until the analysis time runs out
+   if(t>0.9&&t<3.5){ pop(clock,H[0],3.9,H[1],t,0.9,1.1); clock.rotation.y=0.6; hand.rotation.z=-seg(t,1.1,3.2)*Math.PI*2; }
+   if(t>3.7&&t<4.6){ imp.position.y=Math.abs(Math.sin((t-3.7)*7))*0.4;
+     for(let i=0;i<5;i++){ const p=seg(t,3.7+i*0.12,4.4+i*0.12), m=pk[i], s=0.3*(1-p*0.6); if(p<=0||p>=1) continue; m.visible=true; m.scale.set(s,s,s); m.position.set(H[0]+Math.sin(i*2.1+p*5)*0.6,1.0+p*2.3,H[1]+Math.cos(i*2.1+p*5)*0.6); } } },3.8]],
  // Defense Impairment
  [[function(t){ camT=[1.0,3.2]; camS=9.5; base(7);                                                      // Prevent Command History Logging
    const L=[0,1.7,2.3], o=docs[0], f=sm(seg(t,1.8,2.4))*(1-sm(seg(t,5.4,6.0))); o.visible=true; o.scale.set(1.7,1.7,1.7); o.position.set(L[0],lerp(L[1],0.12,f),L[2]); o.rotation.set(-f*Math.PI/2,0.6*(1-f),0);
