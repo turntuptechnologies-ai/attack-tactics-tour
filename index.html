@@ -114,6 +114,7 @@ footer ul{margin:4px 0 0;padding-left:1.2em}
   <div class="cap"><span class="tag" id="tag">導入</span><span class="txt" id="txt">MITRE ATT&amp;CK は、攻撃者の目的を15の「戦術」に整理した知識ベースです。</span></div>
 
   <div class="ctl"><button id="pp" type="button">一時停止</button></div>
+  <p class="mxnote">赤いドクロは攻撃が成功した合図、青い盾は防御側の対策です。</p>
   <p class="mxnote">ATT&amp;CK マトリックス（Enterprise v20）。列が戦術、その下が技術です。赤枠が動画で描いた技術で、列の見出しを押すとその場面に飛びます。サブテクニックは省略しています。</p>
   <div class="mxwrap" id="mxw"><div class="matrix" id="matrix"></div></div>
 
@@ -330,8 +331,12 @@ B(crown,0.56,0.1,0.56,0xf6c531,0,0.63,0); [-0.2,0,0.2].forEach((x,i)=>B(crown,0.
 B(shell,0.62,0.58,0.62,0xdde6f3,0,0.33,0); B(shell,0.4,0.22,0.06,0x58a6ff,0,0.38,0.32);
 const anchor=add(G()); anchor.position.set(3.2,0,1.6); B(anchor,0.45,0.45,0.45,0x6a3fb0,0,0.23,0); B(anchor,0.08,0.22,0.05,0xf6c531,0,0.3,0.24); B(anchor,0.16,0.08,0.05,0xf6c531,0.05,0.22,0.24);
 const steps=add(G()); B(steps,0.8,0.5,0.8,0x8d95a3,0.9,0.25,3.0); B(steps,0.8,1.0,0.8,0x9aa2b0,0.1,0.5,3.0); B(steps,0.8,1.5,0.8,0xaab2c0,-0.7,0.75,3.0);
-const shield=add(G()); B(shield,1.0,1.0,0.15,0x2a63d4,0,0,-0.05); B(shield,0.76,0.76,0.16,0x6f9dff,0,0,0);
-B(shield,0.14,0.32,0.1,0xffffff,-0.17,-0.06,0.1).rotation.z=0.75; B(shield,0.14,0.56,0.1,0xffffff,0.1,0.04,0.1).rotation.z=-0.6;
+const shield=add(G());
+[[1.2,0.55,0.32],[1.04,0.3,-0.1],[0.76,0.24,-0.37],[0.42,0.2,-0.59]].forEach(r=>{ B(shield,r[0],r[1],0.14,0xf4f6fa,0,r[2],-0.04); B(shield,r[0]-0.2,r[1]+0.02,0.16,0x2a63d4,0,r[2]-0.02,0); });
+B(shield,0.16,0.9,0.1,0x9fc2ff,0,0.02,0.07); B(shield,0.7,0.16,0.1,0x9fc2ff,0,0.24,0.07);
+const skull=add(G()); B(skull,0.95,0.62,0.2,0xe0352b,0,0.2,0); B(skull,0.6,0.3,0.2,0xe0352b,0,-0.24,0);
+B(skull,0.24,0.24,0.08,0x2a0c0a,-0.21,0.2,0.08); B(skull,0.24,0.24,0.08,0x2a0c0a,0.21,0.2,0.08); B(skull,0.1,0.12,0.08,0x2a0c0a,0,-0.04,0.08);
+[-0.15,0,0.15].forEach(x=>B(skull,0.05,0.2,0.08,0x2a0c0a,x,-0.26,0.08)); skull.traverse(m=>{ m.castShadow=false; });
 shield.traverse(m=>{ m.castShadow=false; });
 const keys3=[0,1,2].map(()=>{ const g=add(G()); B(g,0.4,0.4,0.12,0xf6c531,0,0.2,0); B(g,0.14,0.6,0.12,0xf6c531,0,-0.25,0); B(g,0.25,0.12,0.12,0xf6c531,0.16,-0.35,0); return g; });
 const marks=racks.map((r,i)=>{ const m=new THREE.Mesh(GEO,basic(i===2?0xf6c531:0xff6fd8)); m.position.set(r.x,3.6,RZ); scene.add(m); return m; });
@@ -375,7 +380,7 @@ const bob=()=>Math.abs(Math.sin(T*5))*0.08;
 let camT=[0,6], camS=22;
 function reset(){
   doorL.position.x=-0.75; doorR.position.x=0.75;
-  [mfa,key,cross,clone,truckA,truckB,botB,arch,scan,segW,user,check,grant,fake,field,hammer,orb,tower,imp,crown,shell,anchor,shield,steps,ascan,c2].forEach(o=>{ o.visible=false; });
+  [mfa,key,cross,clone,truckA,truckB,botB,arch,scan,segW,user,check,grant,fake,field,hammer,orb,tower,imp,crown,shell,anchor,shield,skull,steps,ascan,c2].forEach(o=>{ o.visible=false; });
   [bots,letters,bangs,drones,beams,rings,links,keys3,marks,pk,exps,drings].forEach(a=>a.forEach(o=>{ o.visible=false; }));
   ambient(); atk.visible=def.visible=true; atk.scale.set(1,1,1); actor=atk; imp.rotation.set(0,0.6,0); drones[2].rotation.set(0,0,0);
   anchor.scale.set(1,1,1); steps.scale.set(1,1,1); tower.scale.set(1,1,1); segMat.color.setHex(0x6f9dff);
@@ -432,7 +437,7 @@ const TF=[
    if(t>3.5&&t<3.9){ const b=beams[2]; b.visible=true; b.rotation.set(0,0,0); b.position.set(H[0],1.6,H[1]); b.scale.set(0.3,1.8,0.3); }
    if(t>3.6&&t<5.3){ const s=1-seg(t,3.6,3.9); impAt(H[0],0,H[1],IS*s); }
    else if(t>=5.3){ impAt(H[0],bob(),H[1],IS*back(seg(t,5.3,5.7))); } },
- function(t){ camT=[1,3.6]; camS=10; base(5);                            // Privilege Escalation
+ function(t){ camT=[0.4,2.4]; camS=10.5; base(5);                            // Privilege Escalation
    steps.visible=true; steps.scale.y=Math.max(0.01,back(seg(t,0.2,0.7)));
    const P=[[H[0],0,H[1]],[0.9,0.5,3.0],[0.1,1.0,3.0],[-0.7,1.5,3.0]], T0=[0.9,1.8,2.7];
    let pos=P[0]; imp.rotation.y=-0.9;
@@ -482,7 +487,8 @@ function outro(t){ camT=[0,5.5]; camS=22+t*0.25; base(2); actor=atk;
   put(def,track([[0,-3,4.6],[1,-3,4.6],[3.5,3,4.6],[7,3,4.6]],t,0)); mfa.visible=true; sensor(0.5,3.3+Math.sin(T*3)*0.1,3.5); }
 
 const SC=[{k:-1,d:5,fn:intro,caps:[[0,5,'','MITRE ATT&CK は、攻撃者の目的を15の「戦術」に整理した知識ベース。ひとつの侵入を例に、順に見ていきます。']]}];
-TAC.forEach((tc,k)=>{ const d=tc.d||7; SC.push({k,d,fn:TF[k],caps:tc.caps||[[0,4.6,'a',tc.a],[4.6,d,'d',tc.df]]}); });
+const HITS=[[3.9],[3.5],[3.3],[3.2],[1.8,5.7],[3.8],[3.6],[2.2],[3.8],[3.5],[3.7],[3.5],[1.5],[4.1],[2.4]];
+TAC.forEach((tc,k)=>{ const d=tc.d||7; SC.push({k,d,hits:HITS[k],fn:TF[k],caps:tc.caps||[[0,4.6,'a',tc.a],[4.6,d,'d',tc.df]]}); });
 SC.push({k:15,d:7,fn:outro,caps:[[0,7,'','ここまでが15の戦術。実際の攻撃では順番が前後し、すべてを使うとは限らない。どの段階でも、気づいて止める機会がある。']]});
 let acc=0; SC.forEach(s=>{ s.t0=acc; acc+=s.d; }); const TOTAL=acc;
 
@@ -506,6 +512,8 @@ function draw(){
   const who=c[2]==='a'?actor:c[2]==='d'?def:null;
   if(who&&who.visible){ const col=c[2]==='a'?0xff5a4d:0x6f9dff;
     rings.forEach((g,j)=>{ const ph=(T*0.7+j*0.5)%1, k=1+ph*5.5; g.visible=true; g.material.color.setHex(col); g.scale.set(k,0.02,k); g.position.set(who.position.x,0.07,who.position.z); g.material.opacity=0.6*(1-ph); }); }
+  if(c[2]==='a'&&s.hits&&actor.visible){ const h=s.hits.find(h=>h>=c[0]&&h<c[1]); if(h!=null&&lt>=h){ const k=back(seg(lt,h,h+0.3))*(actor===atk?1:0.9);
+    skull.visible=true; skull.scale.set(k,k,k); skull.rotation.y=0.6; skull.position.set(actor.position.x,actor.position.y+(actor===atk?4.1:1.1*actor.scale.y+1.4)+Math.sin(T*5)*0.08,actor.position.z); } }
   if(c[2]==='d'){ const k=back(seg(lt,c[0],c[0]+0.3)); shield.visible=true; shield.scale.set(k,k,k); shield.rotation.y=0.6; shield.position.set(def.position.x,3.3+Math.sin(T*4)*0.08,def.position.z); }
   const a=W/Hh||16/9; cam.left=-camS*a/2; cam.right=camS*a/2; cam.top=camS/2; cam.bottom=-camS/2; cam.updateProjectionMatrix();
   cam.position.set(camT[0]+OFF.x,OFF.y,camT[1]+OFF.z); cam.lookAt(camT[0],0,camT[1]); cam.updateMatrixWorld();
