@@ -1,7 +1,7 @@
 // 再生機。時間を進め、いまの場面を描き、画面（React）に「いま何を再生しているか」を伝える。
 import * as THREE from 'three'
 import { createKit, type Kit } from '../scene/kit'
-import { back, seg } from '../scene/motion'
+import { overshoot, progress } from '../scene/motion'
 import { createScenes, type Scenes } from '../scene/scenes'
 import type { SceneDef } from '../scene/scenes/types'
 import { createWorld } from '../scene/world'
@@ -127,7 +127,7 @@ export class Player {
     const dt = Math.min(0.05, (now - this.last) / 1000 || 0)
     this.last = now
     if (this.playing) {
-      this.kit.view.T += dt
+      this.kit.view.time += dt
       this.time += dt
       if (this.time >= this.timeline[this.index].duration) {
         this.index = step(this.timeline, this.index, 1, this.includeExtras)
@@ -161,7 +161,7 @@ export class Player {
       el.hidden = true
       return
     }
-    const v = this.projected.set(o.position.x, o.position.y + above, o.position.z).project(this.kit.cam)
+    const v = this.projected.set(o.position.x, o.position.y + above, o.position.z).project(this.kit.camera)
     el.hidden = false
     const x = (((v.x + 1) / 2) * this.width).toFixed(1)
     const y = (((1 - v.y) / 2) * this.height).toFixed(1)
@@ -171,24 +171,24 @@ export class Player {
   private draw() {
     this.resize()
     const { kit } = this
-    const { view, cam } = kit
+    const { view, camera } = kit
     const scene = this.timeline[this.index]
-    const def = this.sceneDef(scene)
+    const sceneDef = this.sceneDef(scene)
     const t = this.time
 
     kit.reset()
-    def.run(t)
+    sceneDef.run(t)
 
     const caption = captionAt(scene, t)
     const side = caption[2]
     const actor = view.actor
 
     // 番が来ている側の足もとに輪を出す
-    const who = side === 'a' ? actor : side === 'd' ? kit.def : null
+    const who = side === 'a' ? actor : side === 'd' ? kit.defender : null
     if (who?.visible) {
       const color = side === 'a' ? 0xff5a4d : 0x6f9dff
-      kit.rings.forEach((g, j) => {
-        const ph = (view.T * 0.7 + j * 0.5) % 1
+      kit.turnRings.forEach((g, j) => {
+        const ph = (view.time * 0.7 + j * 0.5) % 1
         const k = 1 + ph * 5.5
         g.visible = true
         g.material.color.setHex(color)
@@ -199,45 +199,53 @@ export class Player {
     }
     // 攻撃が成功したら赤いドクロ
     if (side === 'a' && actor.visible) {
-      const hit = def.hits.find((h) => h >= caption[0] && h < caption[1])
+      const hit = sceneDef.hits.find((h) => h >= caption[0] && h < caption[1])
       if (hit != null && t >= hit) {
-        const onAttacker = actor === kit.atk
-        const k = back(seg(t, hit, hit + 0.3)) * (onAttacker ? 1 : 0.9)
+        const onAttacker = actor === kit.attacker
+        const k = overshoot(progress(t, hit, hit + 0.3)) * (onAttacker ? 1 : 0.9)
         const above = onAttacker ? 4.1 : 1.1 * actor.scale.y + 1.4
         kit.skull.visible = true
         kit.skull.scale.set(k, k, k)
         kit.skull.rotation.y = 0.6
         kit.skull.position.set(
           actor.position.x,
-          actor.position.y + above + Math.sin(view.T * 5) * 0.08,
+          actor.position.y + above + Math.sin(view.time * 5) * 0.08,
           actor.position.z,
         )
       }
     }
     // 防御側の番には青い盾
     if (side === 'd') {
-      const k = back(seg(t, caption[0], caption[0] + 0.3))
+      const k = overshoot(progress(t, caption[0], caption[0] + 0.3))
       kit.shield.visible = true
       kit.shield.scale.set(k, k, k)
       kit.shield.rotation.y = 0.6
-      kit.shield.position.set(kit.def.position.x, 3.3 + Math.sin(view.T * 4) * 0.08, kit.def.position.z)
+      kit.shield.position.set(
+        kit.defender.position.x,
+        3.3 + Math.sin(view.time * 4) * 0.08,
+        kit.defender.position.z,
+      )
     }
 
     const aspect = this.width / this.height || 16 / 9
-    cam.left = (-view.camS * aspect) / 2
-    cam.right = (view.camS * aspect) / 2
-    cam.top = view.camS / 2
-    cam.bottom = -view.camS / 2
-    cam.updateProjectionMatrix()
-    cam.position.set(view.camT[0] + kit.OFF.x, kit.OFF.y, view.camT[1] + kit.OFF.z)
-    cam.lookAt(view.camT[0], 0, view.camT[1])
-    cam.updateMatrixWorld()
-    this.renderer.render(kit.scene, cam)
+    camera.left = (-view.height * aspect) / 2
+    camera.right = (view.height * aspect) / 2
+    camera.top = view.height / 2
+    camera.bottom = -view.height / 2
+    camera.updateProjectionMatrix()
+    camera.position.set(
+      view.target[0] + kit.CAMERA_OFFSET.x,
+      kit.CAMERA_OFFSET.y,
+      view.target[1] + kit.CAMERA_OFFSET.z,
+    )
+    camera.lookAt(view.target[0], 0, view.target[1])
+    camera.updateMatrixWorld()
+    this.renderer.render(kit.scene, camera)
 
     const { overlay } = this
-    this.label(overlay.attacker, kit.atk, 2.3)
-    this.label(overlay.defender, kit.def, 2.3)
-    this.label(overlay.malware, kit.imp, 1.1 * kit.imp.scale.y + 0.2)
+    this.label(overlay.attacker, kit.attacker, 2.3)
+    this.label(overlay.defender, kit.defender, 2.3)
+    this.label(overlay.malware, kit.malware, 1.1 * kit.malware.scale.y + 0.2)
     if (side === 'd') overlay.defender.hidden = true
     // 場面の変わり目は暗転でつなぐ
     overlay.fade.style.opacity = Math.max(0, 1 - Math.min(t, scene.duration - t) / 0.35).toFixed(2)

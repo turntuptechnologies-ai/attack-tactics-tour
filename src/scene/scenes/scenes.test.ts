@@ -26,7 +26,7 @@ describe('場面の実行', () => {
     name: s.title ?? s.kind,
     duration: s.duration,
     captions: s.captions,
-    def:
+    sceneDef:
       s.kind === 'intro'
         ? scenes.intro
         : s.kind === 'outro'
@@ -34,20 +34,20 @@ describe('場面の実行', () => {
           : scenes.techniques[s.techniqueId!],
   }))
 
-  it.each(all)('$name は最初から最後までエラーなく動く', ({ duration, def }) => {
+  it.each(all)('$name は最初から最後までエラーなく動く', ({ duration, sceneDef }) => {
     for (let t = 0; t <= duration; t += 0.05) {
-      kit.view.T = 3 + t
+      kit.view.time = 3 + t
       kit.reset()
-      def.run(t)
-      expect(Number.isFinite(kit.view.camS)).toBe(true)
-      expect(kit.view.camT.every(Number.isFinite)).toBe(true)
+      sceneDef.run(t)
+      expect(Number.isFinite(kit.view.height)).toBe(true)
+      expect(kit.view.target.every(Number.isFinite)).toBe(true)
     }
   })
 
-  it.each(all.filter((s) => s.def.hits.length))(
+  it.each(all.filter((s) => s.sceneDef.hits.length))(
     '$name の成功の合図は、攻撃側の字幕の時間内にある',
-    ({ captions, def }) => {
-      for (const hit of def.hits) {
+    ({ captions, sceneDef }) => {
+      for (const hit of sceneDef.hits) {
         const caption = captions.find((c) => hit >= c[0] && hit < c[1])
         expect(caption?.[2], `hit ${hit}`).toBe('a')
       }
@@ -71,24 +71,24 @@ describe('reset', () => {
       const visit = (o: (typeof kit.scene)['children'][number], i: number) => {
         if (!o.visible) return
         out.push(i)
-        if (o !== kit.atk && o !== kit.def)
+        if (o !== kit.attacker && o !== kit.defender)
           out.push(...o.position.toArray(), ...o.scale.toArray(), o.rotation.x, o.rotation.y, o.rotation.z)
         o.children.forEach(visit)
       }
       kit.scene.children.forEach(visit)
       return out
     }
-    kit.view.T = 1
+    kit.view.time = 1
     kit.reset()
     const clean = snapshot()
     for (const s of timeline) {
       if (!s.techniqueId) continue
       for (const t of [0.5, 2.5, 4, 6.5]) {
-        kit.view.T = 1
+        kit.view.time = 1
         kit.reset()
         scenes.techniques[s.techniqueId].run(t)
       }
-      kit.view.T = 1
+      kit.view.time = 1
       kit.reset()
       expect(snapshot(), `${s.title} のあと`).toEqual(clean)
     }

@@ -1,31 +1,31 @@
 // 本編の最初（導入）と最後（まとめ）の場面。
 import type { Kit } from '../kit'
-import { put, track } from '../motion'
+import { applyPose, walk } from '../motion'
 import type { SceneDef } from './types'
 
 export function bookends(kit: Kit): { intro: SceneDef; outro: SceneDef } {
-  const { atk, def, mfa, A, view, base, sensor } = kit
+  const { attacker, defender, mfaPanel, ATTACKER_SPOT, view, storyState, placeSensor } = kit
   return {
     intro: {
       hits: [],
       run(t) {
-        view.camT = [0, 6 - t * 0.1]
-        view.camS = 23 - t * 0.2
-        put(
-          atk,
-          track(
+        view.target = [0, 6 - t * 0.1]
+        view.height = 23 - t * 0.2
+        applyPose(
+          attacker,
+          walk(
             [
               [0, 6, 17.5],
               [1, 6, 17.5],
-              [3.5, A[0], A[1]],
-              [5, A[0], A[1]],
+              [3.5, ATTACKER_SPOT[0], ATTACKER_SPOT[1]],
+              [5, ATTACKER_SPOT[0], ATTACKER_SPOT[1]],
             ],
             t,
           ),
         )
-        put(
-          def,
-          track(
+        applyPose(
+          defender,
+          walk(
             [
               [0, -3, 4.6],
               [1.5, -3, 4.6],
@@ -41,13 +41,13 @@ export function bookends(kit: Kit): { intro: SceneDef; outro: SceneDef } {
     outro: {
       hits: [],
       run(t) {
-        view.camT = [0, 5.5]
-        view.camS = 22 + t * 0.25
-        base(2)
-        view.actor = atk
-        put(
-          def,
-          track(
+        view.target = [0, 5.5]
+        view.height = 22 + t * 0.25
+        storyState(2)
+        view.actor = attacker
+        applyPose(
+          defender,
+          walk(
             [
               [0, -3, 4.6],
               [1, -3, 4.6],
@@ -58,8 +58,8 @@ export function bookends(kit: Kit): { intro: SceneDef; outro: SceneDef } {
             0,
           ),
         )
-        mfa.visible = true
-        sensor(0.5, 3.3 + Math.sin(view.T * 3) * 0.1, 3.5)
+        mfaPanel.visible = true
+        placeSensor(0.5, 3.3 + Math.sin(view.time * 3) * 0.1, 3.5)
       },
     },
   }
