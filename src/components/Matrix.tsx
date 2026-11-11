@@ -6,8 +6,8 @@ type Props = {
   /** いま再生している戦術（TACTICS の添字、無ければ -1）と技術ID */
   tactic: number
   techniqueId?: string
-  /** 技術の場面へ飛ぶ */
-  onPick(techniqueId: string): void
+  /** その戦術の、その技術の場面へ飛ぶ */
+  onPick(tactic: number, techniqueId: string): void
 }
 
 /** ATT&CK マトリックス。動画のある技術はボタンになっていて、押すとその場面に飛ぶ */
@@ -37,7 +37,7 @@ export function Matrix({ tactic, techniqueId, onPick }: Props) {
               cols.current[k] = el
             }}
           >
-            <button type="button" className="hd" onClick={() => onPick(t.examples[0].id)}>
+            <button type="button" className="hd" onClick={() => onPick(k, t.examples[0].id)}>
               <span>{t.id}</span>
               {t.ja}
               <em>
@@ -53,14 +53,15 @@ export function Matrix({ tactic, techniqueId, onPick }: Props) {
                     {tech.name}
                   </div>
                 )
+              const kind = j === 0 ? ' main' : t.examples[j].simple == null ? '' : ' simple'
               const playing = k === tactic && tech.id === techniqueId
               return (
                 <button
                   key={tech.id}
                   type="button"
-                  className={`te ex${j === 0 ? ' main' : ''}${playing ? ' on' : ''}`}
-                  title="この場面を再生"
-                  onClick={() => onPick(tech.id)}
+                  className={`te ex${kind}${playing ? ' on' : ''}`}
+                  title={kind === ' simple' ? 'この技術を再生（簡易表示）' : 'この場面を再生'}
+                  onClick={() => onPick(k, tech.id)}
                 >
                   <span>{tech.id}</span>
                   {tech.name}

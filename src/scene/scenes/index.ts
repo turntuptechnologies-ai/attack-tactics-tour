@@ -1,6 +1,7 @@
 // すべての場面を集める。技術の場面は ATT&CK の技術ID をキーにして引く。
 import type { Kit } from '../kit'
 import { bookends } from './bookends'
+import { createSimpleScenes } from './simple'
 import reconnaissance from './ta0043-reconnaissance'
 import resourceDevelopment from './ta0042-resource-development'
 import initialAccess from './ta0001-initial-access'
@@ -36,7 +37,7 @@ export function createScenes(kit: Kit) {
     ...exfiltration(kit),
     ...impact(kit),
   }
-  return { ...bookends(kit), techniques }
+  return { ...bookends(kit), techniques, simple: createSimpleScenes(kit) }
 }
 
 export type Scenes = ReturnType<typeof createScenes>

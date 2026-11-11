@@ -1,25 +1,10 @@
-// 戦術と、動画で描いている技術の例。各戦術の examples の先頭が本編（ひとつの侵入の流れ）で通る技術、
+// 戦術と、専用の場面で描いている技術。各戦術の examples の先頭が本編（ひとつの侵入の流れ）で通る技術、
 // 残りは同じ戦術を別の手口で進めた場合の例。文面はここだけを直せば、字幕・マトリックス・一覧表に反映される。
+// 型の絵（簡易表示）で見せる残りの技術は more-techniques.ts にある。
+import { MORE_TECHNIQUES } from './more-techniques'
+import type { Tactic } from './types'
 
-/** 字幕: [開始秒, 終了秒, 'a'=攻撃側 / 'd'=防御側 / ''=どちらでもない, 本文] */
-export type Caption = [from: number, to: number, side: 'a' | 'd' | '', text: string]
-
-export type Example = {
-  /** ATT&CK の技術ID。src/scene/scenes/ の場面と、この ID で結び付く */
-  id: string
-  /** 攻撃側の字幕 */
-  attack: string
-  /** 防御側の字幕（防御側の打ち手） */
-  defense: string
-  /** 場面の長さ（秒）。省略時は 7 秒 */
-  duration?: number
-  /** 字幕を細かく切り替えたいときだけ指定する。省略時は attack → defense の2本 */
-  captions?: Caption[]
-}
-
-export type Tactic = { id: string; ja: string; en: string; examples: Example[] }
-
-export const TACTICS: Tactic[] = [
+const DETAILED: Tactic[] = [
   {
     id: 'TA0043',
     ja: '偵察',
@@ -524,3 +509,9 @@ export const TACTICS: Tactic[] = [
     ],
   },
 ]
+
+/** すべての戦術と技術。専用の場面のある技術のあとに、簡易表示の技術が続く */
+export const TACTICS: Tactic[] = DETAILED.map((t) => ({
+  ...t,
+  examples: [...t.examples, ...(MORE_TECHNIQUES[t.id] ?? [])],
+}))

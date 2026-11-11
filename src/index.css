@@ -419,3 +419,6 @@ footer ul {
   margin: 4px 0 0;
   padding-left: 1.2em;
 }
+/* 簡易表示（戦術ごとの共通の絵で見せる技術）は、点線の細い枠にして専用の場面と区別する */
+.te.ex.simple{border:1px dashed var(--attack)}
+.lk.simple{text-decoration-style:dashed}
