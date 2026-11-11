@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ATT&amp;CK 戦術めぐり</title>
+<meta name="description" content="ひとつの侵入を例に、MITRE ATT&amp;CK（Enterprise v20）の15の戦術を順にたどるボクセル調アニメーション図解。">
+<link rel="canonical" href="https://turntuptechnologies-ai.github.io/attack-tactics-tour/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="ATT&amp;CK 戦術めぐり">
+<meta property="og:description" content="ひとつの侵入を例に、MITRE ATT&amp;CK（Enterprise v20）の15の戦術を順にたどるボクセル調アニメーション図解。">
+<meta property="og:url" content="https://turntuptechnologies-ai.github.io/attack-tactics-tour/">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;padding:0}
+img{max-width:100%}
+[hidden]:not([hidden=until-found i]){display:none!important}
+</style>
+<style>
+/* Layout: one 16:9 voxel stage as the hero, caption under it, then the ATT&CK tactic row as the chapter rail, reference table below. */
+:root{
+  --bg:#e9f3ef; --panel:#fbfdfb; --fg:#1c2a2d; --muted:#5a6c6e; --line:#c9d9d4;
+  --sky:#101b33; --attack:#d63f35; --defend:#2a63d4; --chip-fg:#ffffff; --seg:#3a4a6b; --seg-done:#9fb4d8;
+  --display:"DotGothic16","Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f181b; --panel:#17242a; --fg:#e4efec; --muted:#9ab0b0; --line:#2b3d44;
+    --sky:#0b1426; --attack:#ff6a5e; --defend:#6f9dff; --chip-fg:#0f181b; --seg:#2b3956; --seg-done:#8ea5cc; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f181b; --panel:#17242a; --fg:#e4efec; --muted:#9ab0b0; --line:#2b3d44;
+  --sky:#0b1426; --attack:#ff6a5e; --defend:#6f9dff; --chip-fg:#0f181b; --seg:#2b3956; --seg-done:#8ea5cc; color-scheme:dark;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.7}
+.wrap{max-width:1040px;margin:0 auto;padding-block:20px 48px;
+  padding-left:max(16px, env(safe-area-inset-left, 0px));padding-right:max(16px, env(safe-area-inset-right, 0px));
+  display:flex;flex-direction:column;gap:14px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 16px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(22px,4.4vw,34px);line-height:1.25;margin:0;text-wrap:balance}
+header p{margin:0;color:var(--muted);font-size:14px}
+.stage{position:relative;width:100%;max-width:100%;aspect-ratio:16/9;background:var(--sky);border:3px solid var(--fg);overflow:hidden}
+.stage.a{border-color:var(--attack)} .stage.d{border-color:var(--defend)}
+.stage canvas{display:block;width:100%;height:100%}
+.fade{position:absolute;inset:0;background:var(--sky);opacity:0;pointer-events:none}
+.strip{position:absolute;left:0;right:0;top:0;display:flex;gap:2px;height:6px}
+.strip i{flex:1;background:var(--seg)} .strip i.done{background:var(--seg-done)} .strip i.on{background:var(--attack)}
+.chips{position:absolute;left:10px;top:14px;display:flex;flex-direction:column;align-items:flex-start;gap:4px;max-width:70%}
+.scene{font-family:var(--display);font-size:clamp(13px,2.4vw,20px);background:var(--fg);color:var(--bg);padding:2px 10px}
+.scene b{font-weight:400;opacity:.7;margin-right:8px;font-variant-numeric:tabular-nums}
+.scene small{font-size:.7em;opacity:.75;margin-left:8px}
+.tech{font-size:clamp(10px,1.6vw,14px);background:var(--panel);color:var(--fg);padding:1px 8px;border:1px solid var(--fg)}
+.turn{position:absolute;right:10px;top:14px;font-family:var(--display);font-size:clamp(13px,2.4vw,20px);padding:2px 10px;color:var(--chip-fg)}
+.turn.a{background:var(--attack)} .turn.d{background:var(--defend)}
+.tagl{position:absolute;left:0;top:0;transform:translate(-50%,-100%);font-family:var(--display);
+  font-size:clamp(10px,1.6vw,14px);padding:0 6px;color:var(--chip-fg);white-space:nowrap;pointer-events:none}
+.tagl.a{background:var(--attack)} .tagl.d{background:var(--defend)}
+.cap{display:flex;gap:12px;align-items:flex-start;min-height:4.6em;background:var(--panel);border:3px solid var(--fg);padding:12px 14px}
+.cap .tag{flex:none;font-family:var(--display);font-size:15px;padding:1px 10px;color:var(--chip-fg);background:var(--muted)}
+.cap .tag.a{background:var(--attack)} .cap .tag.d{background:var(--defend)}
+.cap .txt{min-width:0;font-weight:700;font-size:clamp(16px,2.6vw,22px);line-height:1.5}
+.ctl{display:flex;gap:8px}
+button{font-family:var(--display);font-size:14px;color:var(--fg);background:var(--panel);border:2px solid var(--fg);padding:6px 12px;cursor:pointer}
+button:focus-visible{outline:3px solid var(--defend);outline-offset:2px}
+.mxnote{margin:0;font-size:13px;color:var(--muted)}
+.mxwrap{overflow-x:auto;border:2px solid var(--fg);background:var(--panel)}
+.matrix{display:grid;grid-auto-flow:column;grid-auto-columns:120px;gap:4px;padding:6px;align-items:start;width:max-content}
+.col{display:flex;flex-direction:column;gap:3px;min-width:0}
+.col button{text-align:left;padding:5px 6px;display:flex;flex-direction:column;line-height:1.3;min-width:0;font-size:13px;min-height:74px}
+.col button span{font-size:11px;opacity:.7;font-variant-numeric:tabular-nums}
+.col button em{font-style:normal;font-family:var(--body);font-size:10px;opacity:.75;overflow-wrap:anywhere}
+.col.on button{background:var(--attack);color:var(--chip-fg);border-color:var(--attack)}
+.te{font-size:10.5px;line-height:1.3;padding:3px 5px;border:1px solid var(--line);overflow-wrap:anywhere}
+.te span{display:block;color:var(--muted);font-size:9.5px;font-variant-numeric:tabular-nums}
+.te.ex{border:2px solid var(--attack);font-weight:700}
+.col.on .te.ex{background:var(--attack);color:var(--chip-fg)} .col.on .te.ex span{color:inherit}
+h2{font-family:var(--display);font-weight:400;font-size:20px;margin:14px 0 0}
+.tw{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:14px}
+th,td{text-align:left;vertical-align:top;padding:6px 10px;border-bottom:1px solid var(--line)}
+th{font-family:var(--display);font-weight:400;color:var(--muted)}
+td:first-child{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--muted)}
+td small{display:block;color:var(--muted)}
+.notes p{margin:0 0 8px;font-size:14.5px;color:var(--muted);max-width:68ch}
+footer{border-top:1px solid var(--line);padding-top:12px;font-size:13px;color:var(--muted)}
+footer a{color:var(--defend)}
+footer ul{margin:4px 0 0;padding-left:1.2em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>ATT&amp;CK 戦術めぐり</h1>
+    <p>ひとつの侵入を例に、MITRE ATT&amp;CK（Enterprise v20）の15の戦術を順にたどります。約2分のループです。</p>
+  </header>
+
+  <div class="stage" id="stage">
+    <canvas id="cv" aria-label="ボクセル調のアニメーション。攻撃者が偵察から影響まで、ATT&CKの15の戦術を順に進め、防御側が各段階で対抗する。"></canvas>
+    <div class="tagl a" id="la">攻撃側</div>
+    <div class="tagl d" id="ld">防御側</div>
+    <div class="tagl a" id="lm" hidden>マルウェア</div>
+    <div class="strip" id="strip"></div>
+    <div class="chips"><div class="scene" id="scene">MITRE ATT&amp;CK</div><div class="tech" id="tech" hidden></div></div>
+    <div class="turn" id="turn" hidden></div>
+    <div class="fade" id="fade"></div>
+  </div>
+
+  <div class="cap"><span class="tag" id="tag">導入</span><span class="txt" id="txt">MITRE ATT&amp;CK は、攻撃者の目的を15の「戦術」に整理した知識ベースです。</span></div>
+
+  <div class="ctl"><button id="pp" type="button">一時停止</button></div>
+  <p class="mxnote">ATT&amp;CK マトリックス（Enterprise v20）。列が戦術、その下が技術です。赤枠が動画で描いた技術で、列の見出しを押すとその場面に飛びます。サブテクニックは省略しています。</p>
+  <div class="mxwrap" id="mxw"><div class="matrix" id="matrix"></div></div>
+
+  <section>
+    <h2>15の戦術と、この動画での例</h2>
+    <div class="tw"><table id="tbl"><thead><tr><th>ID</th><th>戦術</th><th>動画で描いた技術の例</th><th>防御側の打ち手</th></tr></thead><tbody></tbody></table></div>
+  </section>
+  <section class="notes">
+    <h2>見るときの注意</h2>
+    <p>戦術は攻撃者の「目的」で、決まった手順ではありません。実際の攻撃では順番が前後したり、同じ戦術を繰り返したり、使わない戦術があったりします。動画では表の左から右へ順に並べています。</p>
+    <p>各戦術には多数の技術があり、ここで描いたのはそれぞれ一例です。</p>
+    <p>v19（2026年4月）で、従来の「防御回避（Defense Evasion）」が Stealth と Defense Impairment の二つに分かれ、戦術は15になりました。この二つの日本語名「ステルス」「防御の妨害」は定訳がまだ見当たらないため、仮の訳です。</p>
+  </section>
+
+  <footer>
+    MITRE ATT&amp;CK Enterprise v20（2026年10月公開）の内容をもとにした図解です。
+    <ul>
+      <li><a href="https://attack.mitre.org/tactics/enterprise/">Enterprise Tactics（MITRE ATT&amp;CK）</a></li>
+      <li><a href="https://attack.mitre.org/resources/updates/updates-april-2026/">Updates - April 2026（v19 の変更点）</a></li>
+      <li><a href="https://attack.mitre.org/resources/updates/">Updates（最新版の変更点）</a></li>
+    </ul>
+    <p>© The MITRE Corporation. This work is reproduced and distributed with the permission of The MITRE Corporation. MITRE ATT&amp;CK® は The MITRE Corporation の登録商標です。本サイトは MITRE とは無関係の非公式な解説です。</p>
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" integrity="sha512-dLxUelApnYxpLt6K2iomGngnHO83iUvZytA3YjDUCjT0HDOHKXnVYdf3hU4JjM8uEhxf9nD1/ey98U3t2vZ0qQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const TAC=[
+ {id:'TA0043',jp:'偵察',en:'Reconnaissance',tq:'T1595 Active Scanning',a:'攻撃者は標的の外側を調べ、公開されたシステムや弱点、従業員の情報を集める。',df:'公開している情報と資産を把握し、不要な露出を減らす。'},
+ {id:'TA0042',jp:'リソース開発',en:'Resource Development',tq:'T1583 Acquire Infrastructure',a:'攻撃に使うサーバーや偽ドメイン、マルウェアを準備する。',df:'組織の外で起きるため見えにくい。脅威情報で偽ドメインなどを監視する。'},
+ {id:'TA0001',jp:'初期アクセス',en:'Initial Access',tq:'T1566 Phishing',a:'だましのメールを送り、開いた従業員の端末にマルウェアを送り込む。',df:'メール対策と訓練、フィッシング耐性のある多要素認証で入口を固める。'},
+ {id:'TA0002',jp:'実行',en:'Execution',tq:'T1059 Command and Scripting Interpreter',a:'入り込んだマルウェアが、端末の上で攻撃者のコードを実行する。',df:'スクリプトの実行を制限し、EDRで不審なプロセスを見張る。'},
+ {id:'TA0003',jp:'永続化',en:'Persistence',tq:'T1053 Scheduled Task/Job',d:9,a:'再起動や駆除のあとも居座れるよう、自動で起動する仕掛けを残す。',df:'自動起動やタスクの登録を監査し、足場ごと取り除く。',
+  caps:[[0,2.8,'a','再起動や駆除のあとも居座れるよう、自動で起動する仕掛けを残す。'],[2.8,4.6,'d','防御側がマルウェアを見つけて駆除しても…'],[4.6,6.6,'a','残した仕掛けから、また戻ってくる。'],[6.6,9,'d','自動起動やタスクの登録を監査し、足場ごと取り除く。']]},
+ {id:'TA0004',jp:'権限昇格',en:'Privilege Escalation',tq:'T1068 Exploitation for Privilege Escalation',a:'脆弱性を突いて、一般ユーザーから管理者の権限へ上がる。',df:'パッチを当て、権限は必要最小限にとどめる。'},
+ {id:'TA0005',jp:'ステルス',en:'Stealth',tq:'T1036 Masquerading',a:'正規のプログラムを装い、ふだんの動きに紛れて隠れる。',df:'名前や見た目ではなく、振る舞いで見分ける。'},
+ {id:'TA0112',jp:'防御の妨害',en:'Defense Impairment',tq:'T1685 Disable or Modify Tools',a:'セキュリティツールを止めたり設定を変えたりして、防御側の目を奪う。',df:'ツールの改ざんを防ぎ、止められたらすぐ気づける仕組みを持つ。'},
+ {id:'TA0006',jp:'認証情報アクセス',en:'Credential Access',tq:'T1003 OS Credential Dumping',a:'端末に残っているIDやパスワードを抜き取る。',df:'認証情報を保護し、特権アカウントを厳しく管理する。'},
+ {id:'TA0007',jp:'探索',en:'Discovery',tq:'T1046 Network Service Discovery',a:'内部のネットワークを調べ、どこに何があるかを把握する。狙いは重要なサーバー。',df:'内部でのスキャンを検知する。おとりを置くのも有効。'},
+ {id:'TA0008',jp:'水平展開',en:'Lateral Movement',tq:'T1021 Remote Services',a:'盗んだ認証情報で、端末から端末へ、そしてサーバーへ移っていく。',df:'ネットワークを区切り、広がりを食い止める。'},
+ {id:'TA0009',jp:'収集',en:'Collection',tq:'T1005 Data from Local System',a:'目的のデータを探し出し、持ち出しやすいよう一か所に集める。',df:'アクセス権を絞り、大量の読み出しを監視する。'},
+ {id:'TA0011',jp:'コマンド＆コントロール',en:'Command and Control',tq:'T1071 Application Layer Protocol',a:'通常の通信に紛れて外のサーバーとやり取りし、内部のマルウェアを遠隔操作する。',df:'外向きの不審な通信を監視し、遮断する。'},
+ {id:'TA0010',jp:'持ち出し',en:'Exfiltration',tq:'T1041 Exfiltration Over C2 Channel',a:'集めたデータを、C2の通信路を使って外へ送り出す。',df:'データの持ち出しを検知・制限する。転送量の異常も手がかり。'},
+ {id:'TA0040',jp:'影響',en:'Impact',tq:'T1486 Data Encrypted for Impact',a:'最後にデータを暗号化して業務を止め、身代金を要求する。',df:'切り離したバックアップから復旧する。手順は訓練しておく。'}
+];
+(function(){ const tb=$('tbl').tBodies[0]; TAC.forEach(t=>{ const tr=document.createElement('tr');
+  [t.id,null,t.tq,t.df].forEach((v,i)=>{ const td=document.createElement('td'); if(i===1){ td.textContent=t.jp; const s=document.createElement('small'); s.textContent=t.en; td.appendChild(s); } else td.textContent=v; tr.appendChild(td); }); tb.appendChild(tr); }); })();
+const TECH=[
+'T1595 Active Scanning|T1592 Gather Victim Host Information|T1589 Gather Victim Identity Information|T1590 Gather Victim Network Information|T1591 Gather Victim Org Information|T1598 Phishing for Information|T1682 Query Public AI Services|T1597 Search Closed Sources|T1596 Search Open Technical Databases|T1593 Search Open Websites/Domains|T1681 Search Threat Vendor Data|T1594 Search Victim-Owned Websites',
+'T1650 Acquire Access|T1583 Acquire Infrastructure|T1586 Compromise Accounts|T1584 Compromise Infrastructure|T1587 Develop Capabilities|T1585 Establish Accounts|T1683 Generate Content|T1588 Obtain Capabilities|T1608 Stage Capabilities',
+'T1659 Content Injection|T1189 Drive-by Compromise|T1190 Exploit Public-Facing Application|T1133 External Remote Services|T1200 Hardware Additions|T1566 Phishing|T1091 Replication Through Removable Media|T1195 Supply Chain Compromise|T1199 Trusted Relationship|T1078 Valid Accounts|T1669 Wi-Fi Networks',
+'T1197 BITS Jobs|T1651 Cloud Administration Command|T1059 Command and Scripting Interpreter|T1609 Container Administration Command|T1610 Deploy Container|T1699 Direct Prompt Injection|T1675 ESXi Administration Command|T1203 Exploitation for Client Execution|T1574 Hijack Execution Flow|T1698 Indirect Prompt Injection|T1674 Input Injection|T1559 Inter-Process Communication|T1106 Native API|T1677 Poisoned Pipeline Execution|T1053 Scheduled Task/Job|T1648 Serverless Execution|T1129 Shared Modules|T1072 Software Deployment Tools|T1569 System Services|T1127 Trusted Developer Utilities Proxy Execution|T1204 User Execution|T1047 Windows Management Instrumentation',
+'T1098 Account Manipulation|T1197 BITS Jobs|T1547 Boot or Logon Autostart Execution|T1037 Boot or Logon Initialization Scripts|T1671 Cloud Application Integration|T1554 Compromise Host Software Binary|T1136 Create Account|T1543 Create or Modify System Process|T1546 Event Triggered Execution|T1668 Exclusive Control|T1133 External Remote Services|T1525 Implant Internal Image|T1556 Modify Authentication Process|T1112 Modify Registry|T1137 Office Application Startup|T1653 Power Settings|T1542 Pre-OS Boot|T1053 Scheduled Task/Job|T1505 Server Software Component|T1176 Software Extensions|T1205 Traffic Signaling|T1078 Valid Accounts',
+'T1548 Abuse Elevation Control Mechanism|T1134 Access Token Manipulation|T1098 Account Manipulation|T1547 Boot or Logon Autostart Execution|T1037 Boot or Logon Initialization Scripts|T1543 Create or Modify System Process|T1484 Domain or Tenant Policy Modification|T1611 Escape to Host|T1546 Event Triggered Execution|T1068 Exploitation for Privilege Escalation|T1055 Process Injection|T1053 Scheduled Task/Job|T1078 Valid Accounts',
+'T1134 Access Token Manipulation|T1696 Anti-Automation Evasion|T1197 BITS Jobs|T1612 Build Image on Host|T1622 Debugger Evasion|T1678 Delay Execution|T1140 Deobfuscate/Decode Files or Information|T1006 Direct Volume Access|T1480 Execution Guardrails|T1211 Exploitation for Stealth|T1564 Hide Artifacts|T1574 Hijack Execution Flow|T1070 Indicator Removal|T1202 Indirect Command Execution|T1036 Masquerading|T1027 Obfuscated Files or Information|T1542 Pre-OS Boot|T1055 Process Injection|T1620 Reflective Code Loading|T1014 Rootkit|T1679 Selective Exclusion|T1684 Social Engineering|T1218 System Binary Proxy Execution|T1216 System Script Proxy Execution|T1221 Template Injection|T1205 Traffic Signaling|T1127 Trusted Developer Utilities Proxy Execution|T1535 Unused/Unsupported Cloud Regions|T1078 Valid Accounts|T1497 Virtualization/Sandbox Evasion|T1220 XSL Script Processing',
+'T1686 Disable or Modify System Firewall|T1685 Disable or Modify Tools|T1484 Domain or Tenant Policy Modification|T1689 Downgrade Attack|T1687 Exploitation for Defense Impairment|T1222 File and Directory Permissions Modification|T1556 Modify Authentication Process|T1578 Modify Cloud Compute Infrastructure|T1666 Modify Cloud Resource Hierarchy|T1112 Modify Registry|T1601 Modify System Image|T1599 Network Boundary Bridging|T1647 Plist File Modification|T1690 Prevent Command History Logging|T1207 Rogue Domain Controller|T1688 Safe Mode Boot|T1553 Subvert Trust Controls|T1600 Weaken Encryption',
+'T1557 Adversary-in-the-Middle|T1110 Brute Force|T1555 Credentials from Password Stores|T1212 Exploitation for Credential Access|T1187 Forced Authentication|T1606 Forge Web Credentials|T1056 Input Capture|T1556 Modify Authentication Process|T1111 Multi-Factor Authentication Interception|T1621 Multi-Factor Authentication Request Generation|T1040 Network Sniffing|T1003 OS Credential Dumping|T1528 Steal Application Access Token|T1697 Steal Application Specific Passwords|T1649 Steal or Forge Authentication Certificates|T1558 Steal or Forge Kerberos Tickets|T1539 Steal Web Session Cookie|T1552 Unsecured Credentials',
+'T1087 Account Discovery|T1010 Application Window Discovery|T1217 Browser Information Discovery|T1580 Cloud Infrastructure Discovery|T1538 Cloud Service Dashboard|T1526 Cloud Service Discovery|T1619 Cloud Storage Object Discovery|T1613 Container and Resource Discovery|T1622 Debugger Evasion|T1652 Device Driver Discovery|T1482 Domain Trust Discovery|T1083 File and Directory Discovery|T1615 Group Policy Discovery|T1680 Local Storage Discovery|T1654 Log Enumeration|T1046 Network Service Discovery|T1135 Network Share Discovery|T1040 Network Sniffing|T1201 Password Policy Discovery|T1120 Peripheral Device Discovery|T1069 Permission Groups Discovery|T1057 Process Discovery|T1012 Query Registry|T1018 Remote System Discovery|T1518 Software Discovery|T1082 System Information Discovery|T1614 System Location Discovery|T1016 System Network Configuration Discovery|T1049 System Network Connections Discovery|T1033 System Owner/User Discovery|T1007 System Service Discovery|T1124 System Time Discovery|T1673 Virtual Machine Discovery|T1497 Virtualization/Sandbox Evasion',
+'T1210 Exploitation of Remote Services|T1534 Internal Spearphishing|T1570 Lateral Tool Transfer|T1563 Remote Service Session Hijacking|T1021 Remote Services|T1091 Replication Through Removable Media|T1072 Software Deployment Tools|T1080 Taint Shared Content|T1550 Use Alternate Authentication Material',
+'T1557 Adversary-in-the-Middle|T1560 Archive Collected Data|T1123 Audio Capture|T1119 Automated Collection|T1185 Browser Session Hijacking|T1115 Clipboard Data|T1530 Data from Cloud Storage|T1602 Data from Configuration Repository|T1213 Data from Information Repositories|T1005 Data from Local System|T1039 Data from Network Shared Drive|T1025 Data from Removable Media|T1074 Data Staged|T1114 Email Collection|T1056 Input Capture|T1113 Screen Capture|T1125 Video Capture',
+'T1071 Application Layer Protocol|T1092 Communication Through Removable Media|T1659 Content Injection|T1132 Data Encoding|T1001 Data Obfuscation|T1568 Dynamic Resolution|T1573 Encrypted Channel|T1008 Fallback Channels|T1665 Hide Infrastructure|T1105 Ingress Tool Transfer|T1104 Multi-Stage Channels|T1095 Non-Application Layer Protocol|T1571 Non-Standard Port|T1572 Protocol Tunneling|T1090 Proxy|T1219 Remote Access Tools|T1205 Traffic Signaling|T1102 Web Service',
+'T1700 AI-Enabled Exfiltration|T1020 Automated Exfiltration|T1030 Data Transfer Size Limits|T1048 Exfiltration Over Alternative Protocol|T1041 Exfiltration Over C2 Channel|T1011 Exfiltration Over Other Network Medium|T1052 Exfiltration Over Physical Medium|T1567 Exfiltration Over Web Service|T1029 Scheduled Transfer|T1537 Transfer Data to Cloud Account',
+'T1531 Account Access Removal|T1485 Data Destruction|T1486 Data Encrypted for Impact|T1565 Data Manipulation|T1491 Defacement|T1561 Disk Wipe|T1667 Email Bombing|T1499 Endpoint Denial of Service|T1657 Financial Theft|T1495 Firmware Corruption|T1490 Inhibit System Recovery|T1498 Network Denial of Service|T1496 Resource Hijacking|T1489 Service Stop|T1529 System Shutdown/Reboot'];
+const matrix=$('matrix'), mxw=$('mxw'), strip=$('strip'), chs=[], segs=[]; let jump=function(){};
+TAC.forEach((tc,k)=>{ const col=document.createElement('div'); col.className='col'; const list=TECH[k].split('|');
+  const b=document.createElement('button'); b.type='button'; b.id='tac'+k;
+  const s=document.createElement('span'); s.textContent=tc.id; const e=document.createElement('em'); e.textContent=tc.en+'（'+list.length+'）';
+  b.appendChild(s); b.appendChild(document.createTextNode(tc.jp)); b.appendChild(e); b.addEventListener('click',()=>jump(k)); col.appendChild(b);
+  let hit=0; list.forEach(x=>{ const c=document.createElement('div'); c.className='te'; const id=x.slice(0,5); if(tc.tq.indexOf(id)===0){ c.className='te ex'; hit++; }
+    const sp=document.createElement('span'); sp.textContent=id; c.appendChild(sp); c.appendChild(document.createTextNode(x.slice(6))); col.appendChild(c); });
+  if(hit!==1) console.error('example technique missing',tc.id);
+  matrix.appendChild(col); chs.push(col); const i=document.createElement('i'); strip.appendChild(i); segs.push(i); });
+const stage=$('stage'), cv=$('cv');
+if(!window.THREE){ $('txt').textContent='3D表示のライブラリを読み込めませんでした。'; return; }
+let renderer;
+try{ renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true}); }
+catch(e){ $('txt').textContent='この環境ではWebGLが使えないため、アニメーションを表示できません。'; return; }
+renderer.outputEncoding=THREE.sRGBEncoding;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.setClearColor(0x000000,0);
+
+const scene=new THREE.Scene();
+const cam=new THREE.OrthographicCamera(-1,1,1,-1,0.1,500);
+const OFF=new THREE.Vector3(9,15,13).normalize().multiplyScalar(150);
+scene.add(new THREE.AmbientLight(0xffffff,0.62));
+const sun=new THREE.DirectionalLight(0xffffff,0.78);
+sun.position.set(-14,26,10); sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);
+const sc=sun.shadow.camera; sc.left=-22; sc.right=22; sc.top=22; sc.bottom=-22; sc.near=1; sc.far=80;
+sun.shadow.bias=-0.0006;
+scene.add(sun); scene.add(sun.target); sun.target.position.set(0,0,3);
+
+// ---------- voxel helpers ----------
+const GEO=new THREE.BoxGeometry(1,1,1);
+const mats={};
+const M=c=>mats[c]||(mats[c]=new THREE.MeshLambertMaterial({color:c}));
+function B(p,w,h,d,c,x,y,z){
+  const m=new THREE.Mesh(GEO, typeof c==='number'?M(c):c);
+  m.scale.set(w,h,d); m.position.set(x,y,z); m.castShadow=true; m.receiveShadow=true; p.add(m); return m;
+}
+const G=()=>new THREE.Group();
+function add(g){ scene.add(g); return g; }
+
+// ---------- world ----------
+const world=add(G());
+B(world,22,1.6,24,0x1b2540,0,-1.3,3.5);            // island soil
+function strips(z0,z1,c1,c2,y){ for(let z=z0;z<z1;z++){ B(world,22,0.5,1,((z-z0)&1)?c2:c1,0,(y||0)-0.25,z+0.5).castShadow=false; } }
+strips(7,16,0x2b4170,0x314a7e);
+const glow=c=>new THREE.MeshBasicMaterial({color:c}), gridM=glow(0x3f8fd6);
+function L(w,d,x,z,m,y){ const o=new THREE.Mesh(GEO,m||gridM); o.scale.set(w,0.02,d); o.position.set(x,y||0.02,z); world.add(o); return o; }
+for(let z=8;z<=15;z++) L(22,0.05,0,z);
+for(let x=-10;x<=10;x+=2) L(0.05,9,x,11.5);
+B(world,22,0.5,1,0xb9bfc9,0,-0.25,6.5).castShadow=false;
+strips(-1,6,0xdde6f3,0xcfdbec);
+strips(-9,-1,0x3d4c66,0x364459);
+B(world,22,0.5,0.5,0x364459,0,-0.25,-8.75).castShadow=false;
+B(world,3,0.06,9,0x4667ad,0,0.02,11.5).castShadow=false;   // access path
+const amb=[];
+function tree(x,z,h){ B(world,0.5,0.5,0.5,0x1b2540,x,0.25,z); const c=new THREE.Mesh(GEO,glow(h>1.2?0xff6fd8:0x5ff0ff)); c.scale.set(0.6,0.6,0.6); c.position.set(x,1.3,z); c.userData.y=1.1+h*0.4; scene.add(c); amb.push(c); }
+for(let i=0;i<16;i++){ const a=i*2.4, c=new THREE.Mesh(GEO,glow([0x2f6fb8,0x5ff0ff,0x7a5fd8][i%3])), k=0.3+(i%3)*0.2; c.scale.set(k,k,k);
+  c.position.set(Math.cos(a)*(15+i%4*2),0,3.5+Math.sin(a)*(16+i%3*2)); c.userData.y=-3+(i%5)*1.6; scene.add(c); amb.push(c); }
+function ambient(){ amb.forEach((c,i)=>{ c.position.y=c.userData.y+Math.sin(T*1.5+i)*0.18; c.rotation.y=T*0.6+i; }); }
+tree(-9.5,14.6,1.4); tree(-7,13.7,1); tree(8.2,14.5,1.6); tree(9.8,13.6,1); tree(-10,15,0.9); tree(6.6,15,1.1);
+
+// wall + gate
+const wm={};
+for(let x=-10;x<=10;x++){ if(Math.abs(x)<2) continue;
+  B(world,1,1.7,1,(wm[x]=new THREE.MeshLambertMaterial({color:0xd9dde4})),x,0.85,6.5);
+  if(x&1) B(world,1,0.35,1,0x2a63d4,x,1.87,6.5); else B(world,1,0.2,1,0xaeb5c0,x,1.8,6.5);
+}
+B(world,0.5,2.4,1.1,0xaeb5c0,-1.75,1.2,6.5); B(world,0.5,2.4,1.1,0xaeb5c0,1.75,1.2,6.5);
+B(world,4,0.4,1.1,0x2a63d4,0,2.6,6.5);
+const doorL=B(world,1.5,1.9,0.25,0x8a5a36,-0.75,0.95,6.6), doorR=B(world,1.5,1.9,0.25,0x8a5a36,0.75,0.95,6.6);
+
+// characters
+function person(body,head,hair,legs){ const g=G();
+  B(g,0.28,0.3,0.3,legs,-0.2,0.15,0); B(g,0.28,0.3,0.3,legs,0.2,0.15,0);
+  B(g,0.8,0.6,0.55,body,0,0.6,0); B(g,0.7,0.6,0.65,head,0,1.2,0);
+  if(hair!=null) B(g,0.74,0.22,0.69,hair,0,1.52,0);
+  B(g,0.1,0.12,0.05,0x222222,-0.17,1.25,0.34); B(g,0.1,0.12,0.05,0x222222,0.17,1.25,0.34);
+  return g; }
+function mkAttacker(scarf){ const g=G();
+  B(g,0.28,0.3,0.3,0x1c1b22,-0.2,0.15,0); B(g,0.28,0.3,0.3,0x1c1b22,0.2,0.15,0);
+  B(g,0.85,0.65,0.6,0x2f2d3a,0,0.62,0); B(g,0.9,0.2,0.65,scarf,0,0.95,0);
+  B(g,0.9,0.75,0.8,0x2f2d3a,0,1.4,0); B(g,0.66,0.4,0.1,0x121117,0,1.36,0.38);
+  B(g,0.14,0.12,0.06,0xff4a3d,-0.16,1.38,0.44); B(g,0.14,0.12,0.06,0xff4a3d,0.16,1.38,0.44);
+  B(g,0.3,0.3,0.3,0x2f2d3a,0,1.9,-0.15);
+  return add(g); }
+const atk=mkAttacker(0x8a4be0), clone=mkAttacker(0xd63f35);
+const def=(function(){ const g=person(0x2f6fe4,0xf2c9a0,null,0x1d3f8a);
+  B(g,0.78,0.3,0.72,0xf4f6fa,0,1.55,0); B(g,0.2,0.32,0.74,0x2f6fe4,0,1.56,0);
+  B(g,0.12,0.75,0.6,0xf6c531,0.5,0.7,0.1); return add(g); })();
+const emps=[[-6,3.5,0xe58a3c,0x4a2f1c],[-3.5,2,0x45b08c,0x1d1d1d],[3.5,3.5,0xd65a9a,0x6b3d1e],[6,2,0x8d8fe0,0x1d1d1d]].map(e=>{
+  const g=person(e[2],0xf2c9a0,e[3],0x39404d); g.position.set(e[0],0,e[1]); world.add(g);
+  B(world,1.4,0.6,0.7,0xa9794f,e[0],0.3,e[1]+0.9); B(world,0.7,0.5,0.1,0x23272f,e[0],0.9,e[1]+0.95); B(world,0.6,0.4,0.04,0x7fe0ff,e[0],0.9,e[1]+0.89);
+  return g; });
+
+// props
+function mkLock(){ const g=G(); B(g,0.8,0.6,0.35,0xf6c531,0,0,0); B(g,0.12,0.4,0.12,0xb8bcc6,-0.25,0.45,0); B(g,0.12,0.4,0.12,0xb8bcc6,0.25,0.45,0); B(g,0.62,0.12,0.12,0xb8bcc6,0,0.68,0); B(g,0.14,0.2,0.06,0x3a2c00,0,0,0.19); return g; }
+const mfa=add(G()); B(mfa,1.5,1.5,0.15,0x2a63d4,0,0,-0.05); B(mfa,1.2,1.2,0.16,0x6f9dff,0,0,0); (function(){ const l=mkLock(); l.position.set(0,-0.15,0.2); mfa.add(l); })();
+const letters=[0,1,2,3].map(()=>{ const g=add(G()); B(g,0.7,0.45,0.1,0xffffff,0,0,0); B(g,0.18,0.18,0.12,0xd63f35,0,0,0); return g; }), letter=letters[0];
+const key=add(G()); B(key,0.4,0.4,0.12,0xf6c531,0,0.2,0); B(key,0.14,0.6,0.12,0xf6c531,0,-0.25,0); B(key,0.25,0.12,0.12,0xf6c531,0.16,-0.35,0);
+const bangs=[0,1,2,3].map(()=>{ const g=add(G()); B(g,0.22,0.6,0.22,0xf6c531,0,0.35,0); B(g,0.22,0.2,0.22,0xf6c531,0,-0.15,0); return g; }), bang=bangs[0];
+const user=(function(){ const g=person(0x2fbf6b,0xf2c9a0,0x3a2a1c,0x2b3a55); B(g,0.22,0.28,0.06,0xffffff,0.2,0.62,0.3); return add(g); })();
+const okM=new THREE.MeshBasicMaterial({color:0x4dff9a});
+const check=add(G()); B(check,0.26,0.6,0.2,okM,-0.34,-0.12,0).rotation.z=0.75; B(check,0.26,1.15,0.2,okM,0.18,0.08,0).rotation.z=-0.6;
+const grant=B(scene,0.5,0.5,0.5,new THREE.MeshBasicMaterial({color:0x5ff0ff}),0,0,0);
+const fake=(function(){ const g=person(0x2fbf6b,0xf2c9a0,0x3a2a1c,0x2b3a55); B(g,0.22,0.28,0.06,0xffffff,0.2,0.62,0.3);
+  B(g,0.12,0.14,0.06,0xff4a3d,-0.17,1.25,0.36); B(g,0.12,0.14,0.06,0xff4a3d,0.17,1.25,0.36); B(g,0.84,0.14,0.6,0x8a4be0,0,0.93,0); B(g,0.34,0.34,0.3,0x2f2d3a,0,1.45,-0.38); return add(g); })();
+const field=new THREE.Mesh(GEO,new THREE.MeshBasicMaterial({color:0x7fc4ff,transparent:true,opacity:0.5})); field.scale.set(4,2.6,0.12); field.position.set(3,3.25,7.0); scene.add(field);
+const hammer=add(G()); B(hammer,0.12,0.9,0.12,0x8a5a36,0,0.45,0); B(hammer,0.5,0.32,0.32,0x8d95a3,0,0.95,0);
+const orb=new THREE.Mesh(GEO,new THREE.MeshBasicMaterial({color:0xff6fd8})); orb.scale.set(0.55,0.55,0.55); scene.add(orb);
+const links=[]; for(let i=0;i<20;i++){ const l=new THREE.Mesh(GEO,new THREE.MeshBasicMaterial({color:0xff6fd8,transparent:true,opacity:0.7})); scene.add(l); links.push(l); }
+const rings=[0,1].map(()=>{ const r=new THREE.Mesh(GEO,new THREE.MeshBasicMaterial({color:0xff6fd8,transparent:true,opacity:0.5,depthWrite:false})); scene.add(r); return r; });
+const EV=[[-8,0,4.6,8.6],[-5,1,4.9,9.0],[-3,2,5.2,8.8],[3,3,5.5,9.2],[6,4,5.8,9.4],[8,4,6.1,10.0],[-9,0,10.2,10.7],[-6,1,10.6,11.0],[4,3,10.9,11.3],[7,4,11.3,11.7],[-2,2,11.8,12.1],[9,4,12.3,12.6],[-7,0,12.9,13.2],[5,3,13.4,13.7],[-4,1,14.2,14.5],[2,2,14.9,15.2]];
+const cross=add(G()); B(cross,1.1,0.22,0.22,0xe0352b,0,0,0).rotation.z=Math.PI/4; B(cross,1.1,0.22,0.22,0xe0352b,0,0,0).rotation.z=-Math.PI/4;
+function mkBot(){ const g=G(); B(g,0.5,0.45,0.5,0xb476ff,0,0.35,0); B(g,0.34,0.1,0.06,0xff4a3d,0,0.42,0.26); B(g,0.14,0.14,0.14,0x4a2a80,-0.14,0.07,0); B(g,0.14,0.14,0.14,0x4a2a80,0.14,0.07,0); return add(g); }
+const NB=20, bots=[]; for(let i=0;i<NB;i++) bots.push(mkBot());
+const drones=[], beams=[], DX=[-6,-3,0,3,6];
+const beamMat=new THREE.MeshBasicMaterial({color:0x7ff3ff});
+DX.forEach(x=>{ const g=G(); B(g,0.6,0.32,0.6,0x6fb4ff,0,0,0); B(g,0.3,0.1,0.06,0xffffff,0,0,0.31);
+  g.userData.rot=B(g,1.1,0.06,0.18,0xf4f6fa,0,0.24,0); drones.push(add(g));
+  const b=new THREE.Mesh(GEO,beamMat); scene.add(b); beams.push(b); });
+function mkTruck(c){ const g=G(); B(g,1.6,1.1,1.0,0xf4f6fa,0,0.85,-1.3); B(g,1.2,0.4,0.06,0x7fe0ff,0,1.05,-1.82);
+  B(g,1.7,1.5,2.4,c,0,1.15,0.5); B(g,1.72,0.3,2.42,0xf4f6fa,0,1.2,0.5);
+  [[-0.8,-1.2],[0.8,-1.2],[-0.8,1.1],[0.8,1.1]].forEach(w=>B(g,0.25,0.5,0.6,0x1d1f25,w[0],0.25,w[1])); return add(g); }
+const truckA=mkTruck(0x3fa7d6), truckB=mkTruck(0x45b08c), botB=mkBot();
+const archMat=new THREE.MeshLambertMaterial({color:0xaeb5c0});
+const arch=add(G()); B(arch,0.4,3,0.4,archMat,-2.1,1.5,0); B(arch,0.4,3,0.4,archMat,2.1,1.5,0); B(arch,4.6,0.4,0.4,archMat,0,3.2,0); arch.position.set(0,0,9.3);
+const scan=new THREE.Mesh(GEO,new THREE.MeshBasicMaterial({color:0x7dffb0,transparent:true,opacity:0.45})); scan.scale.set(3.8,2.9,0.08); scene.add(scan);
+// server room
+const RX=[-6,-3.6,-1.2,1.2,3.6,6], RZ=-5.5, racks=RX.map(x=>{
+  const lm=new THREE.MeshBasicMaterial({color:0x4dff9a});
+  B(world,1.3,2.4,1.1,0x232a36,x,1.2,RZ); for(let k=0;k<3;k++) B(world,0.9,0.14,0.05,lm,x,0.6+k*0.6,RZ+0.57).castShadow=false;
+  const lock=mkLock(); lock.position.set(x,2.75,RZ); scene.add(lock);
+  const cube=B(scene,0.6,0.6,0.6,0x58d7ff,x,2.72,RZ);
+  const bk=B(scene,0.6,0.6,0.6,0x4dff9a,x,2.72,RZ);
+  return {x,lm,lock,cube,bk}; });
+const segMat=new THREE.MeshLambertMaterial({color:0x6f9dff});
+const segW=B(scene,0.4,3,6.5,segMat,2.4,-2,-4.75);
+
+
+// ---------- ATT&CK props ----------
+const A=[2.7,12.9], TWP=[4.5,12.5], H=[1.8,3.0], S=[-1.2,-3.4], IS=1.6, IC=2.0;
+const basic=(c,o)=>new THREE.MeshBasicMaterial(o==null?{color:c}:{color:c,transparent:true,opacity:o,depthWrite:false});
+const tower=add(G()); tower.position.set(TWP[0],0,TWP[1]);
+B(tower,1.3,0.5,1.3,0x2f2d3a,0,0.25,0); B(tower,0.9,1.6,0.9,0x3a3750,0,1.3,0); B(tower,1.1,0.25,1.1,0x8a4be0,0,2.22,0);
+B(tower,0.5,0.5,0.5,basic(0xff6fd8),0,2.6,0); B(tower,0.1,0.6,0.1,0x2f2d3a,0,3.15,0);
+const imp=mkBot(), crown=G(), shell=G(); imp.add(crown); imp.add(shell);
+B(crown,0.56,0.1,0.56,0xf6c531,0,0.63,0); [-0.2,0,0.2].forEach((x,i)=>B(crown,0.12,i===1?0.2:0.14,0.12,0xf6c531,x,i===1?0.78:0.75,0));
+B(shell,0.62,0.58,0.62,0xdde6f3,0,0.33,0); B(shell,0.4,0.22,0.06,0x58a6ff,0,0.38,0.32);
+const anchor=add(G()); anchor.position.set(3.2,0,1.6); B(anchor,0.45,0.45,0.45,0x6a3fb0,0,0.23,0); B(anchor,0.08,0.22,0.05,0xf6c531,0,0.3,0.24); B(anchor,0.16,0.08,0.05,0xf6c531,0.05,0.22,0.24);
+const steps=add(G()); B(steps,0.8,0.5,0.8,0x8d95a3,0.9,0.25,3.0); B(steps,0.8,1.0,0.8,0x9aa2b0,0.1,0.5,3.0); B(steps,0.8,1.5,0.8,0xaab2c0,-0.7,0.75,3.0);
+const shield=add(G()); B(shield,1.0,1.0,0.15,0x2a63d4,0,0,-0.05); B(shield,0.76,0.76,0.16,0x6f9dff,0,0,0);
+B(shield,0.14,0.32,0.1,0xffffff,-0.17,-0.06,0.1).rotation.z=0.75; B(shield,0.14,0.56,0.1,0xffffff,0.1,0.04,0.1).rotation.z=-0.6;
+shield.traverse(m=>{ m.castShadow=false; });
+const keys3=[0,1,2].map(()=>{ const g=add(G()); B(g,0.4,0.4,0.12,0xf6c531,0,0.2,0); B(g,0.14,0.6,0.12,0xf6c531,0,-0.25,0); B(g,0.25,0.12,0.12,0xf6c531,0.16,-0.35,0); return g; });
+const marks=racks.map((r,i)=>{ const m=new THREE.Mesh(GEO,basic(i===2?0xf6c531:0xff6fd8)); m.position.set(r.x,3.6,RZ); scene.add(m); return m; });
+const pk=[]; for(let i=0;i<7;i++){ const m=new THREE.Mesh(GEO,basic(0xff6fd8)); scene.add(m); pk.push(m); }
+const EX=[-7,-3,4], exps=EX.map(x=>{ const m=new THREE.Mesh(GEO,basic(0xf6c531)); m.position.set(x,2.5,6.5); scene.add(m); return m; });
+const ascan=new THREE.Mesh(GEO,basic(0xff6fd8,0.4)); ascan.scale.set(0.5,1.8,1.6); scene.add(ascan);
+const c2=new THREE.Mesh(GEO,basic(0xff6fd8,0.6)); scene.add(c2);
+const drings=[0,1].map(()=>{ const r=new THREE.Mesh(GEO,basic(0xff6fd8,0.5)); scene.add(r); return r; });
+let actor=atk;
+
+// ---------- timing helpers ----------
+const cl=x=>x<0?0:x>1?1:x, seg=(t,a,b)=>cl((t-a)/(b-a)), sm=x=>x*x*(3-2*x), lerp=(a,b,p)=>a+(b-a)*p;
+const back=x=>{ x=cl(x); return 1+2.7*Math.pow(x-1,3)+1.7*Math.pow(x-1,2); };
+const bounce=x=>{ x=cl(x); const n=7.5625,d=2.75; if(x<1/d) return n*x*x; if(x<2/d){x-=1.5/d; return n*x*x+0.75;} if(x<2.5/d){x-=2.25/d; return n*x*x+0.9375;} x-=2.625/d; return n*x*x+0.984375; };
+// keys: [time,x,z]; hops between differing keys, idles between equal ones
+function track(keys,t,rot0){
+  let i=0; while(i<keys.length-2 && t>=keys[i+1][0]) i++;
+  const a=keys[i], b=keys[i+1]; let rot=rot0||Math.PI;
+  for(let j=0;j<=i;j++){ const dx=keys[j+1][1]-keys[j][1], dz=keys[j+1][2]-keys[j][2]; if((dx||dz) && (j<i || t>=keys[j][0])) rot=Math.atan2(dx,dz); }
+  const dx=b[1]-a[1], dz=b[2]-a[2], d=Math.hypot(dx,dz);
+  if(d<0.01 || t<=a[0]) return {x:a[1],y:0,z:a[2],rot,sq:1+Math.sin(t*4)*0.03};
+  if(t>=b[0]) return {x:b[1],y:0,z:b[2],rot,sq:1};
+  const n=Math.max(1,Math.round(d/1.25)), u=(t-a[0])/(b[0]-a[0])*n, k=Math.min(n-1,Math.floor(u)), f=u-k;
+  const e=Math.min(1,f/0.75), q=(k+sm(e))/n;
+  return {x:lerp(a[1],b[1],q), y:Math.sin(Math.PI*e)*0.6, z:lerp(a[2],b[2],q), rot,
+          sq:e<1?1+0.1*Math.sin(Math.PI*e):1-0.16*Math.sin(Math.PI*(f-0.75)/0.25)};
+}
+function put(o,r){ o.position.set(r.x,r.y,r.z); o.rotation.set(0,r.rot,0); const s=r.sq, w=1/Math.sqrt(s); o.scale.set(w,s,w); }
+function arc(o,a,b,p,h){ o.position.set(lerp(a[0],b[0],p), lerp(a[1],b[1],p)+Math.sin(Math.PI*p)*h, lerp(a[2],b[2],p)); }
+function path(t,ks){ let i=0; while(i<ks.length-2 && t>=ks[i+1][0]) i++; return lerp(ks[i][1],ks[i+1][1],sm(seg(t,ks[i][0],ks[i+1][0]))); }
+
+
+function beam(m,a,b,w){ m.visible=true; m.position.set((a[0]+b[0])/2,(a[1]+b[1])/2,(a[2]+b[2])/2); m.scale.set(w,w,Math.hypot(b[0]-a[0],b[1]-a[1],b[2]-a[2])); m.lookAt(b[0],b[1],b[2]); }
+function gate(o){ o=sm(cl(o)); doorL.position.x=-0.75-o*1.4; doorR.position.x=0.75+o*1.4; }
+const idle=(x,z,rot)=>({x,y:0,z,rot:rot==null?Math.PI:rot,sq:1+Math.sin(T*4)*0.03});
+function impAt(x,y,z,s){ imp.visible=s>0.01; imp.position.set(x,y,z); imp.scale.set(s,s,s); }
+function sensor(x,y,z,tilt){ const d=drones[2]; d.visible=true; d.position.set(x,y,z); d.rotation.z=tilt||0; if(!tilt) d.userData.rot.rotation.y=T*25; }
+function cp(i,x,z,s){ const b=bots[i]; s=s==null?1:s; b.visible=s>0.01; s*=1.3; b.scale.set(s,s,s); b.position.set(x,Math.abs(Math.sin(T*5+i))*0.08,z); b.rotation.y=0.6; }
+const PILE=i=>[-1.2+(i-1.5)*0.75,0.3,-2.2], STK=i=>[5.9,0.3+i*0.62,12.5];
+const bob=()=>Math.abs(Math.sin(T*5))*0.08;
+let camT=[0,6], camS=22;
+function reset(){
+  doorL.position.x=-0.75; doorR.position.x=0.75;
+  [mfa,key,cross,clone,truckA,truckB,botB,arch,scan,segW,user,check,grant,fake,field,hammer,orb,tower,imp,crown,shell,anchor,shield,steps,ascan,c2].forEach(o=>{ o.visible=false; });
+  [bots,letters,bangs,drones,beams,rings,links,keys3,marks,pk,exps,drings].forEach(a=>a.forEach(o=>{ o.visible=false; }));
+  ambient(); atk.visible=def.visible=true; atk.scale.set(1,1,1); actor=atk; imp.rotation.set(0,0.6,0); drones[2].rotation.set(0,0,0);
+  anchor.scale.set(1,1,1); steps.scale.set(1,1,1); tower.scale.set(1,1,1); segMat.color.setHex(0x6f9dff);
+  racks.forEach(r=>{ r.lm.color.setHex(0x4dff9a); r.lock.visible=false; r.bk.visible=false; r.cube.visible=true; r.cube.position.set(r.x,2.72,RZ); r.cube.scale.set(0.6,0.6,0.6); r.cube.rotation.set(0,0,0); });
+  emps.forEach((e,i)=>{ e.position.y=0; e.scale.y=1+Math.sin(T*3+i*2)*0.03; });
+  mfa.position.set(0,3.2,7.15);
+}
+// state on entering tactic k
+function base(k){
+  put(def,idle(-2,5,0.4));
+  if(k>=2){ tower.visible=true; put(atk,idle(A[0],A[1])); }
+  if(k>=3){ const p=k>=11?S:H, s=k>=6?IC:IS; impAt(p[0],bob(),p[1],s); crown.visible=k>=6; actor=imp; }
+  if(k>=5) anchor.visible=true;
+  if(k>=4&&k<=7) sensor(0.5,3.3+Math.sin(T*3)*0.1,3.5); else if(k>=8) sensor(0.5,0.25,3.5,0.5);
+  if(k>=11){ cp(1,-2.3,2.6); cp(2,-4.8,3.9); segW.visible=true; segW.position.y=1.5; }
+  if(k===12||k===13) for(let i=0;i<4;i++){ const p=PILE(i); racks[i].cube.position.set(p[0],p[1],p[2]); }
+  if(k>=14) for(let i=0;i<4;i++){ const p=STK(i); racks[i].cube.position.set(p[0],p[1],p[2]); }
+}
+function c2beam(t){ const a=[TWP[0],2.9,TWP[1]], b=[S[0],0.7,S[1]]; beam(c2,a,b,0.1); c2.material.opacity=0.45+0.25*Math.sin(t*8); return [a,b]; }
+
+const TF=[
+ function(t){ camT=[0.5,9.5]; camS=15;                                   // Reconnaissance
+   const r=track([[0,A[0],A[1]],[0.9,6,9.3],[3.9,-7.5,9.3],[7,-7.5,9.3]],t); put(atk,r);
+   if(t>0.9&&t<3.9){ ascan.visible=true; ascan.position.set(r.x,1.1,8.1); ascan.material.opacity=0.35+0.2*Math.sin(t*20); }
+   exps.forEach((m,i)=>{ const seen=t>0.9&&r.x<EX[i]+0.3; let s=seen?0.55:0.42; if(t>4.6&&i!==1) s*=1-sm(seg(t,5+i*0.2,5.6+i*0.2));
+     m.visible=s>0.02; m.material.color.setHex(seen?0xff6fd8:0xf6c531); m.scale.set(s,s,s); m.position.y=2.5+Math.sin(T*4+i)*0.06; m.rotation.y=T; });
+   put(def,track([[0,-3,4.6],[4.6,-3,4.6],[5.4,-5,5.2],[7,-5,5.2]],t,0)); },
+ function(t){ camT=[2.5,10.2]; camS=12.5;                                // Resource Development
+   put(atk,idle(A[0],A[1])); put(def,idle(2,5,0.4));
+   tower.visible=t>0.4; tower.scale.y=Math.max(0.01,back(seg(t,0.4,1.6)));
+   if(t>2){ const k=back(seg(t,2,2.3)); letter.visible=true; letter.position.set(A[0],2.7+Math.sin(t*4)*0.08,A[1]); letter.rotation.set(0,t*3,0); letter.scale.set(k,k,k); }
+   if(t>3.1){ impAt(0.2,bob(),12.6,IS*back(seg(t,3.1,3.5))); imp.rotation.y=Math.PI; } },
+ function(t){ camT=[3,8.4]; camS=14; base(2);                            // Initial Access
+   const from=[A[0],2.7,A[1]], to=[3.5,1.7,3.6], to2=[6,1.7,2.2];
+   letter.scale.set(1,1,1);
+   if(t<0.7){ impAt(0.2,0,12.6,IS*(1-sm(seg(t,0.2,0.7)))); imp.rotation.y=Math.PI; letter.visible=true; letter.position.set(from[0],from[1],from[2]); }
+   else if(t<2.1){ letter.visible=true; arc(letter,from,to,seg(t,0.7,2.1),3.2); letter.rotation.set(0,t*5,0); }
+   if(t>2.1&&t<3.3){ bang.visible=true; bang.position.set(3.5,2.1+Math.abs(Math.sin(t*9))*0.2,3.5); emps[2].position.y=Math.abs(Math.sin(t*9))*0.15; }
+   if(t>2.9){ impAt(H[0],bob(),H[1],IS*back(seg(t,2.9,3.3))); imp.rotation.y=0.6; actor=imp; }
+   if(t>4.6){ mfa.visible=true; mfa.position.y=3.2+(1-bounce(seg(t,4.6,5.3)))*6;
+     const p=seg(t,5,5.9), l=letters[1], q=seg(t,5.45,6.2);
+     if(p>0&&q<1){ l.visible=true; if(p<0.5) arc(l,from,to2,p,2.4); else l.position.set(4.35,4.6-4.2*q*q,7.55+q*1.2); l.rotation.set(0,t*5,q*3); }
+     if(t>5.3&&t<6.2){ field.visible=true; field.position.set(4.35,4.5,7.1); field.material.opacity=0.6*Math.sin(Math.PI*seg(t,5.3,6.2)); }
+     if(t>5.45){ cross.visible=true; cross.position.set(4.35,5.5+Math.sin(t*6)*0.08,7.7); const k=back(seg(t,5.45,5.75)); cross.scale.set(k,k,k); } } },
+ function(t){ camT=[1.5,3.8]; camS=10; base(3);                          // Execution
+   if(t<4.4){ imp.position.y=Math.abs(Math.sin(t*6))*0.25; const s=IS*(1+0.12*Math.sin(t*12)); imp.scale.set(s,s,s); }
+   pk.forEach((m,i)=>{ const a=0.4+i*0.5, p=seg(t,a,a+1.1); if(p<=0||p>=1) return; m.visible=true;
+     m.position.set(H[0]+Math.sin(i*2.1+p*5)*0.55,0.8+p*2.3,H[1]+Math.cos(i*2.1+p*5)*0.55); const s=0.32*(1-p*0.6); m.scale.set(s,s,s); m.rotation.set(t*4,t*6,0); });
+   if(t>4.6) sensor(0.5,lerp(8,3.3,sm(seg(t,4.6,5.6)))+Math.sin(T*3)*0.1,3.5); },
+ function(t){ camT=[1.8,4]; camS=10; base(4);                            // Persistence
+   put(imp,track([[0,H[0],H[1]],[0.5,H[0],H[1]],[1.2,2.2,1.7],[1.9,2.2,1.7],[2.6,H[0],H[1]],[9,H[0],H[1]]],t)); imp.scale.multiplyScalar(IS); if(t>=2.6) imp.rotation.y=0.6;
+   if(t>1.5){ anchor.visible=true; const k=back(seg(t,1.5,1.8))*(1+0.4*Math.sin(Math.PI*seg(t,4.7,5.4))); anchor.scale.set(k,k,k); }
+   const dp=sm(seg(t,2.9,3.5))*(1-sm(seg(t,4.1,4.6))); sensor(lerp(0.5,H[0],dp),lerp(3.3,2.7,dp)+Math.sin(T*3)*0.1,lerp(3.5,H[1],dp));
+   if(t>3.5&&t<3.9){ const b=beams[2]; b.visible=true; b.rotation.set(0,0,0); b.position.set(H[0],1.6,H[1]); b.scale.set(0.3,1.8,0.3); }
+   if(t>3.6&&t<5.3){ const s=1-seg(t,3.6,3.9); impAt(H[0],0,H[1],IS*s); }
+   else if(t>=5.3){ impAt(H[0],bob(),H[1],IS*back(seg(t,5.3,5.7))); } },
+ function(t){ camT=[1,3.6]; camS=10; base(5);                            // Privilege Escalation
+   steps.visible=true; steps.scale.y=Math.max(0.01,back(seg(t,0.2,0.7)));
+   const P=[[H[0],0,H[1]],[0.9,0.5,3.0],[0.1,1.0,3.0],[-0.7,1.5,3.0]], T0=[0.9,1.8,2.7];
+   let pos=P[0]; imp.rotation.y=-0.9;
+   for(let i=0;i<3;i++){ if(t>=T0[i]){ const p=seg(t,T0[i],T0[i]+0.7); arc(imp,P[i],P[i+1],sm(p),0.8); pos=null; } }
+   if(pos) imp.position.set(pos[0],pos[1]+bob(),pos[2]);
+   if(t>3.4){ imp.rotation.y=0.6; crown.visible=t>3.6; const s=lerp(IS,IC,back(seg(t,3.6,4.0))); imp.scale.set(s,s,s); imp.position.y=1.5+bob(); } },
+ function(t){ camT=[1.5,4]; camS=10; base(6);                            // Stealth
+   imp.rotation.y=0.6+sm(seg(t,0.5,1.4))*Math.PI*4; shell.visible=t>0.95; crown.visible=t<=0.95; if(t>1.4) imp.position.y=0;
+   put(def,track([[0,-5,5.4],[1.6,-5,5.4],[4.4,6,5.4],[7,6,5.4]],t,0)); },
+ function(t){ camT=[1,3.8]; camS=10; base(7);                            // Defense Impairment
+   if(t>1&&t<1.5) beam(links[0],[H[0],0.7,H[1]],[0.5,3.3,3.5],0.12);
+   const f=seg(t,1.4,2.2); if(f>0) sensor(0.5,lerp(3.3,0.25,f*f),3.5,0.5*f);
+   if(t>2.2&&t<4.4) imp.position.y=Math.abs(Math.sin((t-2.2)*5))*0.4; },
+ function(t){ camT=[0,3.6]; camS=12.5; base(8);                          // Credential Access
+   [0,1,3].forEach((ei,j)=>{ const e=emps[ei].position, a=0.5+j*0.4, b=1.9+j*0.5, k=keys3[j]; if(t<a) return; k.visible=true; k.rotation.set(0,t*3+j,0);
+     const s=0.8*back(seg(t,a,a+0.3)); k.scale.set(s,s,s); const ang=t*2+j*2.09, o=[H[0]+Math.cos(ang)*1.0,2.3,H[1]+Math.sin(ang)*1.0];
+     if(t<b) k.position.set(e.x,2.4+Math.sin(t*5+j)*0.08,e.z); else if(t<b+0.9) arc(k,[e.x,2.4,e.z],o,sm(seg(t,b,b+0.9)),1.5); else k.position.set(o[0],o[1],o[2]); }); },
+ function(t){ camT=[0,-0.5]; camS=15.5; base(9);                         // Discovery
+   if(t<4.6) drings.forEach((g,j)=>{ const ph=(t*0.55+j*0.5)%1, k=1+ph*26; g.visible=true; g.scale.set(k,0.02,k); g.position.set(H[0],0.08,H[1]); g.material.opacity=0.5*(1-ph); });
+   marks.forEach((m,i)=>{ const a=1.4+i*0.35; if(t<a) return; m.visible=true; const s=(i===2?0.6:0.35)*back(seg(t,a,a+0.3)); m.scale.set(s,s,s); m.position.y=3.7+Math.sin(T*4+i)*0.08; m.rotation.y=T*2; }); },
+ function(t){ camT=[-1,0.6]; camS=14; base(10);                          // Lateral Movement
+   const r=track([[0,H[0],H[1]],[0.4,H[0],H[1]],[1.4,-2.3,2.6],[1.9,-2.3,2.6],[3.6,S[0],S[1]],[7,S[0],S[1]]],t); put(imp,r); imp.scale.multiplyScalar(IC); if(t>=3.6) imp.rotation.y=0.6;
+   key.visible=true; key.position.set(r.x,r.y+2.3,r.z); key.rotation.y=t*3; key.scale.set(0.8,0.8,0.8);
+   if(t>1.7) cp(1,-2.3,2.6,back(seg(t,1.7,2.0)));
+   if(t>2.0){ put(bots[2],track([[2.0,-2.3,2.6],[3.0,-4.8,3.9],[7,-4.8,3.9]],t)); bots[2].visible=true; if(t>=3) bots[2].rotation.y=0.6; }
+   if(t>4.6){ segW.visible=true; segW.position.y=lerp(-1.6,1.5,back(seg(t,4.6,5.3)));
+     if(t>5.2){ put(bots[3],track([[5.2,-0.2,S[1]],[5.9,1.7,S[1]],[6.2,1.7,S[1]],[6.6,0.8,S[1]],[7,0.8,S[1]]],t)); bots[3].visible=true; }
+     if(t>5.9&&t<6.3) segMat.color.setHex(Math.sin(t*30)>0?0xffffff:0x6f9dff); } },
+ function(t){ camT=[-1.5,-3.2]; camS=10.5; base(11);                     // Collection
+   for(let i=0;i<4;i++){ const r=racks[i], a=0.6+i*0.6, p=seg(t,a,a+1); if(p<=0) continue; arc(r.cube,[r.x,2.72,RZ],PILE(i),sm(p),1.5); if(p<1) r.cube.rotation.y=t*5; } },
+ function(t){ camT=[1.5,4.5]; camS=21; base(12);                         // Command and Control
+   const e=c2beam(t); actor=atk; orb.visible=true; orb.position.set(A[0],2.9+Math.sin(t*5)*0.1,A[1]); orb.rotation.set(t*2,t*3,0);
+   for(let i=0;i<4;i++){ const ph=(t*0.6+i*0.25)%1, m=pk[i]; m.visible=true; m.scale.set(0.3,0.3,0.3); m.position.set(lerp(e[0][0],e[1][0],ph),lerp(e[0][1],e[1][1],ph),lerp(e[0][2],e[1][2],ph)); } },
+ function(t){ camT=[1.5,4.5]; camS=21; base(13);                         // Exfiltration
+   c2beam(t);
+   for(let i=0;i<4;i++){ const a=0.5+i*0.7, p=seg(t,a,a+1.5); if(p<=0) continue; arc(racks[i].cube,PILE(i),STK(i),sm(p),4); if(p<1) racks[i].cube.rotation.y=t*5; } },
+ function(t){ camT=[0,-3.2]; camS=13.5; base(14);                        // Impact
+   put(def,idle(4.8,-3,-Math.PI/2));
+   for(let i=0;i<4;i++){ const r=racks[i], a=0.6+i*0.45, rt=5.4+i*0.3;
+     if(t>a&&t<rt){ r.lm.color.setHex(0xff4a3d); r.lock.visible=true; const s=back(seg(t,a,a+0.3)); r.lock.scale.set(s,s,s); }
+     if(t>rt-0.5){ r.bk.visible=true; r.bk.position.y=2.72+(1-bounce(seg(t,rt-0.5,rt+0.2)))*7; } }
+   if(t>2.6&&t<4.5){ bang.visible=true; bang.position.set(4.8,2.2+Math.abs(Math.sin(t*9))*0.2,-3); def.position.y=Math.abs(Math.sin(t*9))*0.15; } }
+];
+function intro(t){ camT=[0,6-t*0.1]; camS=23-t*0.2;
+  put(atk,track([[0,6,17.5],[1,6,17.5],[3.5,A[0],A[1]],[5,A[0],A[1]]],t)); put(def,track([[0,-3,4.6],[1.5,-3,4.6],[4,2,4.6],[5,2,4.6]],t,0)); }
+function outro(t){ camT=[0,5.5]; camS=22+t*0.25; base(2); actor=atk;
+  put(def,track([[0,-3,4.6],[1,-3,4.6],[3.5,3,4.6],[7,3,4.6]],t,0)); mfa.visible=true; sensor(0.5,3.3+Math.sin(T*3)*0.1,3.5); }
+
+const SC=[{k:-1,d:5,fn:intro,caps:[[0,5,'','MITRE ATT&CK は、攻撃者の目的を15の「戦術」に整理した知識ベース。ひとつの侵入を例に、順に見ていきます。']]}];
+TAC.forEach((tc,k)=>{ const d=tc.d||7; SC.push({k,d,fn:TF[k],caps:tc.caps||[[0,4.6,'a',tc.a],[4.6,d,'d',tc.df]]}); });
+SC.push({k:15,d:7,fn:outro,caps:[[0,7,'','ここまでが15の戦術。実際の攻撃では順番が前後し、すべてを使うとは限らない。どの段階でも、気づいて止める機会がある。']]});
+let acc=0; SC.forEach(s=>{ s.t0=acc; acc+=s.d; }); const TOTAL=acc;
+
+// ---------- UI ----------
+const pp=$('pp'); jump=function(k){ T=SC[k+1].t0+0.02; draw(); };
+let playing=!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches), T=playing?0:8, last=0;
+function label(){ pp.textContent=playing?'一時停止':'再生'; } label();
+pp.addEventListener('click',()=>{ playing=!playing; label(); });
+
+const v=new THREE.Vector3(), la=$('la'), ld=$('ld'), lm=$('lm'), fade=$('fade'), turnEl=$('turn'), sceneEl=$('scene'), techEl=$('tech'), tagEl=$('tag'), txtEl=$('txt');
+let W=0,Hh=0, capKey='';
+function size(){ const w=stage.clientWidth, h=stage.clientHeight; if(w===W&&h===Hh||!w) return; W=w; Hh=h;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2)); renderer.setSize(w,h,false); }
+function tagAt(el,o,h){ if(!o.visible){ el.hidden=true; return; } v.set(o.position.x,o.position.y+h,o.position.z).project(cam);
+  el.hidden=false; el.style.transform='translate(-50%,-100%) translate('+((v.x+1)/2*W).toFixed(1)+'px,'+((1-v.y)/2*Hh).toFixed(1)+'px)'; }
+function draw(){
+  size(); if(T>=TOTAL) T=0;
+  let si=SC.length-1; while(si>0&&T<SC[si].t0) si--; const s=SC[si], lt=T-s.t0;
+  reset(); s.fn(lt);
+  const c=s.caps.find(c=>lt>=c[0]&&lt<c[1])||s.caps[s.caps.length-1];
+  const who=c[2]==='a'?actor:c[2]==='d'?def:null;
+  if(who&&who.visible){ const col=c[2]==='a'?0xff5a4d:0x6f9dff;
+    rings.forEach((g,j)=>{ const ph=(T*0.7+j*0.5)%1, k=1+ph*5.5; g.visible=true; g.material.color.setHex(col); g.scale.set(k,0.02,k); g.position.set(who.position.x,0.07,who.position.z); g.material.opacity=0.6*(1-ph); }); }
+  if(c[2]==='d'){ const k=back(seg(lt,c[0],c[0]+0.3)); shield.visible=true; shield.scale.set(k,k,k); shield.rotation.y=0.6; shield.position.set(def.position.x,3.3+Math.sin(T*4)*0.08,def.position.z); }
+  const a=W/Hh||16/9; cam.left=-camS*a/2; cam.right=camS*a/2; cam.top=camS/2; cam.bottom=-camS/2; cam.updateProjectionMatrix();
+  cam.position.set(camT[0]+OFF.x,OFF.y,camT[1]+OFF.z); cam.lookAt(camT[0],0,camT[1]); cam.updateMatrixWorld();
+  renderer.render(scene,cam);
+  tagAt(la,atk,2.3); tagAt(ld,def,2.3); tagAt(lm,imp,1.1*imp.scale.y+0.2); if(c[2]==='d') ld.hidden=true;
+  fade.style.opacity=Math.max(0,1-Math.min(lt,s.d-lt)/0.35).toFixed(2);
+  const key2=si+':'+c[0];
+  if(key2!==capKey){ capKey=key2; const tc=TAC[s.k]; txtEl.textContent=c[3];
+    tagEl.className='tag '+c[2]; tagEl.textContent=c[2]==='a'?'攻撃':c[2]==='d'?'防御':s.k<0?'導入':'まとめ';
+    sceneEl.textContent=''; if(tc){ const b=document.createElement('b'); b.textContent=tc.id; const sm2=document.createElement('small'); sm2.textContent=tc.en;
+      sceneEl.appendChild(b); sceneEl.appendChild(document.createTextNode(tc.jp)); sceneEl.appendChild(sm2); techEl.hidden=false; techEl.textContent='技術の例　'+tc.tq; }
+    else { sceneEl.textContent='MITRE ATT&CK'; techEl.hidden=true; }
+    stage.className='stage '+c[2]; turnEl.hidden=!c[2]; turnEl.className='turn '+c[2]; turnEl.textContent=c[2]==='a'?'攻撃側のターン':'防御側のターン';
+    chs.forEach((b,i)=>b.classList.toggle('on',i===s.k)); if(tc&&mxw.scrollTo){ const c=chs[s.k]; try{ mxw.scrollTo({left:Math.max(0,c.offsetLeft-(mxw.clientWidth-c.offsetWidth)/2),behavior:'smooth'}); }catch(e){} } segs.forEach((e,i)=>{ e.className=i===s.k?'on':(i<s.k?'done':''); }); }
+}
+function loop(now){ const dt=Math.min(0.05,(now-last)/1000||0); last=now; if(playing) T+=dt; draw(); requestAnimationFrame(loop); }
+requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
