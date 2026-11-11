@@ -1,0 +1,99 @@
+import { useEffect, useRef } from 'react'
+import { TACTICS } from '../data/tactics'
+import { Player, type NowPlaying, type PlayerHooks } from '../player/player'
+
+type Props = {
+  now: NowPlaying | null
+  /** 再生機ができたとき（片付けるときは null） */
+  onPlayer(player: Player | null): void
+  onChange: PlayerHooks['onChange']
+  onPlaying: PlayerHooks['onPlaying']
+  /** 3D を表示できないとき */
+  onError(message: string): void
+}
+
+/** アニメーションの舞台。3D の画面と、その上に重ねる場面名・番の表示・ラベル */
+export function Stage({ now, onPlayer, onChange, onPlaying, onError }: Props) {
+  const stage = useRef<HTMLDivElement>(null)
+  const canvas = useRef<HTMLCanvasElement>(null)
+  const attacker = useRef<HTMLDivElement>(null)
+  const defender = useRef<HTMLDivElement>(null)
+  const malware = useRef<HTMLDivElement>(null)
+  const fade = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    let player: Player
+    try {
+      player = new Player(
+        canvas.current!,
+        {
+          stage: stage.current!,
+          attacker: attacker.current!,
+          defender: defender.current!,
+          malware: malware.current!,
+          fade: fade.current!,
+        },
+        { onChange, onPlaying },
+      )
+    } catch {
+      onError('この環境ではWebGLが使えないため、アニメーションを表示できません。')
+      return
+    }
+    player.start()
+    onPlayer(player)
+    return () => {
+      onPlayer(null)
+      player.dispose()
+    }
+  }, [onPlayer, onChange, onPlaying, onError])
+
+  const side = now?.caption[2] ?? ''
+  const tactic = now && now.scene.tactic >= 0 ? TACTICS[now.scene.tactic] : null
+  const current = now?.scene.tactic ?? -1
+  // まとめの場面では、全部の戦術を「済み」にする
+  const done = now?.scene.kind === 'outro' ? TACTICS.length : current
+
+  return (
+    <div className={`stage ${side}`} ref={stage}>
+      <canvas
+        ref={canvas}
+        aria-label="ボクセル調のアニメーション。攻撃者が偵察から影響まで、ATT&CKの15の戦術を順に進め、防御側が各段階で対抗する。"
+      />
+      <div className="tagl a" ref={attacker}>
+        攻撃側
+      </div>
+      <div className="tagl d" ref={defender}>
+        防御側
+      </div>
+      <div className="tagl a" ref={malware} hidden>
+        マルウェア
+      </div>
+      <div className="strip">
+        {TACTICS.map((t, i) => (
+          <i key={t.id} className={i === current ? 'on' : i < done ? 'done' : ''} />
+        ))}
+      </div>
+      <div className="chips">
+        <div className="scene">
+          {tactic ? (
+            <>
+              <b>{tactic.id}</b>
+              {tactic.ja}
+              <small>{tactic.en}</small>
+            </>
+          ) : (
+            'MITRE ATT&CK'
+          )}
+        </div>
+        {tactic && now?.scene.title && (
+          <div className="tech">
+            {now.scene.kind === 'extra' ? 'ほかの例　' : '技術の例　'}
+            {now.scene.title}
+          </div>
+        )}
+      </div>
+      {side && <div className={`turn ${side}`}>{side === 'a' ? '攻撃側のターン' : '防御側のターン'}</div>}
+      <div className="fade" ref={fade} />
+    </div>
+  )
+}
