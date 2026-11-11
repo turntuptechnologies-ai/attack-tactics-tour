@@ -1,23 +1,101 @@
 # ATT&CK Tactics Tour
 
-ひとつの侵入を例に、MITRE ATT&CK（Enterprise v20）の15の戦術を順にたどる、ボクセル調アニメーションの図解サイトです。
+[![CI](https://github.com/turntuptechnologies-ai/attack-tactics-tour/actions/workflows/ci.yml/badge.svg)](https://github.com/turntuptechnologies-ai/attack-tactics-tour/actions/workflows/ci.yml)
+[![Deploy to GitHub Pages](https://github.com/turntuptechnologies-ai/attack-tactics-tour/actions/workflows/deploy.yml/badge.svg)](https://github.com/turntuptechnologies-ai/attack-tactics-tour/actions/workflows/deploy.yml)
+[![Live Demo](https://img.shields.io/badge/demo-live-brightgreen)](https://turntuptechnologies-ai.github.io/attack-tactics-tour/)
 
-マトリックスの赤枠の技術（76個）を押すと、その場面に飛べます。URL の末尾に技術IDを付けると、その場面から開きます（例: `…/attack-tactics-tour/#T1190`）。
+MITRE ATT&CK（Enterprise v20）の15の戦術と76の技術を、ボクセル調のアニメーションで見て回れる図解サイトです。
 
 公開先: https://turntuptechnologies-ai.github.io/attack-tactics-tour/
 
-## 構成
+- **本編**は、ひとつの侵入を偵察から影響まで追う約2分のループです（各戦術から技術を1つずつ）。
+- **ほかの例**は、同じ戦術を別の手口で進めた場合を、技術ごとに1場面ずつ描いたものです。
+- マトリックスの赤枠の技術を押すと、その場面に飛べます。URL の末尾に技術IDを付けると、その場面から開きます（例: `…/attack-tactics-tour/#T1190`）。
 
-- `index.html` — サイト本体（HTML / CSS / JavaScript を1ファイルに収録）
-- 外部読み込みは three.js r128（cdnjs、SRI 付き）と Google Fonts のみ
-- ビルド不要。GitHub Pages が `gh-pages` ブランチのルートをそのまま配信します
+## Stack
 
-## ローカルで確認
+- [Vite](https://vite.dev/) + [React](https://react.dev/) + TypeScript
+- [three.js](https://threejs.org/) r128（3D の描画）
+- [Vitest](https://vitest.dev/)（テスト）、[oxlint](https://oxc.rs/docs/guide/usage/linter)（lint）
+- フォントは [Fontsource](https://fontsource.org/) で同梱（DotGothic16 / Press Start 2P / Zen Kaku Gothic New）。外部への読み込みはありません
+
+## Quick start
 
 ```sh
-python3 -m http.server 8000
-# http://localhost:8000/ を開く
+npm install
+npm run dev      # 開発サーバー（http://localhost:5173/attack-tactics-tour/）
 ```
+
+## Layout
+
+```
+src/
+  data/
+    tactics.ts        戦術と、動画で描く技術の例（字幕の文面もここ）
+    matrix.ts         ATT&CK マトリックスの技術一覧
+  scene/
+    world.ts          舞台と小道具（建物・人物・マルウェアなど、箱の組み合わせ）
+    motion.ts         動きの計算（補間、跳ねて歩く経路、山なりの軌道）
+    kit.ts            場面を書くための道具（置く・飛ばす・現れる、毎フレームの初期化）
+    scenes/           戦術ごとの場面。技術IDをキーにして並べる
+  player/
+    timeline.ts       再生の順番（本編だけ／例も含める、# の直リンク）
+    player.ts         再生機（時間を進めて描く、字幕の切り替えを画面に伝える）
+  components/         画面の部品（舞台、マトリックス、一覧表）
+  App.tsx             ページ全体
+```
+
+描画の考え方は一つだけです。毎フレーム、`kit.reset()` で舞台をまるごと初期状態に戻し、
+いまの場面の `run(t)` が「時刻 t のときの状態」をゼロから組み立てます。
+場面は前のフレームを引きずらないので、好きな時刻に飛んでも同じ絵になります。
+
+## 技術の例を足す
+
+1. `src/data/tactics.ts` の該当する戦術の `examples` に、技術ID・攻撃側の字幕・防御側の字幕を足す。
+   技術IDは `src/data/matrix.ts` のその戦術に載っているものを使います。
+2. `src/scene/scenes/` の該当する戦術のファイルに、同じ技術IDで場面を足す。
+
+   ```ts
+   T1234: {
+     hits: [3.2],            // 攻撃が成功する時刻（秒）。ここで赤いドクロが出る
+     run(t) {
+       view.camT = [1.5, 3.8]  // カメラが見る地点 [x, z]
+       view.camS = 10          // 画面に収める高さ（小さいほど寄る）
+       base(3)                 // 本編でその戦術に入った時点の状況から始める
+       // 0〜4.6 秒が攻撃側、4.6〜7 秒が防御側の番
+     },
+   },
+   ```
+
+3. `npm run test` を通す。データと場面の対応が取れていないと、ここで落ちます。
+
+新しい小道具が要るときは `world.ts` に足し、場面が動かした物は `kit.ts` の `reset()` で
+必ず元に戻してください（戻し忘れは「舞台を同じ初期状態に戻す」のテストで見つかります）。
+
+場面を作るときは、URL に `#T1234-t32` のように `-t` を付けると、3.2 秒の位置で止めた状態で開けます。
+
+## Development
+
+```sh
+npm run build    # 型チェック + 本番ビルド（dist/）
+npm run lint     # oxlint
+npm run test     # Vitest
+npm run preview  # ビルド結果の確認
+```
+
+テストは、次のことを確かめます。
+
+- 例に挙げた技術がマトリックスに載っていて、技術IDが重複していないこと
+- データにある技術すべてに場面があり、最初から最後までエラーなく動くこと
+- どの場面のあとでも、`reset()` で舞台が同じ初期状態に戻ること
+- 再生の順番（本編だけをたどる、例も含める）と、`#` の直リンクの解釈
+
+three.js は r128 に固定しています。新しい版は光と色の扱いが変わり、絵の見た目が変わるためです。
+上げるときは、見た目を確認しながら行ってください。
+
+## Deploy
+
+`main` に push すると、GitHub Actions がビルドして GitHub Pages に公開します（`.github/workflows/deploy.yml`）。
 
 ## 帰属
 
