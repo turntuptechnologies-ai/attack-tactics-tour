@@ -2,7 +2,7 @@
 
 ひとつの侵入を例に、MITRE ATT&CK（Enterprise v20）の15の戦術を順にたどる、ボクセル調アニメーションの図解サイトです。
 
-マトリックスの赤枠の技術（46個）を押すと、その場面に飛べます。URL の末尾に技術IDを付けると、その場面から開きます（例: `…/attack-tactics-tour/#T1190`）。
+マトリックスの赤枠の技術（76個）を押すと、その場面に飛べます。URL の末尾に技術IDを付けると、その場面から開きます（例: `…/attack-tactics-tour/#T1190`）。
 
 公開先: https://turntuptechnologies-ai.github.io/attack-tactics-tour/
 

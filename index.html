@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>ATT&amp;CK 戦術めぐり</title>
-<meta name="description" content="ひとつの侵入を例に、MITRE ATT&amp;CK（Enterprise v20）の15の戦術と46の技術を、ボクセル調アニメーションでたどる図解。技術を選ぶとその場面に飛べます。">
+<meta name="description" content="ひとつの侵入を例に、MITRE ATT&amp;CK（Enterprise v20）の15の戦術と76の技術を、ボクセル調アニメーションでたどる図解。技術を選ぶとその場面に飛べます。">
 <link rel="canonical" href="https://turntuptechnologies-ai.github.io/attack-tactics-tour/">
 <meta property="og:type" content="website">
 <meta property="og:title" content="ATT&amp;CK 戦術めぐり">
-<meta property="og:description" content="ひとつの侵入を例に、MITRE ATT&amp;CK（Enterprise v20）の15の戦術と46の技術を、ボクセル調アニメーションでたどる図解。技術を選ぶとその場面に飛べます。">
+<meta property="og:description" content="ひとつの侵入を例に、MITRE ATT&amp;CK（Enterprise v20）の15の戦術と76の技術を、ボクセル調アニメーションでたどる図解。技術を選ぶとその場面に飛べます。">
 <meta property="og:url" content="https://turntuptechnologies-ai.github.io/attack-tactics-tour/">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -203,6 +203,40 @@ const XT=[
  [{id:'T1485',a:'データを消去や上書きで二度と使えなくし、業務を止める。',df:'切り離したバックアップを定期的に取り、戻せることを訓練で確かめておく。'},
   {id:'T1498',a:'大量の通信を外から浴びせて回線やサーバーをあふれさせ、利用者がサービスを使えないようにする。',df:'DDoS対策サービスやCDNで攻撃の通信を受け流し、回線事業者と連携する。'}]
 ];
+// second batch of examples, appended per tactic
+const XT2=[
+ [{id:'T1593',a:'検索エンジンやSNS、公開サイトを調べ、組織や従業員についての手がかりを集める。',df:'外から自組織がどう見えるかを定期的に確かめ、出しすぎた情報を減らす。'},
+  {id:'T1596',a:'DNSや証明書の記録、インターネット全体のスキャン結果など、公開された技術データベースから標的の機器を洗い出す。',df:'公開データベースに載っている自組織の機器を把握し、不要なものは外から見えなくする。'}],
+ [{id:'T1587',a:'目的に合わせて、マルウェアや攻撃コードを自分たちで開発する。',df:'未知のマルウェアにも対応できるよう、特徴の一致だけに頼らず振る舞いで検知する。'},
+  {id:'T1608',a:'作ったマルウェアや偽サイトを、配布用のサーバーやクラウドに置いて、攻撃の準備を整える。',df:'自組織になりすました偽サイトや不審な配布元を探し、見つけたら停止を依頼する。'}],
+ [{id:'T1189',a:'よく見られるWebサイトを改ざんし、閲覧しただけでマルウェアに感染するようにしておく。',df:'ブラウザを最新に保ち、危険なサイトへの接続を遮断する。'},
+  {id:'T1133',a:'VPNやリモートデスクトップなど、外から社内につなぐための入口を、盗んだ認証情報や設定の甘さを突いて使う。',df:'外部からの接続口を必要最小限にし、多要素認証と接続元の制限をかける。'}],
+ [{id:'T1203',a:'ブラウザやOfficeなど、利用者が使うソフトの脆弱性を突き、ファイルを開いただけでコードが動くようにする。',df:'ソフトをすぐ更新し、脆弱性を突く動きを止める保護機能を有効にする。'},
+  {id:'T1047',a:'Windowsに備わる管理の仕組み（WMI）を使い、正規の機能としてコマンドを実行する。',df:'WMIの利用を記録して不審な呼び出しを検知し、遠隔からの実行を必要な管理者に限る。'}],
+ [{id:'T1505',a:'Webサーバーなどに裏口になる部品（Webシェル）を仕込み、いつでも外から操作できるようにする。',df:'サーバー上のファイルの改変を監視し、見覚えのないスクリプトや部品を取り除く。'},
+  {id:'T1098',a:'すでにあるアカウントに、自分の鍵や権限をこっそり足して、正規の利用者のふりで出入りできるようにする。',df:'アカウントへの鍵や権限の追加を記録し、本人に覚えのない変更を取り消す。'}],
+ [{id:'T1055',a:'高い権限で動いている正規のプロセスの中にコードを注ぎ込み、その権限と見た目を借りる。',df:'プロセスへの不審な書き込みを検知し、特権プロセスを保護する機能を有効にする。'},
+  {id:'T1611',a:'コンテナや仮想環境の仕切りを破り、その外側にあるホストの権限を手に入れる。',df:'コンテナに余計な権限を与えず、ホストとの共有を最小限にして、土台のソフトを更新する。'}],
+ [{id:'T1564',a:'ファイルやプロセス、アカウントを見えにくい場所や属性の陰に置き、利用者や管理者の目に触れないようにする。',df:'隠し属性のファイルや、一覧に出てこないプロセスとアカウントを定期的に洗い出す。'},
+  {id:'T1497',a:'解析用の仮想環境やサンドボックスの中だと気づくと何もせず、本物の端末でだけ動き出す。',df:'解析環境を本物の端末に近づけ、長い待機や環境の確認といった動きそのものを検知する。'}],
+ [{id:'T1690',a:'コマンドの履歴が残らないように設定を変え、何をしたのかをあとから追えなくする。',df:'履歴の設定変更を検知し、コマンドの記録を端末の外にも送って残す。'},
+  {id:'T1688',a:'セキュリティソフトが立ち上がらないセーフモードで端末を再起動し、守りのない状態で活動する。',df:'セーフモードでも守りが働くようにし、意図しない再起動や起動設定の変更を検知する。'}],
+ [{id:'T1621',a:'多要素認証の承認の通知を何度も送りつけ、根負けや押し間違いで承認させる。',df:'通知を承認するだけの方式をやめ、番号の一致やフィッシング耐性のある方式に替える。'},
+  {id:'T1557',a:'利用者と正規のサービスのあいだに割り込み、やり取りされる認証情報やセッションを横取りする。',df:'通信を暗号化して相手を確かめ、中継されても使えないフィッシング耐性のある認証を使う。'}],
+ [{id:'T1018',a:'ネットワーク上にどんな端末やサーバーがあるかを一覧にし、次に移る先を選ぶ。',df:'端末どうしの不要な通信を止め、短時間に多数の相手へ問い合わせる動きを検知する。'},
+  {id:'T1057',a:'端末でどんなプログラムが動いているかを調べ、セキュリティソフトの有無や、ねらい目のプロセスを見きわめる。',df:'プロセスの一覧を何度も調べる動きを、ほかの不審な挙動と合わせて検知する。'}],
+ [{id:'T1210',a:'ネットワーク越しに使えるサービスの脆弱性を突いて、認証なしでとなりの端末やサーバーへ入り込む。',df:'内部の機器にもパッチを当て、端末どうしで不要なサービスを開けたままにしない。'},
+  {id:'T1550',a:'パスワードそのものではなく、盗んだハッシュやチケット、トークンを使い回して、別の端末に本人として入る。',df:'チケットやトークンの有効期間を短くし、ふだん使わない端末からの認証を検知する。'}],
+ [{id:'T1113',a:'利用者の画面を定期的に撮影し、表示されている情報をそのまま手に入れる。',df:'画面を撮る不審なプログラムを検知し、重要な情報を扱う端末を絞る。'},
+  {id:'T1074',a:'あちこちから集めたデータを、持ち出す前に一か所の置き場へまとめておく。',df:'ふだん使われない場所に急にデータがたまる動きや、大きな一時ファイルを検知する。'}],
+ [{id:'T1102',a:'SNSやクラウドストレージなど、だれもが使う正規のWebサービスを指令の受け渡し場所にして、通信を紛れ込ませる。',df:'業務で使わないサービスへの通信を制限し、許可したサービスでも不自然な使い方を検知する。'},
+  {id:'T1572',a:'指令の通信を、DNSやHTTPSなど許可されている別の通信の中に包んで通し、検査をくぐり抜ける。',df:'DNSなどの通信の量や長さの不自然さを調べ、中に包まれた想定外の通信を見つける。'}],
+ [{id:'T1048',a:'指令に使う通信とは別の、監視の薄い種類の通信（DNSやFTPなど）を選んでデータを送り出す。',df:'外向きに許可する通信の種類を絞り、DNSなどに紛れた大量の送信を検知する。'},
+  {id:'T1029',a:'決めた時刻や間隔で少しずつ送り出し、ふだんの通信の波に紛れさせる。',df:'時間帯ごとの通信量の基準を持ち、規則的すぎる送信や時間外の送信を検知する。'}],
+ [{id:'T1490',a:'バックアップや復元の仕組みを先に消し、暗号化や破壊のあとで元に戻せないようにする。',df:'バックアップをネットワークから切り離して保管し、消去や設定変更をすぐ検知する。'},
+  {id:'T1491',a:'Webサイトや社内の画面を書き換え、主張や脅しを見せつけて、信用を傷つける。',df:'公開サイトの改変を監視し、すぐ正しい内容に戻せるよう、元のデータと手順を用意しておく。'}]
+];
+XT.forEach((a,k)=>{ XT2[k].forEach(x=>{ a.push(x); }); });
 const TECH=[
 'T1595 Active Scanning|T1592 Gather Victim Host Information|T1589 Gather Victim Identity Information|T1590 Gather Victim Network Information|T1591 Gather Victim Org Information|T1598 Phishing for Information|T1682 Query Public AI Services|T1597 Search Closed Sources|T1596 Search Open Technical Databases|T1593 Search Open Websites/Domains|T1681 Search Threat Vendor Data|T1594 Search Victim-Owned Websites',
 'T1650 Acquire Access|T1583 Acquire Infrastructure|T1586 Compromise Accounts|T1584 Compromise Infrastructure|T1587 Develop Capabilities|T1585 Establish Accounts|T1683 Generate Content|T1588 Obtain Capabilities|T1608 Stage Capabilities',
@@ -394,6 +428,9 @@ const drings=[0,1].map(()=>{ const r=new THREE.Mesh(GEO,basic(0xff6fd8,0.5)); sc
 const plock=add(mkLock());
 const cloud=add(G()); B(cloud,2.2,0.7,1.2,0xf4f6fa,0,0,0); B(cloud,1.3,0.6,1.0,0xf4f6fa,-0.3,0.6,0); B(cloud,0.8,0.5,0.9,0xffffff,0.65,0.5,0); cloud.traverse(m=>{ m.castShadow=false; });
 const docs=[0,1,2,3].map(()=>{ const g=add(G()); B(g,0.5,0.64,0.08,0xf4f6fa,0,0,0); B(g,0.32,0.07,0.1,0x58a6ff,0,0.14,0); B(g,0.32,0.07,0.1,0x58a6ff,0,-0.04,0); return g; });
+const dbx=add(G()); [0,1,2].forEach(i=>{ B(dbx,1.2,0.36,1.2,0x58a6ff,0,0.2+i*0.5,0); B(dbx,1.24,0.08,1.24,0xf4f6fa,0,0.42+i*0.5,0); });
+const proc=add(G()); B(proc,0.62,0.58,0.62,0xdde6f3,0,0.33,0); B(proc,0.4,0.22,0.06,0x58a6ff,0,0.38,0.32); B(proc,0.56,0.1,0.56,0xf6c531,0,0.68,0); const procEye=B(proc,0.42,0.12,0.07,0xff4a3d,0,0.38,0.33);
+const clock=add(G()), hand=G(); clock.add(hand); B(clock,1.36,1.36,0.08,0x2f2d3a,0,0,-0.04); B(clock,1.2,1.2,0.12,0xf4f6fa,0,0,0); B(hand,0.1,0.5,0.1,0x2f2d3a,0,0.25,0.09); B(clock,0.14,0.14,0.12,0xd63f35,0,0,0.08);
 let actor=atk;
 
 // ---------- timing helpers ----------
@@ -429,12 +466,13 @@ const bob=()=>Math.abs(Math.sin(T*5))*0.08;
 let camT=[0,6], camS=22;
 function reset(){
   doorL.position.x=-0.75; doorR.position.x=0.75;
-  [mfa,key,cross,clone,truckA,truckB,botB,arch,scan,segW,user,check,grant,fake,field,hammer,orb,tower,imp,crown,shell,anchor,shield,skull,steps,ascan,c2,plock,cloud].forEach(o=>{ o.visible=false; });
+  [mfa,key,cross,clone,truckA,truckB,botB,arch,scan,segW,user,check,grant,fake,field,hammer,orb,tower,imp,crown,shell,anchor,shield,skull,steps,ascan,c2,plock,cloud,dbx,proc,clock].forEach(o=>{ o.visible=false; });
   [bots,letters,bangs,drones,beams,rings,links,keys3,marks,pk,exps,drings,docs].forEach(a=>a.forEach(o=>{ o.visible=false; }));
-  [cross,check,user,fake,clone,hammer,truckA,truckB,key,plock,cloud,arch,scan,field,grant].concat(letters,keys3,pk).forEach(o=>{ o.rotation.set(0,0,0); });
+  [cross,check,user,fake,clone,hammer,truckA,truckB,key,plock,cloud,arch,scan,field,grant].concat(letters,keys3,pk,docs,[ascan]).forEach(o=>{ o.rotation.set(0,0,0); });
   [cross,check,user,fake,clone,hammer,truckA,truckB,arch].concat(letters).forEach(o=>{ o.scale.set(1,1,1); });
   grant.scale.set(0.5,0.5,0.5); field.scale.set(4,2.6,0.12); scan.scale.set(3.8,2.9,0.08); ascan.scale.set(0.5,1.8,1.6); arch.position.set(0,0,9.3);
-  exps.forEach((m,i)=>{ m.position.set(EX[i],2.5,6.5); }); wm[4].color.setHex(0xd9dde4);
+  exps.forEach((m,i)=>{ m.position.set(EX[i],2.5,6.5); }); for(const x in wm) wm[x].color.setHex(0xd9dde4);
+  drones.forEach(d=>{ d.scale.set(1,1,1); }); racks.forEach(r=>{ r.bk.scale.set(0.6,0.6,0.6); });
   ambient(); atk.visible=def.visible=true; atk.scale.set(1,1,1); actor=atk; imp.rotation.set(0,0.6,0); drones[2].rotation.set(0,0,0);
   anchor.scale.set(1,1,1); steps.scale.set(1,1,1); tower.scale.set(1,1,1); segMat.color.setHex(0x6f9dff);
   racks.forEach(r=>{ r.lm.color.setHex(0x4dff9a); r.lock.visible=false; r.bk.visible=false; r.cube.visible=true; r.cube.position.set(r.x,2.72,RZ); r.cube.scale.set(0.6,0.6,0.6); r.cube.rotation.set(0,0,0); });
@@ -722,6 +760,177 @@ const XF=[
    if(t>5.0){ field.visible=true; field.position.set(0,1.4,10.6); field.scale.set(9,2.8,0.12); field.material.opacity=0.5*sm(seg(t,5.0,5.5)); }
    if(t>=5.6) ok(6.5,3.0,10.4,t,6.0); },2.6]]
 ];
+// ---------- second batch of scenes ----------
+const ORB=t=>{ orb.visible=true; orb.position.set(A[0],2.9+Math.sin(t*5)*0.1,A[1]); orb.rotation.set(t*2,t*3,0); };
+const XF2=[
+ // Reconnaissance
+ [[function(t){ camT=[0.5,10.5]; camS=14; put(atk,idle(A[0],A[1],-1.2)); put(def,idle(-3,4.6,0.4));       // Search Open Websites/Domains
+   const C=[-3.5,4.2,11.5]; pop(cloud,C[0],C[1]+Math.sin(T*2)*0.12,C[2],t,0.2,1.5); cloud.rotation.y=0.6;
+   docs.forEach((d,i)=>{ const a=1.0+i*0.55; if(t<a) return; fly(d,[C[0]-0.9+i*0.6,C[1]-0.2,C[2]],[A[0]-0.9+i*0.6,2.9+(i&1)*0.5,A[1]],t,a+0.3,a+1.3,1.5,5);
+     const s=back(seg(t,a,a+0.3)); d.scale.set(s,s,s); if(t>=a+1.3) d.rotation.y=0.6; }); },4.0],
+  [function(t){ camT=[0,9.5]; camS=15; put(atk,idle(A[0],A[1],-1.2)); put(def,idle(-3,4.6,0.4));           // Search Open Technical Databases
+   pop(dbx,-2.5,0,12.2,t,0.2); dbx.rotation.y=0.6;
+   if(t>0.9&&t<1.5) beam(links[4],[A[0],1.5,A[1]],[-2.5,1.0,12.2],0.08);
+   exps.forEach((m,i)=>{ const a=1.6+i*0.6, on=t>a; m.visible=true; m.material.color.setHex(on?0xff6fd8:0xf6c531); let s=on?0.55:0.42; if(t>5&&i!==1) s*=1-sm(seg(t,5+i*0.2,5.6+i*0.2));
+     m.visible=s>0.02; m.scale.set(s,s,s); m.position.y=2.5+Math.sin(T*4+i)*0.06; m.rotation.y=T; if(on&&t<4.6) beam(links[i],[-2.5,1.4,12.2],[EX[i],2.5,6.5],0.06); }); },3.1]],
+ // Resource Development
+ [[function(t){ camT=[2,11.2]; camS=11; put(atk,idle(A[0],A[1],-1.2)); put(def,idle(2,5,0.4));            // Develop Capabilities
+   const n=Math.min(4,Math.floor(seg(t,0.6,3.4)*4.001));
+   if(t>0.4&&t<3.6){ hammer.visible=true; hammer.position.set(1.7,0.9,12.5); hammer.rotation.z=0.3+Math.abs(Math.cos((t-0.6)*Math.PI/0.7))*1.0; }
+   impAt(0.6,n>=4?bob():0,12.4,n?IS*(0.25+0.75*n/4):0); },3.5],
+  [function(t){ camT=[0.5,11]; camS=13; put(atk,idle(A[0],A[1],-1.2)); put(def,idle(2,5,0.4));            // Stage Capabilities
+   const C=[-2.5,3.2,12]; pop(cloud,C[0],C[1],C[2],t,0.2,1.5); cloud.rotation.y=0.6;
+   if(t<1.4) impAt(1.0,bob(),12.4,IS); else lands(t,1.4,2.6,[1.0,0,12.4],[C[0],C[1]+0.6,C[2]],2.5,IS);
+   pop(letter,C[0]+1.3,C[1]+1.0,C[2],t,2.9); deny(C[0],C[1]+3.0,C[2],t,5.4); },2.7]],
+ // Initial Access
+ [[function(t){ camT=[-0.5,7]; camS=15; base(2);                                                        // Drive-by Compromise
+   const C=[-4,4.4,10.5], e=emps[1].position, m=pk[0]; cloud.visible=true; cloud.scale.set(1.5,1.5,1.5); cloud.position.set(C[0],C[1]+Math.sin(T*2)*0.12,C[2]); cloud.rotation.y=0.6;
+   fly(m,TOP(),[C[0],C[1]+1.1,C[2]],t,0.4,1.3,2,6); m.scale.set(0.4,0.4,0.4);
+   if(t>1.8&&t<2.8) beam(links[0],[e.x,1.4,e.z],C,0.07);
+   if(t>2.6){ lands(t,2.6,3.5,C,[e.x+0.95,0,e.z+0.2],1.0,IS); actor=imp; }
+   deny(C[0],C[1]+2.8,C[2],t,5.2); },3.5],
+  [function(t){ camT=[3.5,7.5]; camS=13; base(2);                                                       // External Remote Services
+   arch.visible=true; arch.position.set(6.5,0,7.3); arch.scale.set(0.55,0.55,0.55); scan.visible=true; scan.position.set(6.5,0.85,7.3); scan.scale.set(2.0,1.6,0.08); scan.material.opacity=0.3+0.15*Math.sin(t*8);
+   const r=track([[0,A[0],A[1]],[0.3,A[0],A[1]],[1.5,6.5,9.2],[7,6.5,9.2]],t); put(atk,r);
+   key.visible=t<4.6; key.position.set(r.x,r.y+2.9,r.z); key.rotation.y=t*3; key.scale.set(0.8,0.8,0.8);
+   if(t<4.4) ok(6.5,2.7,7.3,t,1.9);
+   if(t>2.3&&t<4.6) beam(links[0],[6.5,0.9,7.3],[6.95,0.6,2.2],0.08);
+   if(t>2.8){ const b=bots[4], s=1.3*back(seg(t,2.8,3.1))*(1-sm(seg(t,5.6,6.0))); b.visible=s>0.01; b.scale.set(s,s,s); b.position.set(6.95,bob(),2.2); b.rotation.y=0.6; }
+   if(t>4.8){ mfa.visible=true; mfa.position.set(6.5,2.5+(1-bounce(seg(t,4.8,5.5)))*6,7.6); } deny(6.5,4.2,7.6,t,5.6); },3.1]],
+ // Execution
+ [[function(t){ camT=[2.6,3.8]; camS=9; base(3);                                                        // Exploitation for Client Execution
+   const d=[2.9,1.25,4.5];
+   if(t<2.4){ const o=docs[0], k=1+0.5*sm(seg(t,1.6,2.4)), m=exps[0]; o.visible=true; o.position.set(d[0],d[1]+Math.sin(t*5)*0.05,d[2]); o.rotation.y=0.5; o.scale.set(k,k,k); impAt(0,0,0,0);
+     m.visible=true; m.material.color.setHex(t>1.6&&Math.sin(t*40)>0?0xff4a3d:0xf6c531); m.scale.set(0.22,0.22,0.22); m.position.set(d[0]+Math.cos(t*6)*0.5,d[1]+0.1,d[2]+Math.sin(t*6)*0.5); }
+   else { lands(t,2.4,3.1,d,IH(0),1.0,IS*back(seg(t,2.4,2.7))); const p=seg(t,2.4,3.2);
+     if(p<1) for(let i=0;i<5;i++){ const m=pk[i], a=i*1.26, s=0.3*(1-p)+0.01; m.visible=true; m.scale.set(s,s,s); m.position.set(d[0]+Math.cos(a)*p*1.6,d[1]+p*1.2,d[2]+Math.sin(a)*p*1.6); } }
+   hop(emps[2],t,0.8,1.4); watch(t); },3.1],
+  [function(t){ camT=[0.5,3.2]; camS=11; base(3);                                                       // Windows Management Instrumentation
+   const g=[0,0.6,2.2]; grant.visible=true; grant.scale.set(0.9,0.9,0.9); grant.position.set(g[0],g[1]+Math.sin(T*3)*0.05,g[2]); grant.rotation.y=T*(t>1.2&&t<4.4?3:0.5);
+   if(t>0.6&&t<1.3) beam(links[0],IH(0.8),g,0.1);
+   [1,2,3].forEach((ei,j)=>{ const e=emps[ei].position, a=1.5+j*0.5, m=pk[j], p=seg(t,a+0.4,a+1.6); if(t>a&&t<a+0.6) beam(links[1+j],g,[e.x,0.9,e.z+0.9],0.07);
+     if(p>0&&p<1){ const s=0.3*(1-p*0.6); m.visible=true; m.scale.set(s,s,s); m.position.set(e.x+Math.sin(p*5)*0.4,1.3+p*1.8,e.z+0.9+Math.cos(p*5)*0.4); } });
+   watch(t); },3.0]],
+ // Persistence
+ [[function(t){ camT=[1.5,2]; camS=19; base(4);                                                         // Server Software Component
+   const r=racks[3], top=[r.x,3.5,RZ], m=pk[0]; fly(m,IH(1.2),top,t,0.5,1.7,3.5,6); m.scale.set(0.4,0.4,0.4); if(t>=1.7) m.rotation.y=T*2;
+   if(t>1.7&&t<5.6) r.lm.color.setHex(0xff6fd8);
+   if(t>2.4&&t<5.2){ beam(c2,[TWP[0],2.9,TWP[1]],top,0.09); c2.material.opacity=0.45+0.25*Math.sin(t*8); }
+   if(t>5.6) m.visible=false; deny(top[0],top[1]+0.9,top[2],t,5.4); },2.6],
+  [function(t){ camT=[2.2,3.2]; camS=9.5; base(4);                                                      // Account Manipulation
+   const ux=3.6, uz=1.8, k0=keys3[0]; user.visible=true; put(user,idle(ux,uz,0.5));
+   k0.visible=true; k0.scale.set(0.6,0.6,0.6); k0.position.set(ux-0.35,2.5+Math.sin(T*4)*0.06,uz); k0.rotation.y=0.6;
+   if(t>0.8){ const k1=keys3[1], g=0.6*(1-sm(seg(t,5.6,6.0))), m=pk[0]; fly(k1,IH(1.8),[ux+0.4,2.5,uz],t,0.8,2.0,1.5,6); k1.scale.set(g,g,g); k1.visible=g>0.02; if(t>=2.0) k1.rotation.y=0.6;
+     m.visible=k1.visible; m.scale.set(0.2,0.2,0.2); m.position.set(k1.position.x,k1.position.y+0.55,k1.position.z); m.rotation.y=T*3; }
+   if(t>4.6){ put(def,track([[4.6,-2,5],[5.6,2.4,2.8],[7,2.4,2.8]],t,0.4)); deny(ux+0.4,3.4,uz,t,5.4); } },2.1]],
+ // Privilege Escalation
+ [[function(t){ camT=[0.8,2.8]; camS=9.5; base(5);                                                      // Process Injection
+   const px=-0.4, pz=2.6; proc.visible=true; proc.scale.set(IC,IC,IC); proc.position.set(px,t>2.6?Math.abs(Math.sin((t-2.6)*6))*0.2*(1-seg(t,2.6,3.6)):0,pz); proc.rotation.y=0.6; procEye.visible=t>2.6&&t<5.6;
+   if(t>=1.4&&t<2.6){ const p=sm(seg(t,1.4,2.6)); impAt(lerp(H[0],px,p),Math.sin(Math.PI*p)*1.6+0.4*p,lerp(H[1],pz,p),IS*(1-0.85*p)); }
+   if(t>=2.6){ impAt(0,0,0,0); actor=proc; }
+   deny(px,2.7,pz,t,5.6); },2.8],
+  [function(t){ camT=[1.0,3.0]; camS=9.5; base(5);                                                      // Escape to Host
+   field.visible=true; field.scale.set(1.7,1.7,1.7); field.position.set(H[0],0.86,H[1]); field.material.opacity=t>2.2&&t<2.9&&Math.sin(t*40)>0?0.12:0.4;
+   if(t<2.2) imp.position.x=H[0]+Math.sin(t*9)*0.25*seg(t,0.6,1.0);
+   else { lands(t,2.2,3.0,IH(0),[-0.2,0,2.8],1.4,lerp(IS,IC,back(seg(t,3.1,3.5)))); crown.visible=t>3.1; } },3.2]],
+ // Stealth
+ [[function(t){ camT=[2.2,3.8]; camS=9.5; base(6);                                                      // Hide Artifacts
+   put(imp,track([[0,H[0],H[1]],[0.6,H[0],H[1]],[1.6,2.3,4.6],[7,2.3,4.6]],t)); imp.scale.multiplyScalar(IC); if(t>=1.6) imp.rotation.y=0.6;
+   const hide=sm(seg(t,1.7,2.4))*(1-sm(seg(t,5.6,6.2))); imp.scale.y*=1-0.82*hide; crown.visible=hide<0.5;
+   put(def,track([[0,-5,5.4],[2.4,-5,5.4],[4.4,5.5,5.4],[4.6,5.5,5.4],[5.6,1.0,5.3],[7,1.0,5.3]],t,0)); alarm(0,1.0,2.6,5.3,t,5.6,7); },2.6],
+  [function(t){ camT=[1.5,3.8]; camS=9.5; base(6);                                                      // Virtualization/Sandbox Evasion
+   const up=1-sm(seg(t,0.4,1.0))+sm(seg(t,3.0,3.6)); if(up<0.99){ field.visible=true; field.scale.set(2.2,2.2,2.2); field.position.set(H[0],1.12+up*5,H[1]); field.material.opacity=0.35; }
+   if(t>1.0&&t<3.0){ const s=IC*0.8; imp.position.y=0; imp.scale.set(s,s,s); crown.visible=false; }
+   if(t>1.8&&t<3.4) ok(H[0],3.7,H[1],t,1.8);
+   if(t>3.6&&t<4.6){ imp.position.y=Math.abs(Math.sin((t-3.6)*7))*0.4;
+     for(let i=0;i<5;i++){ const p=seg(t,3.6+i*0.15,4.4+i*0.15), m=pk[i], s=0.3*(1-p*0.6); if(p<=0||p>=1) continue; m.visible=true; m.scale.set(s,s,s); m.position.set(H[0]+Math.sin(i*2.1+p*5)*0.6,1.0+p*2.3,H[1]+Math.cos(i*2.1+p*5)*0.6); } } },3.8]],
+ // Defense Impairment
+ [[function(t){ camT=[1.0,3.2]; camS=9.5; base(7);                                                      // Prevent Command History Logging
+   const L=[0,1.7,2.3], o=docs[0], f=sm(seg(t,1.8,2.4))*(1-sm(seg(t,5.4,6.0))); o.visible=true; o.scale.set(1.7,1.7,1.7); o.position.set(L[0],lerp(L[1],0.12,f),L[2]); o.rotation.set(-f*Math.PI/2,0.6*(1-f),0);
+   for(let i=0;i<2;i++){ const a=0.3+i*0.6, p=seg(t,a,a+0.8), m=pk[i]; if(p>0&&p<1){ m.visible=true; m.scale.set(0.2,0.2,0.2); arc(m,IH(1.6),L,p,0.6); } }
+   if(t>1.5&&t<1.9) beam(links[0],IH(1.0),L,0.1);
+   if(t>2.6&&t<4.6){ imp.position.y=Math.abs(Math.sin((t-2.6)*5))*0.4;
+     for(let i=2;i<6;i++){ const p=seg(t,2.6+(i-2)*0.4,3.4+(i-2)*0.4), m=pk[i], s=0.2*(1-p)+0.01; if(p<=0||p>=1) continue; m.visible=true; m.scale.set(s,s,s); arc(m,IH(1.6),[L[0]+0.6,1.2,L[2]+0.3],p,0.8); } } },2.5],
+  [function(t){ camT=[1.4,3.8]; camS=10; base(7);                                                       // Safe Mode Boot
+   if(t>0.6&&t<1.2) beam(links[0],IH(0.9),[3.5,0.9,4.4],0.1);
+   emps[2].scale.y=1-0.45*(sm(seg(t,1.2,1.6))-sm(seg(t,2.2,2.5)));
+   if(t>1.2&&t<2.6) drings.forEach((g,j)=>{ const ph=((t-1.2)*0.9+j*0.5)%1, k=1+ph*5; g.visible=true; g.scale.set(k,0.02,k); g.position.set(3.5,0.08,4.4); g.material.opacity=0.5*(1-ph); });
+   const f=sm(seg(t,1.4,2.2))*(1-sm(seg(t,5.2,6.0))), d=drones[2]; d.visible=true; d.rotation.z=0; d.position.set(0.5,lerp(3.3,0.2,f)+(f<0.05?Math.sin(T*3)*0.1:0),3.5); d.userData.rot.rotation.y=f>0.9?0.5:T*25;
+   if(t>2.6&&t<4.6) imp.position.y=Math.abs(Math.sin((t-2.6)*5))*0.4; },2.7]],
+ // Credential Access
+ [[function(t){ camT=[3.6,3.0]; camS=10; base(8);                                                       // Multi-Factor Authentication Request Generation
+   const e=emps[3].position;
+   for(let i=0;i<4;i++){ const a=0.5+i*0.6; if(t>a&&t<a+0.5){ const b=bangs[i]; b.visible=true; b.position.set(e.x+(i%2?0.35:-0.35),2.2+0.5*back(seg(t,a,a+0.25)),e.z); } if(t>a&&t<a+0.25) beam(links[i],IH(1.4),[e.x,1.6,e.z],0.05); }
+   hop(emps[3],t,2.9,3.4,0.15); if(t>2.9&&t<4.4) ok(e.x,2.9,e.z,t,2.9);
+   if(t>3.3){ fly(key,[e.x,2.3,e.z],IH(3.0),t,3.3,4.2,1.5,6); key.scale.set(0.8,0.8,0.8); if(t>=4.2) key.rotation.y=t*3; if(t>5.4) key.visible=false; }
+   deny(e.x,2.9,e.z,t,5.4); },4.2],
+  [function(t){ camT=[-1.5,0.5]; camS=13; base(8);                                                      // Adversary-in-the-Middle
+   const a=[-3.5,1.2,2.0], b=[-3.6,1.6,RZ+0.6], m=[-3.55,1.2,-1.2], mid=t>=2.2;
+   put(imp,track([[0,H[0],H[1]],[0.8,H[0],H[1]],[2.2,m[0],m[2]],[7,m[0],m[2]]],t)); imp.scale.multiplyScalar(IC); if(mid) imp.rotation.y=0.6;
+   if(!mid) beam(beams[0],a,b,0.07); else { beam(links[0],a,m,0.07); beam(links[1],m,b,0.07); }
+   for(let i=0;i<3;i++){ const ph=(t*0.6+i/3)%1, k=keys3[i]; k.visible=true; k.scale.set(0.35,0.35,0.35); k.rotation.y=t*3; k.position.set(lerp(a[0],b[0],ph),lerp(a[1],b[1],ph)+0.35,lerp(a[2],b[2],ph)); }
+   if(t>2.6){ const s=0.8*back(seg(t,2.6,2.9)); key.visible=true; key.scale.set(s,s,s); key.position.set(m[0],3.2+Math.sin(t*5)*0.08,m[2]); key.rotation.y=t*3; } },2.9]],
+ // Discovery
+ [[function(t){ camT=[0,1.5]; camS=15; base(9);                                                         // Remote System Discovery
+   emps.map(g=>[g.position.x,0.9,g.position.z+0.9]).concat([[racks[2].x,1.2,RZ+0.6],[racks[3].x,1.2,RZ+0.6]]).forEach((p,i)=>{ const a=0.6+i*0.45; if(t>a&&t<a+0.4) beam(links[i],IH(1.0),p,0.06);
+     if(t>a+0.3){ const m=pk[i], s=0.3*back(seg(t,a+0.3,a+0.6)); m.visible=true; m.scale.set(s,s,s); m.position.set(p[0],p[1]+1.6+Math.sin(T*4+i)*0.08,p[2]); m.rotation.y=T*2; } }); },3.5],
+  [function(t){ camT=[1.6,3.0]; camS=9.5; base(9);                                                      // Process Discovery
+   const ang=t*2.2, th=6.0; if(t>0.5&&t<3.6){ ascan.visible=true; ascan.scale.set(0.15,1.2,1.7); ascan.position.set(H[0]+Math.sin(ang)*0.95,0.7,H[1]+Math.cos(ang)*0.95); ascan.rotation.y=ang; ascan.material.opacity=0.4; }
+   [0,1,3,4].forEach((di,j)=>{ const d=drones[di], s=0.7*back(seg(t,0.8+j*0.6,1.1+j*0.6)), q=1.0+j*1.25; d.visible=s>0.01; d.scale.set(s,s,s); d.rotation.set(0,0,0); d.position.set(H[0]+Math.sin(q)*1.9,0.9+Math.sin(T*3+j)*0.08,H[1]+Math.cos(q)*1.9); d.userData.rot.rotation.y=T*20; });
+   pop(proc,H[0]+Math.sin(th)*1.9,0,H[1]+Math.cos(th)*1.9,t,3.2,1.3); proc.rotation.y=0.6; procEye.visible=false; alarm(0,proc.position.x,2.0,proc.position.z,t,3.7,4.6); },3.6]],
+ // Lateral Movement
+ [[function(t){ camT=[-0.5,1]; camS=13.5; base(10);                                                     // Exploitation of Remote Services
+   const h1=[-2.3,0.8,2.6], h2=[racks[2].x,1.4,RZ+0.7];
+   [[IH(1.2),h1,0.6],[h1,h2,2.3]].forEach((q,j)=>{ const p=seg(t,q[2],q[2]+1.0); if(p>0&&p<1){ hammer.visible=true; arc(hammer,q[0],q[1],p,2.0); hammer.rotation.z=t*12; } alarm(j,q[1][0],q[1][1]+1.3,q[1][2],t,q[2]+1.0,q[2]+1.5); });
+   if(t>1.6) cp(1,-2.3,2.6,back(seg(t,1.6,1.9)));
+   if(t>3.3&&t<5.6) racks[2].lm.color.setHex(0xff6fd8);
+   ok(racks[2].x,3.9,RZ,t,5.6); },3.4],
+  [function(t){ camT=[-0.5,0.6]; camS=13; base(10);                                                     // Use Alternate Authentication Material
+   arch.visible=true; arch.position.set(S[0],0,-0.9); arch.scale.set(0.6,0.6,0.6); scan.visible=true; scan.position.set(S[0],0.95,-0.9); scan.scale.set(2.2,1.7,0.08); scan.material.opacity=0.3+0.15*Math.sin(t*8);
+   const r=track([[0,H[0],H[1]],[0.5,H[0],H[1]],[1.8,S[0],0.4],[2.8,S[0],0.4],[3.8,S[0],S[1]],[7,S[0],S[1]]],t); put(imp,r); imp.scale.multiplyScalar(IC); if(t>=3.8) imp.rotation.y=0.6;
+   grant.visible=true; grant.position.set(r.x,r.y+2.6,r.z); grant.rotation.y=t*3;
+   if(t>2.0&&t<3.6) ok(S[0],2.9,-0.9,t,2.0);
+   deny(S[0],2.9,-0.9,t,5.2); },3.8]],
+ // Collection
+ [[function(t){ camT=[-2,0.6]; camS=12; base(11);                                                       // Screen Capture
+   const e=emps[1].position, scr=[e.x,1.0,e.z+0.7];
+   for(let i=0;i<3;i++){ const a=0.5+i*0.9, d=docs[i];
+     if(t>a&&t<a+0.25){ field.visible=true; field.scale.set(1.3,1.0,0.1); field.position.set(scr[0],scr[1],scr[2]+0.5); field.material.opacity=0.8; }
+     if(t>a+0.1){ fly(d,[scr[0],1.6,scr[2]],[S[0]-0.7+i*0.7,0.5,S[1]+1.5],t,a+0.3,a+1.3,2.5,5); const s=back(seg(t,a+0.1,a+0.4)); d.scale.set(s,s,s); if(t>=a+1.3) d.rotation.y=0.6; } } },3.7],
+  [function(t){ camT=[-2,-0.5]; camS=14; base(11);                                                      // Data Staged
+   const c=[-3.2,0.3,-2.0]; drings.forEach((g,j)=>{ const ph=(t*0.5+j*0.5)%1, k=1+ph*4; g.visible=true; g.scale.set(k,0.02,k); g.position.set(c[0],0.08,c[2]); g.material.opacity=0.5*(1-ph); });
+   for(let i=0;i<2;i++){ const r=racks[i], a=0.5+i*1.2, p=seg(t,a,a+1.1), e=emps[1-i].position, d=docs[i], b=1.1+i*1.2;
+     if(p>0){ arc(r.cube,[r.x,2.72,RZ],[c[0]-0.4+i*0.8,0.3,c[2]-0.3],sm(p),1.5); if(p<1) r.cube.rotation.y=t*5; }
+     if(t>b){ fly(d,[e.x,2.2,e.z],[c[0]-0.4+i*0.8,0.45,c[2]+0.5],t,b+0.2,b+1.3,3,5); const s=back(seg(t,b,b+0.3)); d.scale.set(s,s,s); if(t>=b+1.3) d.rotation.y=0.6; } } },3.7]],
+ // Command and Control
+ [[function(t){ camT=[-0.5,5]; camS=22; base(12); actor=atk; ORB(t);                                    // Web Service
+   const N=[[TWP[0],2.9,TWP[1]],[-6,5.2,9.5],[S[0],0.7,S[1]]], k=1.7*back(seg(t,0.2,0.6)), on=seg(t,0.8,1.8)*2;
+   cloud.visible=k>0.01; cloud.scale.set(k,k,k); cloud.position.set(N[1][0],N[1][1]-0.4+Math.sin(T*2)*0.1,N[1][2]); cloud.rotation.y=0.6;
+   [c2,links[0]].forEach((m,j)=>{ if(on>j){ beam(m,N[j],N[j+1],0.1); m.material.opacity=0.45+0.25*Math.sin(t*8); } });
+   if(t>1.8) for(let i=0;i<4;i++){ const ph=((t-1.8)*0.35+i*0.25)%1*2, j=Math.min(1,Math.floor(ph)), q=ph-j, m=pk[i]; m.visible=true; m.scale.set(0.3,0.3,0.3); m.position.set(lerp(N[j][0],N[j+1][0],q),lerp(N[j][1],N[j+1][1],q),lerp(N[j][2],N[j+1][2],q)); } },2.9],
+  [function(t){ camT=[1.5,4.5]; camS=21; base(12); actor=atk; ORB(t);                                   // Protocol Tunneling
+   const a=[TWP[0],2.9,TWP[1]], b=[S[0],0.7,S[1]], g=Math.max(0.02,seg(t,0.4,1.4)); beam(field,a,[lerp(a[0],b[0],g),lerp(a[1],b[1],g),lerp(a[2],b[2],g)],0.7); field.material.opacity=0.35;
+   if(t>1.4) for(let i=0;i<4;i++){ const ph=((t-1.4)*0.5+i*0.25)%1, m=pk[i]; m.visible=true; m.scale.set(0.28,0.28,0.28); m.position.set(lerp(a[0],b[0],ph),lerp(a[1],b[1],ph),lerp(a[2],b[2],ph)); } },2.4]],
+ // Exfiltration
+ [[function(t){ camT=[0,4.5]; camS=22; base(13); c2beam(t);                                             // Exfiltration Over Alternative Protocol
+   const N=[[S[0],0.8,S[1]],[-8.5,3.5,9],[5.9,1.2,12.5]]; beam(beams[0],N[0],N[1],0.08); beam(beams[1],N[1],N[2],0.08);
+   for(let i=0;i<4;i++){ const p=seg(t,0.6+i*0.6,2.2+i*0.6)*2, c=racks[i].cube, j=p>=1?1:0, q=p-j, to=j?STK(i):N[1], fr=j?N[1]:PILE(i); if(p<=0) continue;
+     if(p>=2){ const z=STK(i); c.position.set(z[0],z[1],z[2]); continue; }
+     c.position.set(lerp(fr[0],to[0],q),lerp(fr[1],to[1],q),lerp(fr[2],to[2],q)); c.scale.set(0.35,0.35,0.35); c.rotation.y=t*5; } },4.1],
+  [function(t){ camT=[1.5,4.5]; camS=21; base(13); c2beam(t);                                           // Scheduled Transfer
+   clock.visible=true; clock.position.set(S[0]-1.8,3.0,S[1]); clock.rotation.y=0.6; clock.scale.set(1.5,1.5,1.5); hand.rotation.z=-(t-0.5)*Math.PI*2;
+   for(let i=0;i<4;i++){ const a=0.5+i, p=seg(t,a,a+0.9); if(p<=0) continue; arc(racks[i].cube,PILE(i),STK(i),sm(p),4); if(p<1) racks[i].cube.rotation.y=t*5; } },4.4]],
+ // Impact
+ [[function(t){ camT=[0,-3.4]; camS=13.5; base(14); put(def,idle(4.8,-3,-Math.PI/2));                   // Inhibit System Recovery
+   racks.forEach((r,i)=>{ if(i<4){ const a=0.6+i*0.6, s=0.6*(1-sm(seg(t,a+0.3,a+0.7))); r.bk.visible=s>0.02; r.bk.scale.set(s,s,s); r.bk.position.y=3.5; if(t>a&&t<a+0.4) beam(links[i],[S[0],1.2,S[1]],[r.x,3.5,RZ],0.08); }
+     else if(t>5.0){ r.bk.visible=true; r.bk.position.y=3.5+(1-bounce(seg(t,5.0+(i-4)*0.3,5.7+(i-4)*0.3)))*7; } });
+   alarm(0,4.8,2.2,-3,t,3.0,4.5); },3.2],
+  [function(t){ camT=[0.5,8.5]; camS=17; base(14); actor=atk; put(def,idle(-2,5,0.4));                  // Defacement
+   put(atk,track([[0,A[0],A[1]],[0.2,A[0],A[1]],[1.0,0.8,9.2],[7,0.8,9.2]],t));
+   for(let x=-10;x<=10;x++){ if(!wm[x]) continue; const d=Math.abs(x)-2, on=t>0.9+d*0.25&&t<5.2+d*0.12; wm[x].color.setHex(on?(((x+Math.floor(t*4))&1)?0xff6fd8:0xd63f35):0xd9dde4); }
+   ok(0,4.1,6.9,t,6.2); },3.0]]
+];
+XF.forEach((a,k)=>{ XF2[k].forEach(x=>{ a.push(x); }); });
 function intro(t){ camT=[0,6-t*0.1]; camS=23-t*0.2;
   put(atk,track([[0,6,17.5],[1,6,17.5],[3.5,A[0],A[1]],[5,A[0],A[1]]],t)); put(def,track([[0,-3,4.6],[1.5,-3,4.6],[4,2,4.6],[5,2,4.6]],t,0)); }
 function outro(t){ camT=[0,5.5]; camS=22+t*0.25; base(2); actor=atk;
