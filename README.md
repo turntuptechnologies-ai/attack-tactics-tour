@@ -1,4 +1,4 @@
-# ATT&CK 戦術めぐり
+# ATT&CK Tactics Tour
 
 ひとつの侵入を例に、MITRE ATT&CK（Enterprise v20）の15の戦術を順にたどる、ボクセル調アニメーションの図解サイトです。
 
