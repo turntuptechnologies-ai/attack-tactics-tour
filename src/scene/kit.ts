@@ -421,6 +421,22 @@ export function createKit(w: World) {
     }
   }
 
+  /** 探索の見せ方。t0 から dur 秒のあいだ、マルウェアから to へ、調べる線（ピンクの線の i 本目）を伸ばす */
+  function probeFromHost(i: number, to: Vec3, t: number, t0: number, dur = 0.6) {
+    if (t > t0 && t < t0 + dur) stretchBetween(w.pinkBeams[i], aboveHost(0.9), to, 0.07)
+  }
+
+  /** 探索の見せ方。t0 に、調べて分かったこと（紙の i 枚目）を from からマルウェアの頭上へ持ち帰る */
+  function takeNote(i: number, from: Vec3, t: number, t0: number) {
+    if (t < t0) return
+    const note = w.documents[i]
+    const size = 0.8 * overshoot(progress(t, t0, t0 + 0.3))
+    const to = [HOST_SPOT[0] - 0.9 + i * 0.6, 2.8 + (i & 1) * 0.4, HOST_SPOT[1]]
+    flyTo(note, from, to, t, t0 + 0.2, t0 + 1.0, 1.0, 5)
+    note.scale.set(size, size, size)
+    if (t >= t0 + 1.0) note.rotation.y = 0.6
+  }
+
   return {
     ...w,
     view,
@@ -449,6 +465,8 @@ export function createKit(w: World) {
     showSparks,
     wipeThenReturn,
     sensorVisits,
+    probeFromHost,
+    takeNote,
   }
 }
 
