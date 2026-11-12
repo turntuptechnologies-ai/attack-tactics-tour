@@ -58,47 +58,53 @@ export function Stage({ now, onPlayer, onChange, onPlaying, onError }: Props) {
   // まとめの場面では、全部の戦術を「済み」にする
   const done = now?.scene.kind === 'outro' ? TACTICS.length : current
 
+  // 場面名とターンの表示（hud）は、広い画面では舞台の上に重ね、狭い画面では舞台のすぐ上に出す。
+  // 狭い画面で重ねると、舞台が小さいぶん文字どうしが被り、アニメーションも隠れるため。
   return (
-    <div className={`stage ${side}`} ref={stage}>
-      <canvas
-        ref={canvas}
-        aria-label="ボクセル調のアニメーション。攻撃者が偵察から影響まで、ATT&CKの15の戦術を順に進め、防御側が各段階で対抗する。"
-      />
-      <div className="tagl a" ref={attacker}>
-        攻撃側
-      </div>
-      <div className="tagl d" ref={defender}>
-        防御側
-      </div>
-      <div className="tagl a" ref={malware} hidden>
-        マルウェア
-      </div>
-      <div className="strip">
-        {TACTICS.map((t, i) => (
-          <i key={t.id} className={i === current ? 'on' : i < done ? 'done' : ''} />
-        ))}
-      </div>
-      <div className="chips">
-        <div className="scene">
-          {tactic ? (
-            <>
-              <b>{tactic.id}</b>
-              {tactic.ja}
-              <small>{tactic.en}</small>
-            </>
-          ) : (
-            'MITRE ATT&CK'
+    <div className="theater">
+      <div className="hud">
+        <div className="chips">
+          <div className="scene">
+            {tactic ? (
+              <>
+                <b>{tactic.id}</b>
+                {tactic.ja}
+                <small>{tactic.en}</small>
+              </>
+            ) : (
+              'MITRE ATT&CK'
+            )}
+          </div>
+          {tactic && now?.scene.title && (
+            <div className="tech">
+              {LABEL[now.scene.kind] ?? '技術の例　'}
+              {now.scene.title}
+            </div>
           )}
         </div>
-        {tactic && now?.scene.title && (
-          <div className="tech">
-            {LABEL[now.scene.kind] ?? '技術の例　'}
-            {now.scene.title}
-          </div>
-        )}
+        {side && <div className={`turn ${side}`}>{side === 'a' ? '攻撃側のターン' : '防御側のターン'}</div>}
       </div>
-      {side && <div className={`turn ${side}`}>{side === 'a' ? '攻撃側のターン' : '防御側のターン'}</div>}
-      <div className="fade" ref={fade} />
+      <div className={`stage ${side}`} ref={stage}>
+        <canvas
+          ref={canvas}
+          aria-label="ボクセル調のアニメーション。攻撃者が偵察から影響まで、ATT&CKの15の戦術を順に進め、防御側が各段階で対抗する。"
+        />
+        <div className="tagl a" ref={attacker}>
+          攻撃側
+        </div>
+        <div className="tagl d" ref={defender}>
+          防御側
+        </div>
+        <div className="tagl a" ref={malware} hidden>
+          マルウェア
+        </div>
+        <div className="strip">
+          {TACTICS.map((t, i) => (
+            <i key={t.id} className={i === current ? 'on' : i < done ? 'done' : ''} />
+          ))}
+        </div>
+        <div className="fade" ref={fade} />
+      </div>
     </div>
   )
 }
