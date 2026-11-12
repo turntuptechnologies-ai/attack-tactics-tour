@@ -80,7 +80,7 @@ export default function App() {
         <h2>15の戦術と、すべての技術</h2>
         <p className="mxnote">
           「防御側の打ち手」は、MITRE ATT&amp;CK
-          公式サイトの各技術のページにある緩和策（Mitigations）と検知（Detection）をもとに、代表的なものを一文にまとめたものです。原文（英語）は、右端の「公式」のリンクから確認できます。
+          公式サイトの各技術のページにある緩和策（Mitigations）と検知（Detection）をもとに、代表的なものを一文にまとめたものです。原文（英語）は、各行の公式ページへのリンクから確認できます。
         </p>
         <TechniqueTable onPick={pick} />
       </section>
