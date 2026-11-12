@@ -2,10 +2,6 @@ import { useEffect, useRef } from 'react'
 import { TACTICS } from '../data/tactics'
 import { Player, type NowPlaying, type PlayerHooks } from '../player/player'
 
-const LABEL: Partial<Record<NowPlaying['scene']['kind'], string>> = {
-  extra: 'ほかの例　',
-}
-
 type Props = {
   now: NowPlaying | null
   /** 再生機ができたとき（片付けるときは null） */
@@ -76,7 +72,7 @@ export function Stage({ now, onPlayer, onChange, onPlaying, onError }: Props) {
           </div>
           {tactic && now?.scene.title && (
             <div className="tech">
-              {LABEL[now.scene.kind] ?? '技術の例　'}
+              {'技術の例　'}
               {now.scene.title}
             </div>
           )}
