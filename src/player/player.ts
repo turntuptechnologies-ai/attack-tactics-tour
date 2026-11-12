@@ -8,7 +8,7 @@ import { createWorld } from '../scene/world'
 import { TACTICS } from '../data/tactics'
 import type { Caption } from '../data/types'
 import { placeLabels } from './labels'
-import { buildTimeline, captionAt, hashFor, parseHash, step, type TimelineScene } from './timeline'
+import { buildTimeline, captionAt, hashFor, LEAD, parseHash, step, type TimelineScene } from './timeline'
 
 /** 毎フレーム位置を変える重ね表示。React を通さず、要素を直接動かす */
 export type Overlay = {
@@ -27,9 +27,6 @@ export type PlayerHooks = {
   /** 再生・一時停止が切り替わったとき */
   onPlaying(playing: boolean): void
 }
-
-/** 自動で次の場面へ進むとき、次の技術の名前を見せておく秒数 */
-const LEAD = 1.2
 
 export class Player {
   readonly timeline = buildTimeline()

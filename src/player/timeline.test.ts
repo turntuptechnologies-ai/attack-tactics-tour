@@ -10,6 +10,7 @@ import {
   indexOfTechnique,
   parseHash,
   step,
+  storyLoopSeconds,
 } from './timeline'
 
 const timeline = buildTimeline()
@@ -39,11 +40,10 @@ describe('buildTimeline', () => {
     }
   })
 
-  it('本編だけを通すと約2分になる', () => {
-    const story = timeline.filter((s) => s.kind !== 'extra')
-    const total = story.reduce((n, s) => n + s.duration, 0)
-    expect(total).toBeGreaterThan(110)
-    expect(total).toBeLessThan(130)
+  it('本編だけを通すと約2分15秒になる（画面と README の説明と合わせる）', () => {
+    const total = storyLoopSeconds(timeline)
+    expect(total).toBeGreaterThan(130)
+    expect(total).toBeLessThan(140)
   })
 })
 

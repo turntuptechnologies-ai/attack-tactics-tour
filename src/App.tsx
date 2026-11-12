@@ -38,7 +38,7 @@ export default function App() {
         <h1>ATT&amp;CK Tactics Tour</h1>
         <p>
           MITRE ATT&amp;CK（Enterprise v20）の{TACTICS.length}の戦術と{TECHNIQUE_COUNT}
-          の技術を、アニメーションで見て回れます。本編はひとつの侵入を最初から最後まで追う約2分のループです。マトリックスの技術を押すと、その技術の場面に飛べます。
+          の技術を、アニメーションで見て回れます。本編はひとつの侵入を最初から最後まで追う約2分15秒のループです。マトリックスの技術を押すと、その技術の場面に飛べます。
         </p>
       </header>
 
