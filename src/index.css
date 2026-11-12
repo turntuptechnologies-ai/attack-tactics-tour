@@ -522,6 +522,23 @@ td.tid {
 .lk.main {
   font-weight: 700;
 }
+/* 公式ページへのリンク。再生のリンク（.lk）と見分けが付くよう、控えめな色にする */
+td a {
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+td a:hover {
+  color: var(--defend);
+}
+td.src {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+td.src svg {
+  margin-left: 4px;
+  vertical-align: baseline;
+}
 td small {
   display: block;
   color: var(--muted);
