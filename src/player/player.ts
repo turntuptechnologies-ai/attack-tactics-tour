@@ -153,7 +153,6 @@ export class Player {
   private sceneDef(scene: TimelineScene): SceneDef {
     if (scene.kind === 'intro') return this.scenes.intro
     if (scene.kind === 'outro') return this.scenes.outro
-    if (scene.kind === 'simple') return this.scenes.simple(scene.tactic, scene.variant ?? 0)
     return this.scenes.technique(TACTICS[scene.tactic].id, scene.techniqueId!)!
   }
 

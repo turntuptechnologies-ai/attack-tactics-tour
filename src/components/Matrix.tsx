@@ -53,14 +53,14 @@ export function Matrix({ tactic, techniqueId, onPick }: Props) {
                     {tech.name}
                   </div>
                 )
-              const kind = j === 0 ? ' main' : t.examples[j].simple == null ? '' : ' simple'
+              const kind = j === 0 ? ' main' : ''
               const playing = k === tactic && tech.id === techniqueId
               return (
                 <button
                   key={tech.id}
                   type="button"
                   className={`te ex${kind}${playing ? ' on' : ''}`}
-                  title={kind === ' simple' ? 'この技術を再生（簡易表示）' : 'この場面を再生'}
+                  title="この場面を再生"
                   onClick={() => onPick(k, tech.id)}
                 >
                   <span>{tech.id}</span>

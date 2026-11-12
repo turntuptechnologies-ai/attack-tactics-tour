@@ -32,7 +32,7 @@ export function TechniqueTable({ onPick }: { onPick(tactic: number, techniqueId:
                 <td>
                   <button
                     type="button"
-                    className={j === 0 ? 'lk main' : e.simple == null ? 'lk' : 'lk simple'}
+                    className={j === 0 ? 'lk main' : 'lk'}
                     onClick={() => onPick(k, e.id)}
                   >
                     {techniqueTitle(k, e.id)}

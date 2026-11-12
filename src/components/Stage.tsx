@@ -4,7 +4,6 @@ import { Player, type NowPlaying, type PlayerHooks } from '../player/player'
 
 const LABEL: Partial<Record<NowPlaying['scene']['kind'], string>> = {
   extra: 'ほかの例　',
-  simple: '簡易表示　',
 }
 
 type Props = {

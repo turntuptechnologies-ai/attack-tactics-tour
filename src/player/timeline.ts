@@ -5,19 +5,14 @@ import { TACTICS } from '../data/tactics'
 import type { Caption, Tactic } from '../data/types'
 
 export type TimelineScene = {
-  /**
-   * intro=導入、story=本編の技術、extra=別の手口の例（専用の場面）、
-   * simple=型の絵で見せる技術（簡易表示）、outro=まとめ
-   */
-  kind: 'intro' | 'story' | 'extra' | 'simple' | 'outro'
+  /** intro=導入、story=本編の技術、extra=別の手口の例、outro=まとめ */
+  kind: 'intro' | 'story' | 'extra' | 'outro'
   /** TACTICS の添字。導入とまとめは -1 */
   tactic: number
   /** 技術ID（導入とまとめには無い） */
   techniqueId?: string
   /** 「T1595 Active Scanning」の形の表示名 */
   title?: string
-  /** 簡易表示の絵の種類 */
-  variant?: number
   duration: number
   captions: Caption[]
 }
@@ -43,11 +38,10 @@ export function buildTimeline(tactics: Tactic[] = TACTICS): TimelineScene[] {
     tactic.examples.forEach((e, j) => {
       const duration = e.duration ?? 7
       out.push({
-        kind: j === 0 ? 'story' : e.simple == null ? 'extra' : 'simple',
+        kind: j === 0 ? 'story' : 'extra',
         tactic: k,
         techniqueId: e.id,
         title: techniqueTitle(k, e.id),
-        variant: e.simple,
         duration,
         captions: e.captions ?? [
           [0, DEFENSE_AT, 'a', e.attack],
@@ -65,7 +59,7 @@ export function captionAt(scene: TimelineScene, t: number): Caption {
   return scene.captions.find((c) => t >= c[0] && t < c[1]) ?? scene.captions[scene.captions.length - 1]
 }
 
-const inStory = (scene: TimelineScene) => scene.kind !== 'extra' && scene.kind !== 'simple'
+const inStory = (scene: TimelineScene) => scene.kind !== 'extra'
 
 /**
  * 次（dir=1）または前（dir=-1）の場面の添字を返す。端までいくと反対側へ回る。
@@ -87,10 +81,10 @@ export function indexOfExample(timeline: TimelineScene[], tactic: number, id: st
 
 /**
  * 技術IDだけから場面を選ぶ。同じ技術が複数の戦術にあるときは、
- * 本編の場面、専用の場面、簡易表示の順に優先する。無ければ -1。
+ * 本編の場面を優先し、無ければ別の手口の例のうち先に並ぶものを選ぶ。どこにも無ければ -1。
  */
 export function indexOfTechnique(timeline: TimelineScene[], id: string): number {
-  for (const kind of ['story', 'extra', 'simple'] as const) {
+  for (const kind of ['story', 'extra'] as const) {
     const index = timeline.findIndex((s) => s.techniqueId === id && s.kind === kind)
     if (index >= 0) return index
   }

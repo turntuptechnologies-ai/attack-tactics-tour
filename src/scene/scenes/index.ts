@@ -1,8 +1,7 @@
-// すべての場面を集める。専用の場面は「戦術ID → 技術ID」の順に引く。
+// すべての場面を集める。技術の場面は「戦術ID → 技術ID」の順に引く。
 // 同じ技術が複数の戦術に載っていることがあり、戦術ごとに別の場面を持てるようにするため。
 import type { Kit } from '../kit'
 import { bookends } from './bookends'
-import { createSimpleScenes } from './simple'
 import initialAccess from './ta0001-initial-access'
 import execution from './ta0002-execution'
 import persistence from './ta0003-persistence'
@@ -21,7 +20,7 @@ import defenseImpairment from './ta0112-defense-impairment'
 import type { SceneDef, SceneMap } from './types'
 
 export function createScenes(kit: Kit) {
-  /** 戦術ID → その戦術の専用の場面（技術ID → 場面） */
+  /** 戦術ID → その戦術の場面（技術ID → 場面） */
   const byTactic: Record<string, SceneMap> = {
     TA0043: reconnaissance(kit),
     TA0042: resourceDevelopment(kit),
@@ -39,10 +38,10 @@ export function createScenes(kit: Kit) {
     TA0010: exfiltration(kit),
     TA0040: impact(kit),
   }
-  /** その戦術の、その技術の専用の場面（無ければ undefined） */
+  /** その戦術の、その技術の場面（無ければ undefined） */
   const technique = (tacticId: string, techniqueId: string): SceneDef | undefined =>
     byTactic[tacticId]?.[techniqueId]
-  return { ...bookends(kit), byTactic, technique, simple: createSimpleScenes(kit) }
+  return { ...bookends(kit), byTactic, technique }
 }
 
 export type Scenes = ReturnType<typeof createScenes>

@@ -4,25 +4,20 @@ import { buildTimeline, DEFENSE_AT, type TimelineScene } from '../../player/time
 import { createKit } from '../kit'
 import { createWorld } from '../world'
 import { createScenes } from './index'
-import { SIMPLE_VARIANTS } from './simple'
 
 // 画面に描かずに、舞台と場面だけを組み立てて動かす
 const kit = createKit(createWorld())
 const scenes = createScenes(kit)
 const timeline = buildTimeline()
-/** 専用の場面で描くと決めた技術を、「戦術ID/技術ID」の形で並べたもの */
-const detailed = TACTICS.flatMap((t) =>
-  t.examples.filter((e) => e.simple == null).map((e) => `${t.id}/${e.id}`),
-)
+/** データにあるすべての技術を、「戦術ID/技術ID」の形で並べたもの */
+const detailed = TACTICS.flatMap((t) => t.examples.map((e) => `${t.id}/${e.id}`))
 
 const sceneDefOf = (s: TimelineScene) =>
   s.kind === 'intro'
     ? scenes.intro
     : s.kind === 'outro'
       ? scenes.outro
-      : s.kind === 'simple'
-        ? scenes.simple(s.tactic, s.variant ?? 0)
-        : scenes.technique(TACTICS[s.tactic].id, s.techniqueId!)!
+      : scenes.technique(TACTICS[s.tactic].id, s.techniqueId!)!
 
 /** 見えている物の一覧と、その位置・大きさ・向き。攻撃者と防御者は場面が毎回置き直すので、位置は比べない */
 const snapshot = () => {
@@ -39,7 +34,7 @@ const snapshot = () => {
 }
 
 describe('場面の対応', () => {
-  it('専用の場面で描くと決めた技術には、必ず場面がある', () => {
+  it('データにあるすべての技術に、場面がある', () => {
     for (const key of detailed) {
       const [tacticId, techniqueId] = key.split('/')
       expect(scenes.technique(tacticId, techniqueId), key).toBeDefined()
@@ -51,12 +46,6 @@ describe('場面の対応', () => {
       Object.keys(map).map((techniqueId) => `${tacticId}/${techniqueId}`),
     )
     expect(have.sort()).toEqual([...detailed].sort())
-  })
-
-  it('型の場面は、すべての戦術に、すべての絵の種類がある', () => {
-    TACTICS.forEach((_, k) => {
-      for (let v = 0; v < SIMPLE_VARIANTS; v++) expect(scenes.simple(k, v), `${k}:${v}`).toBeDefined()
-    })
   })
 })
 
@@ -87,20 +76,8 @@ describe('場面の実行', () => {
   })
 
   it('本編以外の技術は、防御側の番までに成功の合図が出る', () => {
-    for (const s of timeline.filter((x) => x.kind === 'extra' || x.kind === 'simple'))
+    for (const s of timeline.filter((x) => x.kind === 'extra'))
       expect(sceneDefOf(s).hits[0], s.title).toBeLessThan(DEFENSE_AT)
-  })
-
-  it('型の場面は、成功の合図の時点で攻撃側の主役が画面に出ている（ドクロを出せる）', () => {
-    TACTICS.forEach((t, k) => {
-      for (let v = 0; v < SIMPLE_VARIANTS; v++) {
-        const sceneDef = scenes.simple(k, v)
-        kit.view.time = 3
-        kit.reset()
-        sceneDef.run(sceneDef.hits[0] + 0.05)
-        expect(kit.view.actor.visible, `${t.id} 絵の種類 ${v}`).toBe(true)
-      }
-    })
   })
 })
 
@@ -109,9 +86,7 @@ describe('reset', () => {
     kit.view.time = 1
     kit.reset()
     const clean = snapshot()
-    const defs = new Map(
-      timeline.map((s) => [`${s.kind} ${s.tactic} ${s.techniqueId ?? ''} ${s.variant ?? ''}`, sceneDefOf(s)]),
-    )
+    const defs = new Map(timeline.map((s) => [`${s.kind} ${s.tactic} ${s.techniqueId ?? ''}`, sceneDefOf(s)]))
     for (const [name, sceneDef] of defs) {
       for (const t of [0.5, 2.5, 4, 6.5]) {
         kit.view.time = 1
