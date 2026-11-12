@@ -348,6 +348,9 @@ export function createWorld() {
   const segmentWall = box(scene, 0.4, 3, 6.5, segmentWallMaterial, 2.4, -2, -4.75)
 
   // ---------- ATT&CK props ----------
+  // 防御者のふだんの立ち位置。事務室の右奥。カメラから見て正門のアーチや壁の陰にならず、
+  // 端末のまわりで起きること（場面の小道具）とも重ならない場所にしてある
+  const DEFENDER_SPOT = [6, 0.6]
   const ATTACKER_SPOT = [2.7, 12.9],
     TOWER_SPOT = [4.5, 12.5],
     HOST_SPOT = [1.8, 3.0],
@@ -520,6 +523,7 @@ export function createWorld() {
     segmentWallMaterial,
     segmentWall,
     ATTACKER_SPOT,
+    DEFENDER_SPOT,
     TOWER_SPOT,
     HOST_SPOT,
     SERVER_SPOT,

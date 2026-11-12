@@ -51,6 +51,7 @@ export default function defenseImpairment(kit: Kit): SceneMap {
     ATTACKER_SPOT,
     yellowCubes,
     cloud,
+    DEFENDER_SPOT,
   } = kit
   return {
     // T1685 Disable or Modify Tools（本編）
@@ -329,7 +330,7 @@ export default function defenseImpairment(kit: Kit): SceneMap {
           mark.rotation.y = view.time * 2
         }
         if (weak > 0) placeSensor(0.5, lerp(3.3, 0.6, weak * weak), 3.5, 0.3 * weak)
-        showAlert(0, -2, 2.2, 5, t, 5.2, 6.6)
+        showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.2, 6.6)
       },
     },
     // T1687 Exploitation for Defense Impairment
@@ -467,7 +468,7 @@ export default function defenseImpairment(kit: Kit): SceneMap {
         })
         if (t > 0.6 && t < 1.4)
           stretchBetween(pinkBeams[0], aboveHost(0.9), [root[0] + 1.1, 2.4, root[2]], 0.08)
-        showAlert(0, -2, 2.2, 5, t, 5.0, 6.4)
+        showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.0, 6.4)
       },
     },
     // T1112 Modify Registry
@@ -520,7 +521,7 @@ export default function defenseImpairment(kit: Kit): SceneMap {
         }
         if (t > 3.0 && t < 5.2)
           stretchBetween(pinkBeams[0], aboveHost(0.9), [device[0], 1.0, device[1]], 0.07)
-        showAlert(0, -2, 2.2, 5, t, 5.2, 6.6)
+        showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.2, 6.6)
       },
     },
     // T1599 Network Boundary Bridging
@@ -548,7 +549,7 @@ export default function defenseImpairment(kit: Kit): SceneMap {
             cube.scale.set(0.28, 0.28, 0.28)
             cube.position.set(lerp(0.2, 4.8, p), 1.0 + Math.sin(Math.PI * p) * 0.4, -3.6)
           }
-        showAlert(0, -2, 2.2, 5, t, 5.0, 6.4)
+        showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.0, 6.4)
       },
     },
     // T1647 Plist File Modification

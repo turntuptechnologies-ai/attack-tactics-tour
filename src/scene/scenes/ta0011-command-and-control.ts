@@ -47,6 +47,7 @@ export default function commandAndControl(kit: Kit): SceneMap {
     flyTo,
     showCheck,
     showAlert,
+    DEFENDER_SPOT,
   } = kit
   return {
     // T1071 Application Layer Protocol（本編）
@@ -590,9 +591,14 @@ export default function commandAndControl(kit: Kit): SceneMap {
         // 調べに来た通信（水色の線）には、無害な顔（ガラスの板）を見せる。本当の指令サーバーだとは分からない
         const tower = [TOWER_SPOT[0], 2.4, TOWER_SPOT[1]]
         const probing = t > 1.2 && t < 3.6
-        applyPose(defender, standing(-2, 5, 2.4))
+        applyPose(defender, standing(DEFENDER_SPOT[0], DEFENDER_SPOT[1], 2.4))
         if (probing)
-          stretchBetween(cyanBeams[0], [-2, 1.6, 5], [tower[0] - 0.9, tower[1], tower[2] - 0.6], 0.07)
+          stretchBetween(
+            cyanBeams[0],
+            [DEFENDER_SPOT[0], 1.6, DEFENDER_SPOT[1]],
+            [tower[0] - 0.9, tower[1], tower[2] - 0.6],
+            0.07,
+          )
         if (t > 0.8 && t < 4.6) {
           glass.visible = true
           glass.scale.set(2.2, 3.6, 0.12)
@@ -601,7 +607,7 @@ export default function commandAndControl(kit: Kit): SceneMap {
           glass.material.opacity = 0.6 * smooth(progress(t, 0.8, 1.2))
         }
         if (t < 4.6) showCheck(tower[0] - 1.2, 4.6, tower[2] - 0.8, t, 2.4)
-        showAlert(0, -2, 2.2, 5, t, 5.4, 6.8)
+        showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.4, 6.8)
       },
     },
     // T1104 Multi-Stage Channels

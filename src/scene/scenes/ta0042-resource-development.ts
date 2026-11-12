@@ -125,8 +125,8 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
     T1587: {
       hits: [3.5],
       run(t) {
-        view.target = [2, 11.2]
-        view.height = 11
+        view.target = [2, 10.2]
+        view.height = 12.5
         applyPose(attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1], -1.2))
         applyPose(defender, standing(2, 5, 0.4)) // Develop Capabilities
         const n = Math.min(4, Math.floor(progress(t, 0.6, 3.4) * 4.001))

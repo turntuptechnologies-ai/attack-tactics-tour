@@ -1,3 +1,4 @@
+import { type Material, type Mesh, type Object3D, Raycaster, Vector3 } from 'three'
 import { describe, expect, it } from 'vitest'
 import { TACTICS } from '../../data/tactics'
 import { buildTimeline, DEFENSE_AT, type TimelineScene } from '../../player/timeline'
@@ -78,6 +79,89 @@ describe('場面の実行', () => {
   it('本編以外の技術は、防御側の番までに成功の合図が出る', () => {
     for (const s of timeline.filter((x) => x.kind === 'extra'))
       expect(sceneDefOf(s).hits[0], s.title).toBeLessThan(DEFENSE_AT)
+  })
+})
+
+describe('画面への収まり', () => {
+  // 舞台は 16:9。再生機（player.ts）と同じ手順でカメラを合わせる
+  const aim = () => {
+    const { camera, view } = kit
+    const aspect = 16 / 9
+    camera.left = (-view.height * aspect) / 2
+    camera.right = (view.height * aspect) / 2
+    camera.top = view.height / 2
+    camera.bottom = -view.height / 2
+    camera.updateProjectionMatrix()
+    camera.position.set(
+      view.target[0] + kit.CAMERA_OFFSET.x,
+      kit.CAMERA_OFFSET.y,
+      view.target[1] + kit.CAMERA_OFFSET.z,
+    )
+    camera.lookAt(view.target[0], 0, view.target[1])
+    camera.updateMatrixWorld()
+    kit.scene.updateMatrixWorld(true)
+  }
+  const toCamera = kit.CAMERA_OFFSET.clone().normalize()
+  const ray = new Raycaster()
+  /** その点が、カメラから見て、ほかの不透明な物の陰になっているか */
+  const hidden = (point: Vector3, self: Object3D) => {
+    const meshes: Object3D[] = []
+    const collect = (o: Object3D) => {
+      if (!o.visible || o === self) return
+      if ((o as Mesh).isMesh) meshes.push(o)
+      o.children.forEach(collect)
+    }
+    kit.scene.children.forEach(collect)
+    ray.set(point.clone().addScaledVector(toCamera, 150), toCamera.clone().negate())
+    return ray.intersectObjects(meshes, false).some((hit) => {
+      const material = (hit.object as Mesh).material as Material
+      return hit.distance < 150 - 0.25 && !material.transparent && material.opacity >= 1
+    })
+  }
+  const techniques = timeline.filter((s) => s.techniqueId)
+
+  it('成功の合図（ドクロ）は、画面の中に出る', () => {
+    for (const s of techniques) {
+      const sceneDef = sceneDefOf(s)
+      const t = sceneDef.hits[0] + 0.4
+      kit.view.time = 3 + t
+      kit.reset()
+      sceneDef.run(t)
+      aim()
+      const actor = kit.view.actor
+      if (!actor.visible) continue // 攻撃側の主役が姿を消す場面（別物の中に入り込む、など）では、ドクロは出ない
+      const above = actor === kit.attacker ? 4.1 : 1.1 * actor.scale.y + 1.4
+      const skull = actor.position
+        .clone()
+        .setY(actor.position.y + above)
+        .project(kit.camera)
+      expect(Math.abs(skull.x), `${TACTICS[s.tactic].id} ${s.title}`).toBeLessThan(0.97)
+      expect(Math.abs(skull.y), `${TACTICS[s.tactic].id} ${s.title}`).toBeLessThan(0.95)
+    }
+  })
+
+  it('防御側の番には、防御者が画面の中にいて、建物の陰に隠れていない', () => {
+    for (const s of techniques) {
+      const sceneDef = sceneDefOf(s)
+      const t = 6.2
+      kit.view.time = 3 + t
+      kit.reset()
+      sceneDef.run(t)
+      aim()
+      const name = `${TACTICS[s.tactic].id} ${s.title}`
+      const { defender } = kit
+      expect(defender.visible, name).toBe(true)
+      const { x, z } = defender.position
+      const shield = new Vector3(x, 3.3, z).project(kit.camera)
+      const feet = new Vector3(x, 0.2, z).project(kit.camera)
+      expect(Math.abs(shield.x), name).toBeLessThan(0.97)
+      expect(shield.y, name).toBeLessThan(0.95)
+      expect(feet.y, name).toBeGreaterThan(-0.9)
+      // 胴と頭の両方が隠れていたら、見えていないとみなす（壁ごしに下半身だけ隠れるのは構わない）
+      expect(hidden(new Vector3(x, 1.2, z), defender) && hidden(new Vector3(x, 2.1, z), defender), name).toBe(
+        false,
+      )
+    }
   })
 })
 
