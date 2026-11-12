@@ -30,6 +30,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
     truckB,
     relayBot,
     flyPaper,
+    defenderHardens,
   } = kit
   return {
     // T1595 Active Scanning（本編）
@@ -127,6 +128,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
           const size = 0.36 * overshoot(progress(t, start, start + 0.3))
           cube.scale.set(size, size, size)
         })
+        defenderHardens(t)
       },
     },
     // T1593 Search Open Websites/Domains
@@ -155,6 +157,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
             1,
           )
         })
+        defenderHardens(t)
       },
     },
     // T1596 Search Open Technical Databases
@@ -223,6 +226,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
             0.9,
           )
         })
+        defenderHardens(t)
       },
     },
     // T1590 Gather Victim Network Information
@@ -252,6 +256,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
           const map = documents[0]
           flyPaper(map, [YELLOW_CUBE_X[1], 3.3, 6.5], aboveAttacker(), t, 2.7, 3.6, 2.0, 2.6, 1)
         }
+        defenderHardens(t)
       },
     },
     // T1591 Gather Victim Org Information
@@ -272,6 +277,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
           const chart = documents[0]
           flyPaper(chart, [0, 3.4, 3.0], aboveAttacker(), t, 2.6, 3.6, 3.0, 2.4, 1.1)
         }
+        defenderHardens(t)
       },
     },
     // T1592 Gather Victim Host Information
@@ -319,6 +325,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
             0.85,
           )
         })
+        defenderHardens(t)
       },
     },
     // T1597 Search Closed Sources
@@ -357,6 +364,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
             0.9,
           )
         }
+        defenderHardens(t)
       },
     },
     // T1682 Query Public AI Services
@@ -402,6 +410,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
             0.85,
           )
         })
+        defenderHardens(t)
       },
     },
     // T1681 Search Threat Vendor Data
@@ -428,6 +437,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
         if (t > 0.6) {
           flyPaper(report, [vendor[0], 2.2, vendor[1]], aboveAttacker(), t, 0.9, 2.0, 1.4, 0.6, 1)
         }
+        defenderHardens(t)
       },
     },
   }

@@ -9,6 +9,7 @@ import {
   clamp01,
   lerp,
   applyPose,
+  bounce,
   progress,
   smooth,
   type Pose,
@@ -421,6 +422,38 @@ export function createKit(w: World) {
     }
   }
 
+  // ---- 防御側の番の、基本の絵。場面に固有の防御の絵が無いときに、字幕の中身に合うものを選んで使う ----
+
+  /** いま攻撃側の主役がいる場所（防御者が目を向ける先） */
+  const actorSpot = (): Vec3 => [view.actor.position.x, view.actor.position.y + 0.8, view.actor.position.z]
+
+  /**
+   * 検知の絵。防御者が気づいて（「！」）、怪しい場所へ目を向ける（水色の細い線）。
+   * at を省くと、いまの攻撃側の主役を見る。「！」は 4 つ目、線は 5 本目を使う。
+   */
+  function defenderNotices(t: number, at: Vec3 = actorSpot()) {
+    const d = w.defender.position
+    showAlert(3, d.x, 2.2, d.z, t, 4.9, 6.5)
+    if (t > 5.1 && t < 6.7) stretchBetween(w.cyanBeams[4], [d.x, 1.7, d.z], at, 0.05)
+  }
+
+  /** 止める絵。防御者が気づいたうえで、その場所に × を出す（権限を絞る、遮断する、無効にする、など） */
+  function defenderBlocks(t: number, at: Vec3 = actorSpot()) {
+    defenderNotices(t, at)
+    // 主役の頭上には名前の札が出るので、× はその上に出す
+    showCross(at[0], at[1] + 2.5, at[2], t, 5.5)
+  }
+
+  /**
+   * 備えを固める絵。入口に守りの盾が降りてくる。
+   * 偵察やリソース開発のように、攻撃側の動きそのものは標的から見えない段階で使う。
+   */
+  function defenderHardens(t: number) {
+    if (t < 4.9) return
+    w.gateGuard.visible = true
+    w.gateGuard.position.y = 3.2 + (1 - bounce(progress(t, 4.9, 5.6))) * 6
+  }
+
   /**
    * ピンクの粒を、折れ線 path に沿って等間隔に流す（通信が流れている様子）。
    * clock は進み具合で、1 増えるごとに端から端まで 1 回流れる。size は粒の大きさ（[x, y, z] でも渡せる）。
@@ -532,6 +565,9 @@ export function createKit(w: World) {
     flyPaper,
     flowAlong,
     aroundHost,
+    defenderNotices,
+    defenderBlocks,
+    defenderHardens,
   }
 }
 

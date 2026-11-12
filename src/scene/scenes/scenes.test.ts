@@ -4,7 +4,7 @@ import { TACTICS } from '../../data/tactics'
 import { buildTimeline, DEFENSE_AT, type TimelineScene } from '../../player/timeline'
 import { createKit } from '../kit'
 import { createWorld } from '../world'
-import { createScenes } from './index'
+import { createScenes, LATEST_SUCCESS } from './index'
 
 // 画面に描かずに、舞台と場面だけを組み立てて動かす
 const kit = createKit(createWorld())
@@ -79,6 +79,34 @@ describe('場面の実行', () => {
   it('本編以外の技術は、防御側の番までに成功の合図が出る', () => {
     for (const s of timeline.filter((x) => x.kind === 'extra'))
       expect(sceneDefOf(s).hits[0], s.title).toBeLessThan(DEFENSE_AT)
+  })
+})
+
+describe('間合い', () => {
+  const techniques = timeline.filter((s) => s.techniqueId)
+
+  it('成功の合図（ドクロ）は、防御側の番までに 0.8 秒は見えている', () => {
+    for (const s of techniques) {
+      const hits = sceneDefOf(s).hits
+      // 成功が 2 回ある場面（消されて戻ってくる本編の永続化）は、1 回目だけを見る
+      expect(hits[0], `${TACTICS[s.tactic].id} ${s.title}`).toBeLessThanOrEqual(LATEST_SUCCESS + 1e-9)
+    }
+  })
+
+  it('防御側の番には、絵のどこかが変わる（字幕だけが防御の話をしている、という場面を作らない）', () => {
+    for (const s of techniques) {
+      const sceneDef = sceneDefOf(s)
+      // ゆらゆらした動きは止めて（view.time を固定）、場面が自分の時刻で起こす変化だけを見る
+      const at = (t: number) => {
+        kit.view.time = 3
+        kit.reset()
+        sceneDef.run(t)
+        return JSON.stringify(snapshot())
+      }
+      const before = at(DEFENSE_AT + 0.1)
+      const changed = [5.2, 5.7, 6.2, 6.7].some((t) => at(t) !== before)
+      expect(changed, `${TACTICS[s.tactic].id} ${s.title}`).toBe(true)
+    }
   })
 })
 

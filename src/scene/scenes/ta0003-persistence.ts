@@ -58,6 +58,7 @@ export default function persistence(kit: Kit): SceneMap {
     wipeThenReturn,
     DEFENDER_SPOT,
     showRipples,
+    defenderBlocks,
   } = kit
   return {
     // T1053 Scheduled Task/Job（本編）
@@ -247,6 +248,9 @@ export default function persistence(kit: Kit): SceneMap {
           cube.position.set(k1.position.x, k1.position.y + 0.55, k1.position.z)
           cube.rotation.y = view.time * 3
         }
+        // 足した鍵で、いつでも入れる状態が続く
+        if (t > 2.8 && t < 4.4 && Math.sin(t * 9) > -0.3)
+          stretchBetween(pinkBeams[0], [ux + 0.4, 2.5, uz], aboveHost(0.9), 0.06)
         if (t > 4.6) {
           applyPose(
             defender,
@@ -335,6 +339,7 @@ export default function persistence(kit: Kit): SceneMap {
           placeMalware(HOST_SPOT[0], 0, HOST_SPOT[1], MALWARE_SIZE * (1 - progress(t, 2.2, 2.5)))
         else if (t >= 3.6)
           jumpMalware(t, 3.6, 4.2, deep, aboveHost(0), 0.9, MALWARE_SIZE * overshoot(progress(t, 3.6, 3.9)))
+        defenderBlocks(t)
       },
     },
     // T1078 Valid Accounts
@@ -679,6 +684,7 @@ export default function persistence(kit: Kit): SceneMap {
           mark.scale.set(0.26, 0.26, 0.26)
           mark.position.set(x, 1.15 + Math.sin(Math.PI * p) * 0.5, z)
         }
+        defenderBlocks(t)
       },
     },
     // T1556 Modify Authentication Process

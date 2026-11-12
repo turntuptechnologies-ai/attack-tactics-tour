@@ -53,6 +53,8 @@ export default function defenseImpairment(kit: Kit): SceneMap {
     DEFENDER_SPOT,
     showRipples,
     flyPaper,
+    defenderBlocks,
+    defenderNotices,
   } = kit
   return {
     // T1685 Disable or Modify Tools（本編）
@@ -67,6 +69,7 @@ export default function defenseImpairment(kit: Kit): SceneMap {
         const amount = progress(t, 1.4, 2.2)
         if (amount > 0) placeSensor(0.5, lerp(3.3, 0.25, amount * amount), 3.5, 0.5 * amount)
         if (t > 2.2 && t < 4.4) malware.position.y = Math.abs(Math.sin((t - 2.2) * 5)) * 0.4
+        defenderNotices(t)
       },
     },
     // T1686 Disable or Modify System Firewall
@@ -485,6 +488,7 @@ export default function defenseImpairment(kit: Kit): SceneMap {
             stretchBetween(pinkBeams[i], aboveHost(0.9), [-1.9 + i * 0.75, 1.5, 2.4], 0.07)
         })
         if (weak > 0) placeSensor(0.5, lerp(3.3, 0.25, weak * weak), 3.5, 0.5 * weak)
+        defenderBlocks(t)
       },
     },
     // T1601 Modify System Image

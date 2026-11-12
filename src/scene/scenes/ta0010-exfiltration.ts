@@ -30,6 +30,8 @@ export default function exfiltration(kit: Kit): SceneMap {
     documents,
     flyTo,
     showRipples,
+    defenderBlocks,
+    defenderNotices,
   } = kit
   return {
     // T1041 Exfiltration Over C2 Channel（本編）
@@ -47,6 +49,7 @@ export default function exfiltration(kit: Kit): SceneMap {
           arcBetween(racks[i].data, pileSpot(i), stolenSpot(i), smooth(p), 4)
           if (p < 1) racks[i].data.rotation.y = t * 5
         }
+        defenderBlocks(t)
       },
     },
     // T1567 Exfiltration Over Web Service
@@ -78,6 +81,7 @@ export default function exfiltration(kit: Kit): SceneMap {
           if (p < 1) rackData.rotation.y = t * 5
           else rackData.position.y += by
         }
+        defenderBlocks(t)
       },
     },
     // T1052 Exfiltration Over Physical Medium
@@ -149,6 +153,7 @@ export default function exfiltration(kit: Kit): SceneMap {
           rackData.scale.set(0.35, 0.35, 0.35)
           rackData.rotation.y = t * 5
         }
+        defenderBlocks(t)
       },
     },
     // T1029 Scheduled Transfer
@@ -171,6 +176,7 @@ export default function exfiltration(kit: Kit): SceneMap {
           arcBetween(racks[i].data, pileSpot(i), stolenSpot(i), smooth(p), 4)
           if (p < 1) racks[i].data.rotation.y = t * 5
         }
+        defenderNotices(t)
       },
     },
     // T1030 Data Transfer Size Limits
@@ -206,6 +212,7 @@ export default function exfiltration(kit: Kit): SceneMap {
               lerp(ends[1][2], ends[0][2], p),
             )
           }
+        defenderNotices(t)
       },
     },
     // T1011 Exfiltration Over Other Network Medium
@@ -230,6 +237,7 @@ export default function exfiltration(kit: Kit): SceneMap {
           arcBetween(data, pileSpot(i), [receiver[0] - 0.5 + i * 0.5, 1.6, receiver[1] + 0.2], smooth(p), 6)
           if (p < 1) data.rotation.y = t * 5
         }
+        defenderBlocks(t)
       },
     },
     // T1537 Transfer Data to Cloud Account
@@ -258,6 +266,7 @@ export default function exfiltration(kit: Kit): SceneMap {
           data.scale.set(0.45, 0.45, 0.45)
           if (p > 0 && p < 1) data.rotation.y = t * 5
         }
+        defenderBlocks(t)
       },
     },
     // T1700 AI-Enabled Exfiltration
@@ -289,6 +298,7 @@ export default function exfiltration(kit: Kit): SceneMap {
           arcBetween(data, pileSpot(i), [drive[0] - 0.7 + i * 0.7, drive[1] + 1.5, drive[2]], smooth(p), 3)
           if (p < 1) data.rotation.y = t * 5
         }
+        defenderBlocks(t)
       },
     },
     // T1020 Automated Exfiltration

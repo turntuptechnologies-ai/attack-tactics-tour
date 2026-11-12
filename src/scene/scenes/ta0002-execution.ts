@@ -42,6 +42,7 @@ export default function execution(kit: Kit): SceneMap {
     showCheck,
     showSparks,
     showRipples,
+    showCross,
   } = kit
   return {
     // T1059 Command and Scripting Interpreter（本編）
@@ -441,6 +442,7 @@ export default function execution(kit: Kit): SceneMap {
         if (t > 1.6 && t < 2.7) stretchBetween(cyanBeams[0], [manager[0], 1.0, manager[1]], box(1), 0.07)
         showSparks(box(1)[0], 0.7, box(1)[2], t, 2.6)
         sensorArrives(t)
+        showCross(manager[0], 2.6, manager[1], t, 5.5)
       },
     },
     // T1699 Direct Prompt Injection

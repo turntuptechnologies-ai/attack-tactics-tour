@@ -44,6 +44,8 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
     showCheck,
     DEFENDER_SPOT,
     showRipples,
+    defenderBlocks,
+    defenderNotices,
   } = kit
   return {
     // T1068 Exploitation for Privilege Escalation（本編）
@@ -79,6 +81,7 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
           malware.scale.set(size, size, size)
           malware.position.y = 1.5 + bobHeight()
         }
+        defenderNotices(t)
       },
     },
     // T1548 Abuse Elevation Control Mechanism
@@ -152,6 +155,7 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
           const size = lerp(MALWARE_SIZE, ADMIN_MALWARE_SIZE, overshoot(progress(t, 3.0, 3.4)))
           malware.scale.set(size, size, size)
         }
+        defenderNotices(t)
       },
     },
     // T1055 Process Injection
@@ -172,6 +176,8 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
         )
         trustedProcess.rotation.y = 0.6
         trustedProcessEyes.visible = t > 2.6 && t < 5.6
+        // ねらいを付ける
+        if (t > 0.5 && t < 1.4) stretchBetween(pinkBeams[0], aboveHost(0.8), [px, 1.0, pz], 0.08)
         if (t >= 1.4 && t < 2.6) {
           const p = smooth(progress(t, 1.4, 2.6))
           placeMalware(
@@ -212,6 +218,7 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
           )
           crown.visible = t > 3.1
         }
+        defenderBlocks(t)
       },
     },
     // T1484 Domain or Tenant Policy Modification
@@ -307,6 +314,7 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
           crown.visible = true
           malware.scale.set(size, size, size)
         }
+        defenderBlocks(t)
       },
     },
     // T1547 Boot or Logon Autostart Execution
@@ -342,6 +350,7 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
           crown.visible = true
           malware.scale.set(size, size, size)
         }
+        defenderNotices(t)
       },
     },
     // T1037 Boot or Logon Initialization Scripts
@@ -382,6 +391,7 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
           crown.visible = true
           malware.scale.set(size, size, size)
         }
+        defenderBlocks(t)
       },
     },
     // T1543 Create or Modify System Process
@@ -425,6 +435,7 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
           )
           crown.visible = t > 3.6
         }
+        defenderBlocks(t)
       },
     },
     // T1053 Scheduled Task/Job
