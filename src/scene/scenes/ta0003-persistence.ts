@@ -38,6 +38,7 @@ export default function persistence(kit: Kit): SceneMap {
     showAlert,
     jumpMalware,
     hopInPlace,
+    stairs,
   } = kit
   return {
     // T1053 Scheduled Task/Job（本編）
@@ -302,6 +303,35 @@ export default function persistence(kit: Kit): SceneMap {
           )
           showCross(screen[0], 2.3, screen[2], t, 5.6)
         }
+      },
+    },
+    // T1542 Pre-OS Boot
+    T1542: {
+      hits: [4.2],
+      run(t) {
+        view.target = [1.4, 3.4]
+        view.height = 10
+        storyState(4)
+        // 段の低いほうほど、OSより深い層（起動の仕組みやファームウェア）。いちばん低い段に仕掛ける
+        const deep = [0.9, 0.75, 3.0]
+        const piece = pinkCubes[0]
+        stairs.visible = true
+        flyTo(piece, aboveHost(1.2), deep, t, 0.5, 1.4, 1.0, 6)
+        piece.scale.set(0.3, 0.3, 0.3)
+        // OSごと入れ直されても（輪）、深い層に残した仕掛けから戻ってくる
+        if (t > 2.0 && t < 3.4)
+          pulseRings.forEach((ring, j) => {
+            const phase = ((t - 2.0) * 0.9 + j * 0.5) % 1
+            const scale = 1 + phase * 5
+            ring.visible = true
+            ring.scale.set(scale, 0.02, scale)
+            ring.position.set(HOST_SPOT[0], 0.08, HOST_SPOT[1])
+            ring.material.opacity = 0.5 * (1 - phase)
+          })
+        if (t >= 2.2 && t < 3.6)
+          placeMalware(HOST_SPOT[0], 0, HOST_SPOT[1], MALWARE_SIZE * (1 - progress(t, 2.2, 2.5)))
+        else if (t >= 3.6)
+          jumpMalware(t, 3.6, 4.2, deep, aboveHost(0), 0.9, MALWARE_SIZE * overshoot(progress(t, 3.6, 3.9)))
       },
     },
   }

@@ -225,5 +225,37 @@ export default function reconnaissance(kit: Kit): SceneMap {
         })
       },
     },
+    // T1590 Gather Victim Network Information
+    T1590: {
+      hits: [3.6],
+      run(t) {
+        view.target = [0.5, 9.2]
+        view.height = 15
+        applyPose(attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1]))
+        applyPose(defender, standing(-3, 4.6, 0.4))
+        // 外から見える機器（黄色い箱）と、そのつながりを一つずつ描き出して、ネットワークの地図を作る
+        yellowCubes.forEach((node, i) => {
+          const start = 0.6 + i * 0.7
+          const found = t > start
+          const size = found ? 0.55 : 0.42
+          const at = [YELLOW_CUBE_X[i], 2.5, 6.5]
+          node.visible = true
+          node.material.color.setHex(found ? 0xff6fd8 : 0xf6c531)
+          node.scale.set(size, size, size)
+          node.position.y = 2.5 + Math.sin(view.time * 4 + i) * 0.06
+          node.rotation.y = view.time
+          if (found && i > 0) stretchBetween(pinkBeams[i], [YELLOW_CUBE_X[i - 1], 2.5, 6.5], at, 0.07)
+          if (t > start && t < start + 0.5)
+            stretchBetween(pinkBeams[4 + i], [ATTACKER_SPOT[0], 1.6, ATTACKER_SPOT[1]], at, 0.05)
+        })
+        if (t > 2.6) {
+          const map = documents[0]
+          const size = overshoot(progress(t, 2.6, 2.9))
+          flyTo(map, [YELLOW_CUBE_X[1], 3.3, 6.5], aboveAttacker(), t, 2.7, 3.6, 2.0, 5)
+          map.scale.set(size, size, size)
+          if (t >= 3.6) map.rotation.y = 0.6
+        }
+      },
+    },
   }
 }

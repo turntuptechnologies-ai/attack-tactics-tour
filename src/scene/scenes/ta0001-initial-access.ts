@@ -346,5 +346,50 @@ export default function initialAccess(kit: Kit): SceneMap {
         }
       },
     },
+    // T1199 Trusted Relationship
+    T1199: {
+      hits: [3.9],
+      run(t) {
+        view.target = [1.5, 7.6]
+        view.height = 13
+        storyState(2)
+        // 出入りを許されている保守業者。その接続に相乗りして、門を通り抜ける
+        const pose = walk(
+          [
+            [0, 5.5, 10.5],
+            [0.4, 5.5, 10.5],
+            [1.6, 0, 8.8],
+            [2.3, 0, 8.8],
+            [3.4, 0, 4.8],
+            [7, 0, 4.8],
+          ],
+          t,
+        )
+        user.visible = true
+        applyPose(user, pose)
+        openGate(progress(t, 1.9, 2.3) - progress(t, 3.6, 4.0))
+        if (t < 3.2) showCheck(0, 4.1, 6.9, t, 1.8)
+        // マルウェアは業者のすぐ後ろについていき、中に入ってから端末へ移る
+        if (t < 3.4)
+          placeMalware(
+            pose.x + 0.3,
+            pose.y,
+            pose.z + 1.1,
+            MALWARE_SIZE * 0.75 * overshoot(progress(t, 0.2, 0.5)),
+          )
+        else {
+          jumpMalware(
+            t,
+            3.4,
+            3.9,
+            [0.3, 0, 5.9],
+            aboveHost(0),
+            0.8,
+            lerp(MALWARE_SIZE * 0.75, MALWARE_SIZE, progress(t, 3.4, 3.7)),
+          )
+          view.actor = malware
+        }
+      },
+    },
   }
 }

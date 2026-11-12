@@ -22,6 +22,7 @@ export default function collection(kit: Kit): SceneMap {
     popIn,
     pinkBeams,
     database,
+    scanPlane,
   } = kit
   return {
     // T1005 Data from Local System（本編）
@@ -215,6 +216,37 @@ export default function collection(kit: Kit): SceneMap {
           )
           doc.scale.set(size, size, size)
           if (t >= start + 1.2) doc.rotation.y = 0.6
+        })
+      },
+    },
+    // T1119 Automated Collection
+    T1119: {
+      hits: [3.4],
+      run(t) {
+        view.target = [-0.5, -3.4]
+        view.height = 12.5
+        storyState(11)
+        // 条件に合うデータを、仕組みで端から機械的に集めていく
+        const sweep = progress(t, 0.5, 2.9)
+        if (t > 0.5 && t < 2.9) {
+          scanPlane.visible = true
+          scanPlane.rotation.y = Math.PI / 2
+          scanPlane.scale.set(2.0, 3.4, 0.08)
+          scanPlane.position.set(lerp(racks[0].x - 1, racks[5].x + 1, sweep), 1.7, RACK_Z)
+          scanPlane.material.opacity = 0.4
+        }
+        racks.forEach((rack, i) => {
+          const start = 0.5 + ((rack.x + 7) / 14) * 2.4
+          const p = progress(t, start, start + 0.6)
+          if (p <= 0) return
+          arcBetween(
+            rack.data,
+            [rack.x, 2.72, RACK_Z],
+            [SERVER_SPOT[0] - 1.6 + i * 0.62, 0.3, SERVER_SPOT[1] + 1.5],
+            smooth(p),
+            1.2,
+          )
+          if (p < 1) rack.data.rotation.y = t * 6
         })
       },
     },

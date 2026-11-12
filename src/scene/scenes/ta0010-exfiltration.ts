@@ -21,6 +21,9 @@ export default function exfiltration(kit: Kit): SceneMap {
     storyState,
     showC2Link,
     pinkCubes,
+    relayBot,
+    pulseRings,
+    bobHeight,
   } = kit
   return {
     // T1041 Exfiltration Over C2 Channel（本編）
@@ -197,6 +200,38 @@ export default function exfiltration(kit: Kit): SceneMap {
               lerp(ends[1][2], ends[0][2], p),
             )
           }
+      },
+    },
+    // T1011 Exfiltration Over Other Network Medium
+    T1011: {
+      hits: [3.8],
+      run(t) {
+        view.target = [2.5, 3.5]
+        view.height = 21
+        storyState(13)
+        // 監視されている回線は使わず、無線などの別の経路で、外で待つ受け手へ送る
+        const receiver = [8.5, 10.5]
+        relayBot.visible = true
+        relayBot.scale.set(1.2, 1.2, 1.2)
+        relayBot.position.set(receiver[0], bobHeight(), receiver[1])
+        relayBot.rotation.y = -0.6
+        if (t > 0.4 && t < 4.4)
+          pulseRings.forEach((ring, j) => {
+            const phase = ((t - 0.4) * 0.6 + j * 0.5) % 1
+            const scale = 1 + phase * 10
+            ring.visible = true
+            ring.scale.set(scale, 0.02, scale)
+            ring.position.set(SERVER_SPOT[0], 0.08, SERVER_SPOT[1])
+            ring.material.opacity = 0.5 * (1 - phase)
+          })
+        for (let i = 0; i < 3; i++) {
+          const start = 0.8 + i * 0.7
+          const p = progress(t, start, start + 1.5)
+          if (p <= 0) continue
+          const data = racks[i].data
+          arcBetween(data, pileSpot(i), [receiver[0] - 0.5 + i * 0.5, 1.6, receiver[1] + 0.2], smooth(p), 6)
+          if (p < 1) data.rotation.y = t * 5
+        }
       },
     },
   }

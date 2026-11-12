@@ -10,7 +10,10 @@ import { SIMPLE_VARIANTS } from './simple'
 const kit = createKit(createWorld())
 const scenes = createScenes(kit)
 const timeline = buildTimeline()
-const detailedIds = TACTICS.flatMap((t) => t.examples.filter((e) => e.simple == null).map((e) => e.id))
+/** 専用の場面で描くと決めた技術を、「戦術ID/技術ID」の形で並べたもの */
+const detailed = TACTICS.flatMap((t) =>
+  t.examples.filter((e) => e.simple == null).map((e) => `${t.id}/${e.id}`),
+)
 
 const sceneDefOf = (s: TimelineScene) =>
   s.kind === 'intro'
@@ -19,7 +22,7 @@ const sceneDefOf = (s: TimelineScene) =>
       ? scenes.outro
       : s.kind === 'simple'
         ? scenes.simple(s.tactic, s.variant ?? 0)
-        : scenes.techniques[s.techniqueId!]
+        : scenes.technique(TACTICS[s.tactic].id, s.techniqueId!)!
 
 /** 見えている物の一覧と、その位置・大きさ・向き。攻撃者と防御者は場面が毎回置き直すので、位置は比べない */
 const snapshot = () => {
@@ -37,11 +40,17 @@ const snapshot = () => {
 
 describe('場面の対応', () => {
   it('専用の場面で描くと決めた技術には、必ず場面がある', () => {
-    for (const id of detailedIds) expect(scenes.techniques[id], id).toBeDefined()
+    for (const key of detailed) {
+      const [tacticId, techniqueId] = key.split('/')
+      expect(scenes.technique(tacticId, techniqueId), key).toBeDefined()
+    }
   })
 
   it('データに無い技術の場面は残っていない', () => {
-    expect(Object.keys(scenes.techniques).sort()).toEqual([...detailedIds].sort())
+    const have = Object.entries(scenes.byTactic).flatMap(([tacticId, map]) =>
+      Object.keys(map).map((techniqueId) => `${tacticId}/${techniqueId}`),
+    )
+    expect(have.sort()).toEqual([...detailed].sort())
   })
 
   it('型の場面は、すべての戦術に、すべての絵の種類がある', () => {

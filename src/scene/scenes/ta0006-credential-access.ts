@@ -25,6 +25,9 @@ export default function credentialAccess(kit: Kit): SceneMap {
     showCheck,
     hopInPlace,
     database,
+    token,
+    cloud,
+    popIn,
   } = kit
   return {
     // T1003 OS Credential Dumping（本編）
@@ -235,6 +238,30 @@ export default function credentialAccess(kit: Kit): SceneMap {
           spareKey.scale.set(size, size, size)
           if (t >= start + 0.8) spareKey.rotation.y = t * 3 + j
         })
+      },
+    },
+    // T1539 Steal Web Session Cookie
+    T1539: {
+      hits: [3.2],
+      run(t) {
+        view.target = [1.8, 3.2]
+        view.height = 10.5
+        storyState(8)
+        // ログイン済みのしるし（クッキー）。これを盗めば、パスワードなしでその人としてサービスに入れる
+        const screen = [3.5, 2.0, 4.4]
+        const service = [0.2, 4.6, 0.6]
+        popIn(cloud, service[0], service[1], service[2], t, 0.2, 1.2)
+        cloud.rotation.y = 0.6
+        if (t > 0.4 && t < 4.6) stretchBetween(cyanBeams[0], screen, service, 0.05)
+        token.visible = true
+        token.scale.set(0.4, 0.4, 0.4)
+        token.rotation.y = view.time * 2
+        if (t < 1.4) token.position.set(screen[0], screen[1], screen[2])
+        else arcBetween(token, screen, aboveHost(2.9), smooth(progress(t, 1.4, 2.4)), 1.0)
+        // 盗んだしるしを出すと、マルウェアも同じサービスに通されてしまう
+        if (t > 2.6 && t < 4.6) stretchBetween(pinkBeams[0], aboveHost(2.9), service, 0.06)
+        if (t > 3.0 && t < 4.6) showCheck(service[0], service[1] + 1.7, service[2], t, 3.0)
+        showCross(service[0], service[1] + 1.7, service[2], t, 5.4)
       },
     },
   }

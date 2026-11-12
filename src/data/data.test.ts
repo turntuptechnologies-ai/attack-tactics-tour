@@ -29,11 +29,6 @@ describe('戦術と技術のデータ', () => {
     }
   })
 
-  it('専用の場面を持つ技術のIDは、全体で重複しない（場面を技術IDで引くため）', () => {
-    const ids = TACTICS.flatMap((t) => t.examples.filter((e) => e.simple == null).map((e) => e.id))
-    expect(new Set(ids).size).toBe(ids.length)
-  })
-
   it('簡易表示の絵の種類は、用意された範囲に収まる', () => {
     for (const t of TACTICS)
       for (const e of t.examples)
