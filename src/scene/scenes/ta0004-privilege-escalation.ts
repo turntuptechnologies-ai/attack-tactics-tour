@@ -30,6 +30,11 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
     database,
     impostor,
     standing,
+    employees,
+    cyanBeams,
+    pinkCubes,
+    hopInPlace,
+    showAlert,
   } = kit
   return {
     // T1068 Exploitation for Privilege Escalation（本編）
@@ -258,6 +263,41 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
           malware.scale.set(size, size, size)
         }
         showCross(who[0], 3.4, who[1], t, 5.4)
+      },
+    },
+    // T1546 Event Triggered Execution
+    T1546: {
+      hits: [3.6],
+      run(t) {
+        view.target = [1.0, 3.0]
+        view.height = 10
+        storyState(5)
+        // 高い権限のプログラムは、決まった出来事に反応して動く。その反応先に、自分のコードを結び付けておく
+        const px = -0.6
+        const pz = 2.4
+        const hook = pinkCubes[0]
+        trustedProcess.visible = true
+        trustedProcess.scale.set(1.5, 1.5, 1.5)
+        trustedProcess.position.set(
+          px,
+          t > 2.6 && t < 3.2 ? Math.abs(Math.sin((t - 2.6) * 10)) * 0.25 : 0,
+          pz,
+        )
+        trustedProcess.rotation.y = 0.6
+        trustedProcessEyes.visible = false
+        flyTo(hook, aboveHost(1.2), [px + 0.75, 0.6, pz], t, 0.5, 1.4, 1.2, 6)
+        hook.scale.set(0.3, 0.3, 0.3)
+        // 出来事（従業員の操作）が起きると…
+        showAlert(0, 3.5, 2.2, 3.5, t, 1.8, 2.6)
+        hopInPlace(employees[2], t, 1.8, 2.4, 0.15)
+        if (t > 2.2 && t < 2.8) stretchBetween(cyanBeams[0], [3.5, 1.2, 3.6], [px, 1.0, pz], 0.06)
+        // …プログラムが反応し、その権限で結び付けたコードが動く
+        if (t > 2.8 && t < 3.4) stretchBetween(pinkBeams[0], [px + 0.75, 0.6, pz], aboveHost(1.0), 0.08)
+        if (t > 3.2) {
+          const size = lerp(MALWARE_SIZE, ADMIN_MALWARE_SIZE, overshoot(progress(t, 3.2, 3.6)))
+          crown.visible = true
+          malware.scale.set(size, size, size)
+        }
       },
     },
   }

@@ -53,6 +53,7 @@ export default function initialAccess(kit: Kit): SceneMap {
     user,
     token,
     showAlert,
+    relayBot,
   } = kit
   return {
     // T1566 Phishing（本編）
@@ -389,6 +390,42 @@ export default function initialAccess(kit: Kit): SceneMap {
           )
           view.actor = malware
         }
+      },
+    },
+    // T1200 Hardware Additions
+    T1200: {
+      hits: [3.8],
+      run(t) {
+        view.target = [3.2, 7.2]
+        view.height = 13
+        storyState(2)
+        // 不正な小型の機器を中へ持ち込み、社内のネットワークにつないで入口にする
+        const landed = [5.0, 4.9]
+        const drop = smooth(progress(t, 0.8, 2.2))
+        relayBot.visible = t > 0.4
+        relayBot.scale.set(0.9, 0.9, 0.9)
+        relayBot.rotation.y = t < 2.2 ? t * 5 : 0.6
+        relayBot.position.set(
+          lerp(ATTACKER_SPOT[0], landed[0], drop),
+          lerp(2.7, 0, drop) + Math.sin(Math.PI * drop) * 4.5,
+          lerp(ATTACKER_SPOT[1], landed[1], drop),
+        )
+        // つながれた機器から、となりの端末へ
+        if (t > 2.5 && t < 3.3)
+          stretchBetween(pinkBeams[0], [landed[0], 0.6, landed[1]], [3.5, 0.9, 4.4], 0.08)
+        if (t > 3.1) {
+          jumpMalware(
+            t,
+            3.1,
+            3.8,
+            [3.5, 1.0, 4.4],
+            aboveHost(0),
+            0.9,
+            MALWARE_SIZE * overshoot(progress(t, 3.1, 3.4)),
+          )
+          view.actor = malware
+        }
+        showCross(landed[0], 2.2, landed[1], t, 5.4)
       },
     },
   }

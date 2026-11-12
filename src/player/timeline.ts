@@ -86,12 +86,15 @@ export function indexOfExample(timeline: TimelineScene[], tactic: number, id: st
 }
 
 /**
- * 技術IDだけから場面を選ぶ。同じ技術が複数の戦術にあるときは、専用の場面があるものを優先する。
- * 無ければ -1。
+ * 技術IDだけから場面を選ぶ。同じ技術が複数の戦術にあるときは、
+ * 本編の場面、専用の場面、簡易表示の順に優先する。無ければ -1。
  */
 export function indexOfTechnique(timeline: TimelineScene[], id: string): number {
-  const detailed = timeline.findIndex((s) => s.techniqueId === id && s.kind !== 'simple')
-  return detailed >= 0 ? detailed : timeline.findIndex((s) => s.techniqueId === id)
+  for (const kind of ['story', 'extra', 'simple'] as const) {
+    const index = timeline.findIndex((s) => s.techniqueId === id && s.kind === kind)
+    if (index >= 0) return index
+  }
+  return -1
 }
 
 /** その場面を開く # を返す。#T1190 で一意に決まるならそれを、決まらないなら #TA0003-T1078 の形にする */

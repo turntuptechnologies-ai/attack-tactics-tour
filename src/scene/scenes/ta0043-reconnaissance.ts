@@ -257,5 +257,28 @@ export default function reconnaissance(kit: Kit): SceneMap {
         }
       },
     },
+    // T1591 Gather Victim Org Information
+    T1591: {
+      hits: [3.6],
+      run(t) {
+        view.target = [0.5, 7.2]
+        view.height = 15
+        applyPose(attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1]))
+        applyPose(defender, standing(-1, 4.6, 0.4))
+        // だれがだれの上司で、どの部署がどうつながっているか。組織の形（線）を外から描き出す
+        const heads = employees.map((employee) => [employee.position.x, 2.3, employee.position.z])
+        for (let i = 0; i < 3; i++) {
+          const start = 0.6 + i * 0.6
+          if (t > start) stretchBetween(pinkBeams[i], heads[i], heads[i + 1], 0.07)
+        }
+        if (t > 2.4) {
+          const chart = documents[0]
+          const size = 1.1 * overshoot(progress(t, 2.4, 2.7))
+          flyTo(chart, [0, 3.4, 3.0], aboveAttacker(), t, 2.6, 3.6, 3.0, 5)
+          chart.scale.set(size, size, size)
+          if (t >= 3.6) chart.rotation.y = 0.6
+        }
+      },
+    },
   }
 }

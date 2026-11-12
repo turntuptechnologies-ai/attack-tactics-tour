@@ -23,6 +23,8 @@ export default function collection(kit: Kit): SceneMap {
     pinkBeams,
     database,
     scanPlane,
+    pinkCubes,
+    hopInPlace,
   } = kit
   return {
     // T1005 Data from Local System（本編）
@@ -248,6 +250,37 @@ export default function collection(kit: Kit): SceneMap {
           )
           if (p < 1) rack.data.rotation.y = t * 6
         })
+      },
+    },
+    // T1123 Audio Capture
+    T1123: {
+      hits: [3.6],
+      run(t) {
+        view.target = [-1.6, 1.2]
+        view.height = 12
+        storyState(11)
+        // 乗っ取った端末のマイクで、周りの会話を録音する
+        const mic = [-2.3, 0.8, 2.6]
+        const talker = employees[1].position
+        if (t > 0.4 && t < 4.4)
+          pulseRings.forEach((ring, j) => {
+            const phase = ((t - 0.4) * 0.8 + j * 0.5) % 1
+            const scale = 1 + phase * 6
+            ring.visible = true
+            ring.scale.set(scale, 0.02, scale)
+            ring.position.set(talker.x, 0.08, talker.z)
+            ring.material.opacity = 0.5 * (1 - phase)
+          })
+        hopInPlace(employees[1], t, 0.4, 4.4, 0.06)
+        for (let i = 0; i < 4; i++) {
+          const start = 1.0 + i * 0.5
+          const p = progress(t, start, start + 1.1)
+          if (p <= 0) continue
+          const cube = pinkCubes[i]
+          cube.visible = true
+          cube.scale.set(0.24, 0.24, 0.24)
+          arcBetween(cube, mic, [SERVER_SPOT[0] - 0.9 + i * 0.6, 0.3, SERVER_SPOT[1] + 1.5], smooth(p), 2.0)
+        }
       },
     },
   }

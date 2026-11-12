@@ -35,6 +35,7 @@ export default function lateralMovement(kit: Kit): SceneMap {
     cyanBeams,
     placeMalware,
     bobHeight,
+    user,
   } = kit
   return {
     // T1021 Remote Services（本編）
@@ -282,6 +283,35 @@ export default function lateralMovement(kit: Kit): SceneMap {
         placeMalware(x, lift + (ride >= 1 ? bobHeight() : 0), z, ADMIN_MALWARE_SIZE)
         // 防御側は、使われていない接続を切る
         showCross((from[0] + to[0]) / 2, 3.2, (from[2] + to[2]) / 2, t, 5.4)
+      },
+    },
+    // T1091 Replication Through Removable Media
+    T1091: {
+      hits: [3.8],
+      run(t) {
+        view.target = [-0.4, 3.2]
+        view.height = 12
+        storyState(10)
+        // 感染した端末に挿されたUSBメモリに、自分の写しを入れておく。それを別の端末に挿した人が、運び役になる
+        const pose = walk(
+          [
+            [0, 2.6, 4.4],
+            [1.4, 2.6, 4.4],
+            [3.0, -2.6, 2.9],
+            [7, -2.6, 2.9],
+          ],
+          t,
+          0,
+        )
+        user.visible = true
+        applyPose(user, pose)
+        token.visible = t < 3.4
+        token.scale.set(0.35, 0.35, 0.35)
+        token.rotation.y = view.time * 2
+        if (t < 1.2) arcBetween(token, aboveHost(1.4), [2.6, 2.0, 4.4], smooth(progress(t, 0.4, 1.2)), 0.8)
+        else token.position.set(pose.x, pose.y + 2.0, pose.z)
+        if (t > 3.3) markCompromised(1, -2.3, 2.6, overshoot(progress(t, 3.3, 3.6)))
+        showCross(-2.3, 2.6, 2.6, t, 5.6)
       },
     },
   }

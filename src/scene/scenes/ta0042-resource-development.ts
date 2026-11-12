@@ -1,6 +1,15 @@
 // TA0042 リソース開発（Resource Development）の場面。
 import type { Kit } from '../kit'
-import { progress, smooth, overshoot, keyframes, applyPose, stretchBetween, lerp } from '../motion'
+import {
+  progress,
+  smooth,
+  overshoot,
+  keyframes,
+  applyPose,
+  stretchBetween,
+  lerp,
+  arcBetween,
+} from '../motion'
 import type { SceneMap } from './types'
 
 export default function resourceDevelopment(kit: Kit): SceneMap {
@@ -33,6 +42,8 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
     showAlert,
     documents,
     database,
+    secondAttacker,
+    showCheck,
   } = kit
   return {
     // T1583 Acquire Infrastructure（本編）
@@ -216,6 +227,41 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
         }
         // 持ち主は、自分のサーバーが使われていることに気づきにくい
         showAlert(0, owner[0], 2.4, owner[1], t, 5.0, 7)
+      },
+    },
+    // T1650 Acquire Access
+    T1650: {
+      hits: [3.2],
+      run(t) {
+        view.target = [1.2, 10.4]
+        view.height = 13
+        applyPose(attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1], -1.2))
+        applyPose(defender, standing(2, 5, 0.4))
+        // すでに中へ入れる鍵を持っている仲介者から、その入口を買い取る
+        const broker = [-0.8, 12.2]
+        const fee = pinkCubes[0]
+        secondAttacker.visible = true
+        applyPose(secondAttacker, standing(broker[0], broker[1], 1.2))
+        key.visible = true
+        key.scale.set(0.8, 0.8, 0.8)
+        key.rotation.y = view.time * 2
+        if (t < 2.2) key.position.set(broker[0], 2.9 + Math.sin(view.time * 4) * 0.06, broker[1])
+        else arcBetween(key, [broker[0], 2.9, broker[1]], aboveAttacker(), smooth(progress(t, 2.2, 3.2)), 1.2)
+        if (t > 0.8 && t < 2.0) {
+          flyTo(
+            fee,
+            [ATTACKER_SPOT[0], 2.6, ATTACKER_SPOT[1]],
+            [broker[0], 2.2, broker[1]],
+            t,
+            0.8,
+            1.9,
+            1.2,
+            6,
+          )
+          fee.scale.set(0.34, 0.34, 0.34)
+        }
+        // 買った鍵は、そのまま門を開けられる
+        if (t > 3.4 && t < 4.6) showCheck(0, 4.1, 6.9, t, 3.4)
       },
     },
   }

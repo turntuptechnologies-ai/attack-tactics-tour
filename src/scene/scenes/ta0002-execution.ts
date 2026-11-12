@@ -30,6 +30,9 @@ export default function execution(kit: Kit): SceneMap {
     cyanBeams,
     trustedProcess,
     trustedProcessEyes,
+    clock,
+    clockHand,
+    popIn,
   } = kit
   return {
     // T1059 Command and Scripting Interpreter（本編）
@@ -295,6 +298,38 @@ export default function execution(kit: Kit): SceneMap {
             1.2 + p * 2.0,
             pz + Math.cos(i * 2.1 + p * 5) * 0.5,
           )
+        }
+        sensorArrives(t)
+      },
+    },
+    // T1053 Scheduled Task/Job
+    T1053: {
+      hits: [3.0],
+      run(t) {
+        view.target = [1.6, 3.6]
+        view.height = 10
+        storyState(3)
+        // OSの予約実行に登録しておく。針が上に来るたびに、決めておいたコードが動く
+        const turns = Math.max(0, (t - 1.0) / 1.6)
+        popIn(clock, HOST_SPOT[0] + 0.1, 3.3 + Math.sin(view.time * 3) * 0.05, HOST_SPOT[1], t, 0.5, 1.0)
+        clock.rotation.y = 0.6
+        clockHand.rotation.z = -turns * Math.PI * 2
+        for (let n = 1; n <= 2; n++) {
+          const fire = 1.0 + n * 1.6
+          if (t > fire && t < fire + 0.6) malware.position.y = Math.abs(Math.sin((t - fire) * 8)) * 0.3
+          for (let i = 0; i < 3; i++) {
+            const p = progress(t, fire + i * 0.12, fire + 0.9 + i * 0.12)
+            if (p <= 0 || p >= 1) continue
+            const cube = pinkCubes[(n - 1) * 3 + i]
+            const size = 0.28 * (1 - p * 0.6)
+            cube.visible = true
+            cube.scale.set(size, size, size)
+            cube.position.set(
+              HOST_SPOT[0] + Math.sin(i * 2.1 + p * 5) * 0.6,
+              0.8 + p * 1.8,
+              HOST_SPOT[1] + Math.cos(i * 2.1 + p * 5) * 0.6,
+            )
+          }
         }
         sensorArrives(t)
       },

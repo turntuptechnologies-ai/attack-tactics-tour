@@ -1,6 +1,6 @@
 // TA0112 防御の妨害（Defense Impairment）の場面。
 import type { Kit } from '../kit'
-import { progress, smooth, lerp, arcBetween, stretchBetween } from '../motion'
+import { progress, smooth, lerp, arcBetween, stretchBetween, overshoot } from '../motion'
 import type { SceneMap } from './types'
 
 export default function defenseImpairment(kit: Kit): SceneMap {
@@ -30,6 +30,8 @@ export default function defenseImpairment(kit: Kit): SceneMap {
     flyTo,
     showAlert,
     gateGuard,
+    database,
+    popIn,
   } = kit
   return {
     // T1685 Disable or Modify Tools（本編）
@@ -243,6 +245,38 @@ export default function defenseImpairment(kit: Kit): SceneMap {
             )
           }
         if (t > 5.6) showCheck(0, 4.7, 7.0, t, 5.8)
+      },
+    },
+    // T1207 Rogue Domain Controller
+    T1207: {
+      hits: [3.4],
+      run(t) {
+        view.target = [0.4, 2.4]
+        view.height = 10.5
+        storyState(7)
+        // 本物の管理サーバー（左）のとなりに偽物を立て、仲間どうしのやり取りとして変更を流し込む
+        const real = [-1.2, 2.4]
+        const rogue = [0.2, 0.9]
+        const mark = pinkCubes[0]
+        database.visible = true
+        database.scale.set(0.9, 0.9, 0.9)
+        database.position.set(real[0], 0, real[1])
+        database.rotation.y = 0.6
+        // 偽物は、信頼されたプログラムの見た目で現れる
+        popIn(trustedProcess, rogue[0], 0, rogue[1], t, 1.0, 1.5)
+        trustedProcess.rotation.y = 0.6
+        trustedProcessEyes.visible = t > 1.2
+        if (t > 0.5 && t < 1.2) stretchBetween(pinkBeams[0], aboveHost(0.8), [rogue[0], 0.6, rogue[1]], 0.09)
+        if (t > 2.0 && t < 3.2)
+          stretchBetween(pinkBeams[1], [rogue[0], 0.8, rogue[1]], [real[0], 1.2, real[1]], 0.09)
+        if (t > 3.0 && t < 5.6) {
+          const size = 0.4 * overshoot(progress(t, 3.0, 3.3))
+          mark.visible = true
+          mark.scale.set(size, size, size)
+          mark.position.set(real[0], 1.9 + Math.sin(view.time * 4) * 0.06, real[1])
+          mark.rotation.y = view.time * 2
+        }
+        showCross(rogue[0], 2.2, rogue[1], t, 5.4)
       },
     },
   }

@@ -28,6 +28,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
     token,
     cloud,
     popIn,
+    racks,
   } = kit
   return {
     // T1003 OS Credential Dumping（本編）
@@ -262,6 +263,40 @@ export default function credentialAccess(kit: Kit): SceneMap {
         if (t > 2.6 && t < 4.6) stretchBetween(pinkBeams[0], aboveHost(2.9), service, 0.06)
         if (t > 3.0 && t < 4.6) showCheck(service[0], service[1] + 1.7, service[2], t, 3.0)
         showCross(service[0], service[1] + 1.7, service[2], t, 5.4)
+      },
+    },
+    // T1040 Network Sniffing
+    T1040: {
+      hits: [3.2],
+      run(t) {
+        view.target = [-1.2, 0.8]
+        view.height = 13
+        storyState(8)
+        // 従業員とサーバーのあいだを流れる通信（水色の線）を、横からのぞき見る
+        const from = [-3.5, 1.2, 2.9]
+        const to = [racks[1].x, 1.6, RACK_Z + 0.6]
+        const tap = [(from[0] + to[0]) / 2, (from[1] + to[1]) / 2, (from[2] + to[2]) / 2]
+        stretchBetween(cyanBeams[0], from, to, 0.07)
+        if (t > 0.6 && t < 4.6) stretchBetween(pinkBeams[0], aboveHost(1.0), tap, 0.06)
+        spareKeys.forEach((spareKey, i) => {
+          // 鍵は本来の相手へ流れ続け、のぞき見た写しだけがマルウェアに届く
+          const p = (t * 0.5 + i / 3) % 1
+          spareKey.visible = true
+          spareKey.scale.set(0.35, 0.35, 0.35)
+          spareKey.rotation.y = t * 3
+          spareKey.position.set(
+            lerp(from[0], to[0], p),
+            lerp(from[1], to[1], p) + 0.35,
+            lerp(from[2], to[2], p),
+          )
+        })
+        if (t > 1.6) {
+          const copy = progress(t, 1.6, 3.0)
+          key.visible = true
+          key.scale.set(0.7, 0.7, 0.7)
+          key.rotation.y = t * 3
+          arcBetween(key, tap, aboveHost(3.0), smooth(copy), 1.0)
+        }
       },
     },
   }

@@ -28,6 +28,8 @@ export default function discovery(kit: Kit): SceneMap {
     scanPlane,
     flyTo,
     glass,
+    clock,
+    clockHand,
   } = kit
   return {
     // T1046 Network Service Discovery（本編）
@@ -265,6 +267,28 @@ export default function discovery(kit: Kit): SceneMap {
           cube.scale.set(size, size, size)
           cube.position.set(seat.x, 2.4 + Math.sin(view.time * 4 + i) * 0.08, seat.z)
           cube.rotation.y = view.time * 2
+        }
+      },
+    },
+    // T1124 System Time Discovery
+    T1124: {
+      hits: [2.6],
+      run(t) {
+        view.target = [1.8, 3.4]
+        view.height = 9.5
+        storyState(9)
+        // 端末の時計を読み、いまの時刻と時間帯を知る。動く時刻を決めたり、どの地域かの手がかりにしたりする
+        const at = [3.5, 2.6, 4.2]
+        popIn(clock, at[0], at[1] + Math.sin(view.time * 3) * 0.05, at[2], t, 0.5, 1.1)
+        clock.rotation.y = 0.6
+        clockHand.rotation.z = -1.1 - view.time * 0.4
+        if (t > 1.0 && t < 1.8) stretchBetween(pinkBeams[0], aboveHost(1.0), at, 0.07)
+        if (t > 1.6) {
+          const note = documents[0]
+          const size = 0.8 * overshoot(progress(t, 1.6, 1.9))
+          flyTo(note, [at[0], at[1] - 0.9, at[2]], aboveHost(2.8), t, 1.8, 2.6, 0.8, 5)
+          note.scale.set(size, size, size)
+          if (t >= 2.6) note.rotation.y = 0.6
         }
       },
     },
