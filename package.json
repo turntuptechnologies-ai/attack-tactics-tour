@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "attack:diff": "node scripts/attack-diff.mjs",
+    "attack:groups": "node scripts/build-groups.mjs",
     "build:artifact": "npm run build && node scripts/build-artifact.mjs"
   },
   "dependencies": {

@@ -30,6 +30,7 @@ img {
   --chip-fg: #ffffff;
   --seg: #3a4a6b;
   --seg-done: #9fb4d8;
+  --used: #ffe08a;
   --title: 'Press Start 2P', 'DotGothic16', 'Zen Kaku Gothic New', monospace;
   --display: 'DotGothic16', 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
   --body: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
@@ -49,6 +50,7 @@ img {
     --chip-fg: #0f181b;
     --seg: #2b3956;
     --seg-done: #8ea5cc;
+    --used: #6b5613;
     color-scheme: dark;
   }
 }
@@ -64,6 +66,7 @@ img {
   --chip-fg: #0f181b;
   --seg: #2b3956;
   --seg-done: #8ea5cc;
+  --used: #6b5613;
   color-scheme: dark;
 }
 body {
@@ -498,6 +501,44 @@ h2 {
   font-weight: 400;
   font-size: 20px;
   margin: 14px 0 0;
+}
+/* 攻撃グループを選ぶ欄 */
+.grp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.grp label {
+  font-family: var(--display);
+  font-size: 14px;
+}
+.grp select {
+  flex: 0 1 300px;
+  min-width: 0;
+  font: inherit;
+  /* 16px より小さいと、iOS で選ぶたびに画面が拡大される */
+  font-size: 16px;
+  color: var(--fg);
+  background: var(--panel);
+  border: 2px solid var(--fg);
+  border-radius: 0;
+  padding: 5px 8px;
+}
+.mxnote a {
+  color: var(--defend);
+}
+/* グループを選んでいる間は、そのグループが使った技術を光らせ、それ以外は薄くする */
+.matrix.picking .te.ex {
+  opacity: 0.38;
+}
+.matrix.picking .te.ex.used {
+  opacity: 1;
+  background: var(--used);
+}
+.matrix.picking .te.ex.on {
+  opacity: 1;
+  background: var(--attack);
 }
 /* 一覧表の絞り込み */
 .find {

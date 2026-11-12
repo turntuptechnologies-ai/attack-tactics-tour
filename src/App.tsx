@@ -1,20 +1,32 @@
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Matrix } from './components/Matrix'
 import { Stage } from './components/Stage'
 import { TechniqueTable } from './components/TechniqueTable'
+import { GROUPS, type Group } from './data/groups'
+import { groupUrl } from './data/official'
 import { TACTICS } from './data/tactics'
 import type { NowPlaying, Player } from './player/player'
-import { indexOfExample } from './player/timeline'
+import { buildTimeline, indexOfExample, playlistOf } from './player/timeline'
 
 const TECHNIQUE_COUNT = new Set(TACTICS.flatMap((t) => t.examples.map((e) => e.id))).size
 
 const TAG = { a: '攻撃', d: '防御' } as const
+
+/** 場面の並び。再生機が持っているものと同じ（データから決まるので、作り直しても同じ並びになる） */
+const TIMELINE = buildTimeline()
+const groupById = (id: string) => GROUPS.find((g) => g.id === id) ?? null
+/** URL の # がグループID（#G0007）なら、そのグループ */
+const groupInHash = () => (/^#G\d{4}$/.test(location.hash) ? groupById(location.hash.slice(1)) : null)
 
 export default function App() {
   const player = useRef<Player | null>(null)
   const [now, setNow] = useState<NowPlaying | null>(null)
   const [playing, setPlaying] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [group, setGroup] = useState<Group | null>(null)
+  /** 選んだグループが使った技術と、その場面の並び（マトリックスの左から右） */
+  const used = useMemo(() => (group ? new Set(group.techniques) : null), [group])
+  const playlist = useMemo(() => (group ? playlistOf(TIMELINE, group.techniques) : []), [group])
 
   const onPlayer = useCallback((p: Player | null) => {
     player.current = p
@@ -27,6 +39,28 @@ export default function App() {
     if (index >= 0) p.show(index, true)
   }, [])
 
+  /** グループを選ぶ（null で解除）。選んだら、そのグループの最初の技術から再生する */
+  const chooseGroup = useCallback((next: Group | null, fromUser = true) => {
+    setGroup(next)
+    const p = player.current
+    if (!p) return
+    const list = next ? playlistOf(p.timeline, next.techniques) : []
+    p.setPlaylist(next ? list : null)
+    if (list.length) p.show(list[0], fromUser)
+  }, [])
+
+  // #G0007 の形の URL で開いたら、そのグループを選んだ状態にする
+  useEffect(() => {
+    const apply = () => {
+      const fromHash = groupInHash()
+      if (fromHash) chooseGroup(fromHash, false)
+    }
+    apply()
+    window.addEventListener('hashchange', apply)
+    return () => window.removeEventListener('hashchange', apply)
+  }, [chooseGroup])
+
+  const place = now ? playlist.indexOf(now.index) : -1
   const side = now?.caption[2] ?? ''
   const tag = side ? TAG[side] : now?.scene.kind === 'outro' ? 'まとめ' : '導入'
   const text =
@@ -63,18 +97,54 @@ export default function App() {
           <input
             type="checkbox"
             id="all"
+            disabled={!!group}
             onChange={(e) => player.current?.setIncludeExtras(e.target.checked)}
           />
           本編以外の技術も続けて再生
         </label>
       </div>
 
+      <div className="grp">
+        <label htmlFor="grp">攻撃グループで見る</label>
+        <select id="grp" value={group?.id ?? ''} onChange={(e) => chooseGroup(groupById(e.target.value))}>
+          <option value="">（選ばない）</option>
+          {GROUPS.map((g) => (
+            <option key={g.id} value={g.id}>
+              {g.name}（{g.techniques.length}）
+            </option>
+          ))}
+        </select>
+        {group && (
+          <>
+            <button type="button" onClick={() => chooseGroup(group)}>
+              ▶ 最初から
+            </button>
+            <button type="button" onClick={() => chooseGroup(null)}>
+              解除
+            </button>
+          </>
+        )}
+      </div>
+      {group && (
+        <p className="mxnote" role="status">
+          <b>{group.name}</b>（
+          <a href={groupUrl(group.id)} target="_blank" rel="noopener noreferrer">
+            {group.id}
+          </a>
+          {group.aliases.length > 0 && `、別名 ${group.aliases.join('、')}`}
+          ）が使ったと記録されている技術は {group.techniques.length} 種類で、マトリックスの {playlist.length}{' '}
+          マスが光っています{place >= 0 && `（いま ${place + 1} マス目）`}
+          。公開された報告に基づく記録で、使った順番までは分かりません。ここでは、マトリックスの左の戦術から右へ順に再生します。{' '}
+          <a href={`#${group.id}`}>このグループへのリンク</a>
+        </p>
+      )}
+
       <p className="mxnote">赤いドクロは攻撃が成功した合図、青い盾は防御側の対策です。</p>
       <p className="mxnote">
         ATT&amp;CK マトリックス（Enterprise
         v20）。列が戦術、その下が技術です。どの技術も押すと再生できます。太字は本編で通る技術、赤い枠はそれ以外の技術で、どの技術にも専用の場面があります。列の見出しを押すと、その戦術の先頭に飛びます。サブテクニックは省略しています。
       </p>
-      <Matrix tactic={now?.scene.tactic ?? -1} techniqueId={now?.scene.techniqueId} onPick={pick} />
+      <Matrix tactic={now?.scene.tactic ?? -1} techniqueId={now?.scene.techniqueId} onPick={pick} used={used} />
 
       <section>
         <h2>15の戦術と、すべての技術</h2>

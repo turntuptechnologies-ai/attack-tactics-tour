@@ -84,6 +84,26 @@ export function step(timeline: TimelineScene[], index: number, dir: 1 | -1, incl
   return i
 }
 
+/**
+ * 渡した技術のどれかを描く場面の添字を、再生の順に並べる（＝マトリックスの左の戦術から右へ）。
+ * 同じ技術が複数の戦術に載っていれば、それぞれの戦術の場面が入る。
+ */
+export function playlistOf(timeline: TimelineScene[], techniqueIds: Iterable<string>): number[] {
+  const wanted = new Set(techniqueIds)
+  return timeline.flatMap((s, i) => (s.techniqueId && wanted.has(s.techniqueId) ? [i] : []))
+}
+
+/**
+ * 並び（playlist）の中で、index の次（dir=1）または前（dir=-1）の場面の添字を返す。端までいくと反対側へ回る。
+ * index が並びに入っていなくてもよい（並びの外の技術を見ている途中でも、そこから先の最初の場面へ進む）。
+ */
+export function stepWithin(playlist: number[], index: number, dir: 1 | -1): number {
+  if (!playlist.length) return index
+  if (dir === 1) return playlist.find((i) => i > index) ?? playlist[0]
+  for (let k = playlist.length - 1; k >= 0; k--) if (playlist[k] < index) return playlist[k]
+  return playlist[playlist.length - 1]
+}
+
 /** tactic 番目の戦術の、その技術の場面の添字（無ければ -1） */
 export function indexOfExample(timeline: TimelineScene[], tactic: number, id: string): number {
   return timeline.findIndex((s) => s.tactic === tactic && s.techniqueId === id)
