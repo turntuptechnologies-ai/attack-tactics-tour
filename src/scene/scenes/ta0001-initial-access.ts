@@ -19,7 +19,7 @@ export default function initialAccess(kit: Kit): SceneMap {
     attacker,
     secondAttacker,
     employees,
-    mfaPanel,
+    gateGuard,
     mails,
     mail,
     key,
@@ -64,9 +64,9 @@ export default function initialAccess(kit: Kit): SceneMap {
           to2 = [6, 1.7, 2.2]
         mail.scale.set(1, 1, 1)
         if (t < 0.7) {
-          placeMalware(0.2, 0, 12.6, MALWARE_SIZE * (1 - smooth(progress(t, 0.2, 0.7))))
-          malware.rotation.y = Math.PI
+          const size = overshoot(progress(t, 0, 0.3))
           mail.visible = true
+          mail.scale.set(size, size, size)
           mail.position.set(from[0], from[1], from[2])
         } else if (t < 2.1) {
           mail.visible = true
@@ -89,8 +89,8 @@ export default function initialAccess(kit: Kit): SceneMap {
           view.actor = malware
         }
         if (t > 4.6) {
-          mfaPanel.visible = true
-          mfaPanel.position.y = 3.2 + (1 - bounce(progress(t, 4.6, 5.3))) * 6
+          gateGuard.visible = true
+          gateGuard.position.y = 3.2 + (1 - bounce(progress(t, 4.6, 5.3))) * 6
           const p = progress(t, 5, 5.9),
             mailItem = mails[1],
             q = progress(t, 5.45, 6.2)
@@ -180,8 +180,8 @@ export default function initialAccess(kit: Kit): SceneMap {
         openGate(progress(t, 2.0, 2.5) - progress(t, 4.6, 5.0))
         if (t < 4.4) showCheck(0, 4.1, 6.9, t, 1.9)
         if (t > 4.6) {
-          mfaPanel.visible = true
-          mfaPanel.position.y = 3.2 + (1 - bounce(progress(t, 4.6, 5.3))) * 6
+          gateGuard.visible = true
+          gateGuard.position.y = 3.2 + (1 - bounce(progress(t, 4.6, 5.3))) * 6
           secondAttacker.visible = true
           applyPose(
             secondAttacker,
@@ -292,8 +292,8 @@ export default function initialAccess(kit: Kit): SceneMap {
           bot.rotation.y = 0.6
         }
         if (t > 4.8) {
-          mfaPanel.visible = true
-          mfaPanel.position.set(6.5, 2.5 + (1 - bounce(progress(t, 4.8, 5.5))) * 6, 7.6)
+          gateGuard.visible = true
+          gateGuard.position.set(6.5, 2.5 + (1 - bounce(progress(t, 4.8, 5.5))) * 6, 7.6)
         }
         showCross(6.5, 4.2, 7.6, t, 5.6)
       },

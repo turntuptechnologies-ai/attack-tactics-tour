@@ -197,13 +197,13 @@ export function createWorld() {
     box(g, 0.14, 0.2, 0.06, 0x3a2c00, 0, 0, 0.19)
     return g
   }
-  const mfaPanel = add(group())
-  box(mfaPanel, 1.5, 1.5, 0.15, 0x2a63d4, 0, 0, -0.05)
-  box(mfaPanel, 1.2, 1.2, 0.16, 0x6f9dff, 0, 0, 0)
+  const gateGuard = add(group())
+  box(gateGuard, 1.5, 1.5, 0.15, 0x2a63d4, 0, 0, -0.05)
+  box(gateGuard, 1.2, 1.2, 0.16, 0x6f9dff, 0, 0, 0)
   ;(function () {
     const l = makeLock()
     l.position.set(0, -0.15, 0.2)
-    mfaPanel.add(l)
+    gateGuard.add(l)
   })()
   const mails = [0, 1, 2, 3].map(() => {
       const g = add(group())
@@ -491,7 +491,7 @@ export function createWorld() {
     secondAttacker,
     defender,
     employees,
-    mfaPanel,
+    gateGuard,
     mails,
     mail,
     key,

@@ -110,7 +110,7 @@ export function createKit(w: World) {
     doorL.position.x = -0.75
     doorR.position.x = 0.75
     const single: Object3D[] = [
-      w.mfaPanel,
+      w.gateGuard,
       w.key,
       crossMark,
       w.secondAttacker,
@@ -234,7 +234,7 @@ export function createKit(w: World) {
       e.position.y = 0
       e.scale.y = 1 + Math.sin(view.time * 3 + i * 2) * 0.03
     })
-    w.mfaPanel.position.set(0, 3.2, 7.15)
+    w.gateGuard.position.set(0, 3.2, 7.15)
   }
 
   /**

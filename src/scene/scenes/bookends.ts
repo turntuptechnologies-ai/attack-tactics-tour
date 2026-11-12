@@ -4,7 +4,7 @@ import { applyPose, walk } from '../motion'
 import type { SceneDef } from './types'
 
 export function bookends(kit: Kit): { intro: SceneDef; outro: SceneDef } {
-  const { attacker, defender, mfaPanel, ATTACKER_SPOT, view, storyState, placeSensor } = kit
+  const { attacker, defender, gateGuard, ATTACKER_SPOT, view, storyState, placeSensor } = kit
   return {
     intro: {
       hits: [],
@@ -58,7 +58,7 @@ export function bookends(kit: Kit): { intro: SceneDef; outro: SceneDef } {
             0,
           ),
         )
-        mfaPanel.visible = true
+        gateGuard.visible = true
         placeSensor(0.5, 3.3 + Math.sin(view.time * 3) * 0.1, 3.5)
       },
     },
