@@ -749,7 +749,7 @@ export default function execution(kit: Kit): SceneMap {
           const service = bots[4 + i]
           service.visible = true
           service.scale.set(0.9, 0.9, 0.9)
-          service.position.set(-1.9 + i * 0.85, Math.abs(Math.sin(view.time * 4 + i)) * 0.08, 3.9 - i * 0.25)
+          service.position.set(-1.9 + i * 0.85, Math.abs(Math.sin(view.time * 4 + i)) * 0.08, 3.4 - i * 0.25)
           service.rotation.y = 0.6
         }
         if (t > 0.5) {

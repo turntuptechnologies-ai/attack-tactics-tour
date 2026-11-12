@@ -31,6 +31,10 @@ export default function reconnaissance(kit: Kit): SceneMap {
     relayBot,
     flyPaper,
     defenderHardens,
+    defenderHidesExposure,
+    defenderNotices,
+    defenderScans,
+    defenderWarnsStaff,
   } = kit
   return {
     // T1595 Active Scanning（本編）
@@ -128,7 +132,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
           const size = 0.36 * overshoot(progress(t, start, start + 0.3))
           cube.scale.set(size, size, size)
         })
-        defenderHardens(t)
+        defenderWarnsStaff(t, 1)
       },
     },
     // T1593 Search Open Websites/Domains
@@ -157,7 +161,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
             1,
           )
         })
-        defenderHardens(t)
+        defenderScans(t, cloud)
       },
     },
     // T1596 Search Open Technical Databases
@@ -226,7 +230,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
             0.9,
           )
         })
-        defenderHardens(t)
+        defenderNotices(t, database)
       },
     },
     // T1590 Gather Victim Network Information
@@ -256,7 +260,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
           const map = documents[0]
           flyPaper(map, [YELLOW_CUBE_X[1], 3.3, 6.5], aboveAttacker(), t, 2.7, 3.6, 2.0, 2.6, 1)
         }
-        defenderHardens(t)
+        defenderHidesExposure(t)
       },
     },
     // T1591 Gather Victim Org Information
@@ -325,7 +329,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
             0.85,
           )
         })
-        defenderHardens(t)
+        defenderHidesExposure(t)
       },
     },
     // T1597 Search Closed Sources
@@ -410,7 +414,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
             0.85,
           )
         })
-        defenderHardens(t)
+        defenderWarnsStaff(t, 2)
       },
     },
     // T1681 Search Threat Vendor Data

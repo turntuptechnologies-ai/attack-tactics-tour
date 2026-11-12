@@ -50,6 +50,11 @@ export default function discovery(kit: Kit): SceneMap {
     flyPaper,
     defenderBlocks,
     defenderNotices,
+    defenderCollectsLogs,
+    defenderCutsLink,
+    defenderLocks,
+    defenderScans,
+    defenderSendsSensor,
   } = kit
   return {
     // T1046 Network Service Discovery（本編）
@@ -69,7 +74,7 @@ export default function discovery(kit: Kit): SceneMap {
           m.position.y = 3.7 + Math.sin(view.time * 4 + i) * 0.08
           m.rotation.y = view.time * 2
         })
-        defenderBlocks(t)
+        defenderCutsLink(t, malware, rackMarks[2])
       },
     },
     // T1087 Account Discovery
@@ -103,7 +108,7 @@ export default function discovery(kit: Kit): SceneMap {
             cube.rotation.y = view.time * 2
           }
         })
-        defenderNotices(t)
+        defenderNotices(t, database)
       },
     },
     // T1083 File and Directory Discovery
@@ -133,7 +138,7 @@ export default function discovery(kit: Kit): SceneMap {
           documents[i].rotation.y = 0.6
         })
         showAlert(0, -6, 3.1, 4.1, t, 3.5, 4.6)
-        defenderNotices(t)
+        defenderSendsSensor(t, documents[1])
       },
     },
     // T1018 Remote System Discovery
@@ -172,7 +177,7 @@ export default function discovery(kit: Kit): SceneMap {
         view.height = 9.5
         storyState(9) // Process Discovery
         const ang = t * 2.2,
-          th = 6.0
+          th = 4.1
         if (t > 0.5 && t < 3.6) {
           attackerScan.visible = true
           attackerScan.scale.set(0.15, 1.2, 1.7)
@@ -210,7 +215,7 @@ export default function discovery(kit: Kit): SceneMap {
         trustedProcess.rotation.y = 0.6
         trustedProcessEyes.visible = false
         showAlert(0, trustedProcess.position.x, 2.0, trustedProcess.position.z, t, 3.7, 4.6)
-        defenderNotices(t)
+        defenderNotices(t, trustedProcess)
       },
     },
     // T1082 System Information Discovery
@@ -242,7 +247,7 @@ export default function discovery(kit: Kit): SceneMap {
             start,
           )
         })
-        defenderNotices(t)
+        defenderSendsSensor(t)
       },
     },
     // T1069 Permission Groups Discovery
@@ -283,7 +288,7 @@ export default function discovery(kit: Kit): SceneMap {
           cube.position.set(seat.x, 2.4 + Math.sin(view.time * 4 + i) * 0.08, seat.z)
           cube.rotation.y = view.time * 2
         }
-        defenderNotices(t)
+        defenderNotices(t, key)
       },
     },
     // T1124 System Time Discovery
@@ -303,7 +308,7 @@ export default function discovery(kit: Kit): SceneMap {
           const note = documents[0]
           flyPaper(note, [at[0], at[1] - 0.9, at[2]], aboveHost(2.8), t, 1.8, 2.6, 0.8, 1.6)
         }
-        defenderNotices(t)
+        defenderNotices(t, clock)
       },
     },
     // T1010 Application Window Discovery
@@ -325,7 +330,7 @@ export default function discovery(kit: Kit): SceneMap {
           probeFromHost(i, at, t, found - 0.3, 0.5)
           if (i < 2) takeNote(i, at, t, found + 0.3)
         })
-        defenderNotices(t)
+        defenderSendsSensor(t, yellowCubes[1])
       },
     },
     // T1217 Browser Information Discovery
@@ -355,7 +360,7 @@ export default function discovery(kit: Kit): SceneMap {
             stretchBetween(cyanBeams[i], at, [racks[2 + i].x, 2.4, RACK_Z], 0.04)
           if (i < 2) takeNote(i, at, t, found + 0.5)
         })
-        defenderNotices(t)
+        defenderNotices(t, glass)
       },
     },
     // T1580 Cloud Infrastructure Discovery
@@ -383,7 +388,7 @@ export default function discovery(kit: Kit): SceneMap {
           stretchBetween(cyanBeams[i], [sky[0], sky[1] - 0.6, sky[2]], [at[0], at[1] + 0.8, at[2]], 0.04)
           takeNote(i, at, t, found + 0.4)
         })
-        defenderBlocks(t)
+        defenderLocks(t, database)
       },
     },
     // T1538 Cloud Service Dashboard
@@ -421,7 +426,7 @@ export default function discovery(kit: Kit): SceneMap {
         }
         takeNote(0, screen, t, 2.4)
         takeNote(1, screen, t, 2.9)
-        defenderBlocks(t)
+        defenderBlocks(t, glass)
       },
     },
     // T1526 Cloud Service Discovery
@@ -446,7 +451,7 @@ export default function discovery(kit: Kit): SceneMap {
           probeFromHost(i, at, t, found - 0.3, 0.5)
           takeNote(i, at, t, found + 0.2)
         })
-        defenderNotices(t)
+        defenderCollectsLogs(t, cloud)
       },
     },
     // T1619 Cloud Storage Object Discovery
@@ -476,7 +481,7 @@ export default function discovery(kit: Kit): SceneMap {
           item.position.set(store[0] + 1.6, store[1] + 1.4 - i * 0.32, store[2] + 0.6)
         }
         takeNote(0, [store[0] + 1.6, store[1] + 0.8, store[2] + 0.6], t, 2.8)
-        defenderBlocks(t)
+        defenderLocks(t, database)
       },
     },
     // T1613 Container and Resource Discovery
@@ -510,7 +515,7 @@ export default function discovery(kit: Kit): SceneMap {
             stretchBetween(cyanBeams[i], [manager[0], 1.0, manager[1]], at, 0.05)
           if (i > 0) takeNote(i - 1, at, t, found + 0.3)
         })
-        defenderBlocks(t)
+        defenderBlocks(t, trustedProcess)
       },
     },
     // T1622 Debugger Evasion
@@ -564,7 +569,7 @@ export default function discovery(kit: Kit): SceneMap {
         probeFromHost(0, [stack[0], scanAt, stack[1]], t, 0.8, 2.0)
         // まん中の板は、守りの製品のもの
         showAlert(0, stack[0], 2.6, stack[1], t, 1.9, 2.8)
-        defenderNotices(t)
+        defenderSendsSensor(t, yellowCubes[0])
       },
     },
     // T1482 Domain Trust Discovery
@@ -595,7 +600,7 @@ export default function discovery(kit: Kit): SceneMap {
           if (t >= 2.6) tracer.position.y = theirs[1] + 1.2 + Math.sin(view.time * 4) * 0.06
         }
         takeNote(0, theirs, t, 2.6)
-        defenderBlocks(t)
+        defenderCutsLink(t, database, trustedProcess)
       },
     },
     // T1615 Group Policy Discovery
@@ -616,7 +621,7 @@ export default function discovery(kit: Kit): SceneMap {
         })
         probeFromHost(0, ledger, t, 0.6, 2.4)
         for (let i = 0; i < 3; i++) takeNote(i, [ledger[0], 2.2, ledger[2]], t, 1.2 + i * 0.6)
-        defenderNotices(t)
+        defenderCollectsLogs(t, database)
       },
     },
     // T1680 Local Storage Discovery
@@ -647,7 +652,7 @@ export default function discovery(kit: Kit): SceneMap {
           }
           if (i > 0) takeNote(i - 1, at, t, found + 0.3)
         })
-        defenderNotices(t)
+        defenderNotices(t, yellowCubes[1])
       },
     },
     // T1654 Log Enumeration
@@ -658,7 +663,7 @@ export default function discovery(kit: Kit): SceneMap {
         view.height = 10.5
         storyState(9)
         // 見張りが書きためた記録（台帳）を読む。だれがいつ入ったか、何が検知されたか、防御側がどこまで気づいているかが、ここに書いてある
-        const store = [-1.0, 1.4, 4.4]
+        const store = [-1.6, 1.4, 3.2]
         database.visible = true
         database.scale.set(0.8, 0.8, 0.8)
         database.position.set(store[0], 0, store[2])
@@ -669,7 +674,7 @@ export default function discovery(kit: Kit): SceneMap {
         // 防御側の様子をうかがう
         if (t > 3.0 && t < 4.4)
           stretchBetween(pinkBeams[1], aboveHost(2.8), [DEFENDER_SPOT[0], 1.6, DEFENDER_SPOT[1]], 0.03)
-        defenderBlocks(t)
+        defenderLocks(t, database)
       },
     },
     // T1135 Network Share Discovery
@@ -696,7 +701,7 @@ export default function discovery(kit: Kit): SceneMap {
           attackerScan.position.set(lerp(racks[0].x, racks[5].x, sweep), 1.5, RACK_Z)
           attackerScan.material.opacity = 0.3
         }
-        defenderBlocks(t)
+        defenderBlocks(t, [racks[3].x, 2.9, RACK_Z])
       },
     },
     // T1040 Network Sniffing
@@ -727,7 +732,7 @@ export default function discovery(kit: Kit): SceneMap {
           glass.material.opacity = 0.25 + 0.1 * Math.sin(t * 8)
         }
         probeFromHost(0, tap, t, 0.5, 0.6)
-        defenderBlocks(t)
+        defenderLocks(t, [1.0, 1.9, 0.6])
       },
     },
     // T1201 Password Policy Discovery
@@ -763,7 +768,7 @@ export default function discovery(kit: Kit): SceneMap {
           fitted.position.set(HOST_SPOT[0] + 0.9, 2.2, HOST_SPOT[1])
           fitted.rotation.y = t * 3
         }
-        defenderNotices(t)
+        defenderNotices(t, padlock)
       },
     },
     // T1120 Peripheral Device Discovery
@@ -794,7 +799,7 @@ export default function discovery(kit: Kit): SceneMap {
         probeFromHost(1, [printer[0], 0.6, printer[2]], t, 1.5, 0.5)
         takeNote(0, usb, t, 1.2)
         takeNote(1, [printer[0], 0.9, printer[2]], t, 2.0)
-        defenderNotices(t)
+        defenderNotices(t, relayBot)
       },
     },
     // T1012 Query Registry
@@ -822,7 +827,7 @@ export default function discovery(kit: Kit): SceneMap {
           attackerScan.position.set(lerp(-2.5, 0.1, sweep), 1.4, 2.5)
           attackerScan.material.opacity = 0.4
         }
-        defenderNotices(t)
+        defenderSendsSensor(t, yellowCubes[1])
       },
     },
     // T1518 Software Discovery
@@ -926,7 +931,7 @@ export default function discovery(kit: Kit): SceneMap {
         takeNote(0, aboveHost(0.6), t, 0.9)
         takeNote(1, exit, t, 1.5)
         takeNote(2, names, t, 2.2)
-        defenderNotices(t)
+        defenderNotices(t, relayBot)
       },
     },
     // T1049 System Network Connections Discovery
@@ -984,7 +989,7 @@ export default function discovery(kit: Kit): SceneMap {
         }
         probeFromHost(0, badge, t, 1.8, 0.6)
         takeNote(0, badge, t, 2.2)
-        defenderNotices(t)
+        defenderNotices(t, token)
       },
     },
     // T1007 System Service Discovery
@@ -1016,7 +1021,7 @@ export default function discovery(kit: Kit): SceneMap {
           attackerScan.position.set(lerp(-2.9, 0.3, sweep), 0.8, lerp(2.2, 3.6, sweep))
           attackerScan.material.opacity = 0.4
         }
-        defenderNotices(t)
+        defenderScans(t, bots[4], bots[6])
       },
     },
     // T1673 Virtual Machine Discovery

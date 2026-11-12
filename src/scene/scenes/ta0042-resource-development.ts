@@ -45,6 +45,9 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
     secondAttacker,
     showCheck,
     defenderHardens,
+    defenderNotices,
+    defenderWarnsStaff,
+    defenderWatchesOutside,
   } = kit
   return {
     // T1583 Acquire Infrastructure（本編）
@@ -101,7 +104,7 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
           jumpMalware(t, 1.9, 2.7, [0.6, 1.9, 14.4], [1.0, 0, 12.4], 0.8, MALWARE_SIZE)
           malware.rotation.y = Math.PI
         }
-        defenderHardens(t)
+        defenderWatchesOutside(t, malware)
       },
     },
     // T1586 Compromise Accounts
@@ -194,7 +197,7 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
           popIn(documents[i], x, 2.6 + Math.sin(view.time * 4 + i) * 0.06, z, t, start + 0.5, 0.8)
           documents[i].rotation.y = 0.6
         })
-        defenderHardens(t)
+        defenderNotices(t, impostor)
       },
     },
     // T1584 Compromise Infrastructure
@@ -266,7 +269,7 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
         }
         // 買った鍵は、そのまま門を開けられる
         if (t > 3.4 && t < 4.6) showCheck(0, 4.1, 6.9, t, 3.4)
-        defenderHardens(t)
+        defenderWatchesOutside(t, secondAttacker)
       },
     },
     // T1683 Generate Content
@@ -293,7 +296,7 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
           applyPose(impostor, standing(-1.6, 11.8, 0.6))
           impostor.scale.multiplyScalar(size)
         }
-        defenderHardens(t)
+        defenderWarnsStaff(t, 2)
       },
     },
   }

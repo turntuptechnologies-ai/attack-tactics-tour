@@ -1,7 +1,7 @@
 // 場面を書くための道具。舞台の物（world）に、よく使う動かし方を足して、場面に渡す。
 // 毎フレーム reset() で全部を初期状態に戻してから場面の run(t) を呼ぶので、
 // 場面は「時刻 t のときの状態」を毎回ゼロから組み立てればよい（前のフレームを引きずらない）。
-import type { Object3D } from 'three'
+import { Box3, Object3D, Vector3 } from 'three'
 import {
   arcBetween,
   overshoot,
@@ -422,36 +422,179 @@ export function createKit(w: World) {
     }
   }
 
-  // ---- 防御側の番の、基本の絵。場面に固有の防御の絵が無いときに、字幕の中身に合うものを選んで使う ----
+  // ---- 防御側の番（4.6 秒から）の絵 ----
+  // 防御側の字幕が言っていることを、その場面でねらわれている物に対して描く。
+  // 相手（target）は、座標 [x, y, z] でも、舞台の物そのものでも渡せる。物を渡すと、その物のてっぺんを指す。
+  // 「！」は 3 つ目と 4 つ目、水色の線は 3 本目と 5 本目を使う。場面の側では、防御側の番にこれらを使わないこと。
 
-  /** いま攻撃側の主役がいる場所（防御者が目を向ける先） */
-  const actorSpot = (): Vec3 => [view.actor.position.x, view.actor.position.y + 0.8, view.actor.position.z]
+  type Target = Vec3 | Object3D
+  const box = new Box3()
+  const boxCentre = new Vector3()
+  /** 相手の場所。物なら、そのてっぺんの中央 */
+  function spotOf(target: Target): number[] {
+    if (!(target instanceof Object3D)) return [target[0], target[1], target[2]]
+    box.setFromObject(target)
+    if (box.isEmpty()) return [target.position.x, target.position.y, target.position.z]
+    box.getCenter(boxCentre)
+    return [boxCentre.x, box.max.y, boxCentre.z]
+  }
+  /** 防御者が相手へ向ける、水色の細い線（目を向ける、手を打つ） */
+  function defenderReaches(t: number, at: Vec3, t0 = 5.0, t1 = 6.7) {
+    const d = w.defender.position
+    if (t > t0 && t < t1) stretchBetween(w.cyanBeams[4], [d.x, 1.7, d.z], at, 0.05)
+  }
 
-  /**
-   * 検知の絵。防御者が気づいて（「！」）、怪しい場所へ目を向ける（水色の細い線）。
-   * at を省くと、いまの攻撃側の主役を見る。「！」は 4 つ目、線は 5 本目を使う。
-   */
-  function defenderNotices(t: number, at: Vec3 = actorSpot()) {
+  /** 検知する。防御者が気づいて（「！」）、怪しい物へ目を向ける。相手を省くと、いまの攻撃側の主役を見る */
+  function defenderNotices(t: number, target: Target = view.actor) {
     const d = w.defender.position
     showAlert(3, d.x, 2.2, d.z, t, 4.9, 6.5)
-    if (t > 5.1 && t < 6.7) stretchBetween(w.cyanBeams[4], [d.x, 1.7, d.z], at, 0.05)
+    defenderReaches(t, spotOf(target), 5.1)
   }
 
-  /** 止める絵。防御者が気づいたうえで、その場所に × を出す（権限を絞る、遮断する、無効にする、など） */
-  function defenderBlocks(t: number, at: Vec3 = actorSpot()) {
-    defenderNotices(t, at)
-    // 主役の頭上には名前の札が出るので、× はその上に出す
-    showCross(at[0], at[1] + 2.5, at[2], t, 5.5)
+  /** 止める。気づいたうえで、相手の上に × を出す（遮断する、使えなくする） */
+  function defenderBlocks(t: number, target: Target = view.actor) {
+    const at = spotOf(target)
+    defenderNotices(t, target)
+    // 攻撃側の主役の頭上には名前の札が出るので、× はその上に出す
+    showCross(at[0], at[1] + (target === view.actor ? 1.9 : 0.9), at[2], t, 5.5)
+  }
+
+  /** 錠を掛ける。相手に錠が降りてくる（権限を絞る、書き込めなくする、守る） */
+  function defenderLocks(t: number, target: Target) {
+    const at = spotOf(target)
+    defenderReaches(t, at)
+    if (t < 5.0) return
+    w.padlock.visible = true
+    w.padlock.scale.set(0.7, 0.7, 0.7)
+    w.padlock.rotation.set(0, 0.6, 0)
+    w.padlock.position.set(at[0], at[1] + 0.55 + (1 - bounce(progress(t, 5.0, 5.7))) * 5, at[2])
+  }
+
+  /** 取り除く。相手が × とともに消える（不審なものを消す、機能を無効にする、閉じる） */
+  function defenderRemoves(t: number, target: Object3D) {
+    const at = spotOf(target)
+    defenderReaches(t, at, 5.0, 5.9)
+    showCross(at[0], at[1] + 0.9, at[2], t, 5.3)
+    const left = 1 - smooth(progress(t, 5.3, 5.9))
+    target.scale.multiplyScalar(Math.max(left, 0.001))
+    if (left < 0.02) target.visible = false
+  }
+
+  /** 点検する。水色の光の板が、相手の上を端から端まで走る（監査する、設定を確かめる、検証する） */
+  function defenderScans(t: number, from: Target, to: Target = from) {
+    const a = spotOf(from)
+    const b = spotOf(to)
+    const wide = from === to ? 1.1 : 0.5
+    defenderReaches(t, [(a[0] + b[0]) / 2, Math.max(a[1], b[1]), (a[2] + b[2]) / 2], 4.9, 5.4)
+    if (t < 5.0 || t > 6.6) return
+    const p = smooth(progress(t, 5.0, 6.6))
+    w.scanPlane.visible = true
+    w.scanPlane.rotation.set(0, Math.PI / 2, 0)
+    w.scanPlane.scale.set(1.8, 2.2, 0.08)
+    // 高い所にある物（雲など）は、その高さで照らす
+    const height = Math.max(1.15, Math.max(a[1], b[1]) - 0.9)
+    w.scanPlane.position.set(lerp(a[0] - wide, b[0] + wide, p), height, lerp(a[2], b[2], p))
+    w.scanPlane.material.opacity = 0.42
   }
 
   /**
-   * 備えを固める絵。入口に守りの盾が降りてくる。
+   * 見張りを向かわせる。見張り（ドローン）が相手の真上まで来て、下を照らす（振る舞いを監視する）。
+   * 浮かんでいる見張りがいればそれを、いなければ（まだ居ない、または止められている）新しい見張りを呼ぶ。
+   */
+  function defenderSendsSensor(t: number, target: Target = view.actor) {
+    const at = spotOf(target)
+    const hover = Math.max(at[1] + 1.7, 3.2) + Math.sin(view.time * 3) * 0.1
+    const sensor = drones[2]
+    const arrive = smooth(progress(t, 4.8, 5.6))
+    if (sensor.visible && sensor.position.y > 1.5 && sensor.rotation.z === 0) {
+      if (t > 4.8)
+        placeSensor(
+          lerp(sensor.position.x, at[0], arrive),
+          lerp(sensor.position.y, hover, arrive),
+          lerp(sensor.position.z, at[2], arrive),
+        )
+    } else if (t > 4.8) {
+      const extra = drones[0]
+      extra.visible = true
+      extra.rotation.set(0, 0, 0)
+      extra.position.set(at[0], lerp(hover + 6, hover, arrive), at[2])
+      extra.userData.rot.rotation.y = view.time * 20
+    }
+    if (t > 5.6 && t < 6.7) {
+      const ray = w.cyanBeams[2]
+      const height = hover - at[1] - 0.3
+      ray.visible = true
+      ray.rotation.set(0, 0, 0)
+      ray.scale.set(0.3, Math.max(height, 0.2), 0.3)
+      ray.position.set(at[0], at[1] + height / 2, at[2])
+    }
+  }
+
+  /** 直す。相手の上に緑のチェックが出る（更新する、守りの機能を有効にする） */
+  function defenderApproves(t: number, target: Target) {
+    const at = spotOf(target)
+    defenderReaches(t, at, 5.0, 5.8)
+    showCheck(at[0], at[1] + 0.9, at[2], t, 5.4)
+  }
+
+  /** 従業員に確かめさせる。声を掛けられた従業員が気づき、確かめてから進める（訓練する、別の経路で確かめる） */
+  function defenderWarnsStaff(t: number, who: number) {
+    const employee = w.employees[who]
+    const { x, z } = employee.position
+    defenderReaches(t, [x, 1.6, z], 4.9, 5.7)
+    hopInPlace(employee, t, 5.1, 5.8, 0.15)
+    showAlert(2, x + 0.6, 2.7, z + 0.7, t, 5.1, 5.8)
+    // 席のすぐ奥に侵入した端末があることが多いので、チェックは従業員の手前寄りに出す
+    showCheck(x + 0.6, 2.9, z + 0.7, t, 5.8)
+  }
+
+  /** 記録を取り寄せる。相手の所から、記録の紙が防御者の手もとへ飛んでくる（記録する、照会を監視する、監査する） */
+  function defenderCollectsLogs(t: number, target: Target) {
+    const at = spotOf(target)
+    const d = w.defender.position
+    defenderReaches(t, at, 4.9, 5.5)
+    if (t > 5.1) flyPaper(w.documents[3], at, [d.x - 0.7, 2.4, d.z], t, 5.3, 6.3, 1.4, 5.1, 0.75)
+  }
+
+  /** 通り道を断つ。2 つの場所を結ぶ道のまん中に × を出す（通信を遮断する、つながりを減らす） */
+  function defenderCutsLink(t: number, from: Target, to: Target) {
+    const a = spotOf(from)
+    const b = spotOf(to)
+    const middle = [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2 + 0.6, (a[2] + b[2]) / 2]
+    defenderNotices(t, middle)
+    showCross(middle[0], middle[1] + 0.5, middle[2], t, 5.5)
+  }
+
+  /**
+   * 備えを固める。入口に守りの盾が降りてくる。
    * 偵察やリソース開発のように、攻撃側の動きそのものは標的から見えない段階で使う。
    */
   function defenderHardens(t: number) {
     if (t < 4.9) return
     w.gateGuard.visible = true
     w.gateGuard.position.y = 3.2 + (1 - bounce(progress(t, 4.9, 5.6))) * 6
+  }
+
+  /** 外に見せるものを減らす。外壁に出ている物（黄色い箱）が小さくなる（公開する情報を絞る） */
+  function defenderHidesExposure(t: number) {
+    const less = smooth(progress(t, 5.0, 5.8))
+    let shown: Object3D | null = null
+    for (const cube of w.yellowCubes) {
+      if (!cube.visible) continue
+      shown = shown ?? cube
+      cube.scale.multiplyScalar(lerp(1, 0.4, less))
+    }
+    const at = shown ? spotOf(shown) : [0, 3, 6.5]
+    defenderReaches(t, at, 4.9, 5.8)
+    showCheck(at[0], at[1] + 1.1, at[2], t, 5.8)
+  }
+
+  /** 外を見張る。防御者が外の相手へ目を向け、そこから分かったこと（紙）を手もとに集める（脅威情報で監視する） */
+  function defenderWatchesOutside(t: number, target: Target) {
+    const at = spotOf(target)
+    const d = w.defender.position
+    defenderReaches(t, at, 4.9, 6.7)
+    if (t > 5.1) flyPaper(w.documents[3], at, [d.x - 0.7, 2.6, d.z], t, 5.3, 6.4, 2.6, 5.1, 0.75)
   }
 
   /**
@@ -567,7 +710,17 @@ export function createKit(w: World) {
     aroundHost,
     defenderNotices,
     defenderBlocks,
+    defenderLocks,
+    defenderRemoves,
+    defenderScans,
+    defenderSendsSensor,
+    defenderApproves,
+    defenderWarnsStaff,
+    defenderCollectsLogs,
+    defenderCutsLink,
     defenderHardens,
+    defenderHidesExposure,
+    defenderWatchesOutside,
   }
 }
 
