@@ -111,6 +111,18 @@ export function Stage({ now, onPlayer, onChange, onPlaying, onError }: Props) {
           </div>
         )}
         <div className="fade" ref={fade} />
+        {/* 次の場面に入る前の「間」に、暗転の上へ出す名前。出し入れは再生機が .stage の lead で切り替える */}
+        <div className="card" aria-hidden="true">
+          {tactic && now?.scene.title && (
+            <>
+              <span>
+                <b>{tactic.id}</b>
+                {tactic.ja}
+              </span>
+              <strong>{now.scene.title}</strong>
+            </>
+          )}
+        </div>
       </div>
     </div>
   )
