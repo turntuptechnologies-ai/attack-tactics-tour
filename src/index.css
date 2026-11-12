@@ -483,6 +483,47 @@ h2 {
   font-size: 20px;
   margin: 14px 0 0;
 }
+/* 一覧表の絞り込み */
+.find {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+.find label {
+  font-family: var(--display);
+  font-size: 14px;
+}
+.find input {
+  flex: 1 1 220px;
+  min-width: 0;
+  max-width: 420px;
+  font: inherit;
+  /* 16px より小さいと、iOS で入力のたびに画面が拡大される */
+  font-size: 16px;
+  color: var(--fg);
+  background: var(--panel);
+  border: 2px solid var(--fg);
+  border-radius: 0;
+  padding: 5px 10px;
+}
+/* 消すボタンは自前で出す（ブラウザ備え付けのものは、出るブラウザと出ないブラウザがある） */
+.find input::-webkit-search-cancel-button {
+  display: none;
+}
+.find input::placeholder {
+  color: var(--muted);
+}
+.find-count {
+  font-size: 13px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+td.none {
+  color: var(--muted);
+  padding: 18px 10px;
+}
 .tw {
   overflow-x: auto;
 }
