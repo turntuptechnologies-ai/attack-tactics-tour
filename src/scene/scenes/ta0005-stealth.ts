@@ -1,6 +1,6 @@
 // TA0005 ステルス（Stealth）の場面。
 import type { Kit } from '../kit'
-import { progress, smooth, lerp, walk, applyPose } from '../motion'
+import { progress, smooth, lerp, walk, applyPose, overshoot, stretchBetween } from '../motion'
 import type { SceneMap } from './types'
 
 export default function stealth(kit: Kit): SceneMap {
@@ -27,6 +27,9 @@ export default function stealth(kit: Kit): SceneMap {
     aboveHost,
     flyTo,
     cyanBeams,
+    pinkBeams,
+    bots,
+    cloud,
   } = kit
   return {
     // T1036 Masquerading（本編）
@@ -323,6 +326,48 @@ export default function stealth(kit: Kit): SceneMap {
           ray.position.set(HOST_SPOT[0], 1.3, HOST_SPOT[1])
           ray.scale.set(0.3, 2.2, 0.3)
         }
+      },
+    },
+    // T1535 Unused/Unsupported Cloud Regions
+    T1535: {
+      hits: [3.0],
+      run(t) {
+        view.target = [-2.5, 6.5]
+        view.height = 19
+        storyState(6)
+        // 標的がふだん使っていないクラウドの地域（遠くの雲）。だれも見ていないそこで活動する
+        const far = [-8.5, 4.6, 12.5]
+        popIn(cloud, far[0], far[1] + Math.sin(view.time * 2) * 0.1, far[2], t, 0.4, 1.5)
+        cloud.rotation.y = 0.6
+        if (t > 0.9 && t < 1.8) stretchBetween(pinkBeams[0], aboveHost(1.0), far, 0.07)
+        for (let i = 0; i < 3; i++) {
+          const start = 1.6 + i * 0.4
+          if (t < start) continue
+          const bot = bots[4 + i]
+          const size = 0.9 * overshoot(progress(t, start, start + 0.3))
+          bot.visible = true
+          bot.scale.set(size, size, size)
+          bot.position.set(
+            far[0] - 0.8 + i * 0.8,
+            far[1] + 0.9 + Math.abs(Math.sin(t * 6 + i)) * 0.25,
+            far[2],
+          )
+          bot.rotation.y = 0.6
+        }
+        // 防御側の見回りは、ふだん使う場所だけ
+        applyPose(
+          defender,
+          walk(
+            [
+              [0, -5, 5.4],
+              [1.6, -5, 5.4],
+              [4.4, 6, 5.4],
+              [7, 6, 5.4],
+            ],
+            t,
+            0,
+          ),
+        )
       },
     },
   }

@@ -42,6 +42,9 @@ export default function impact(kit: Kit): SceneMap {
     showAlert,
     yellowCubes,
     employees,
+    mail,
+    aboveAttacker,
+    flyTo,
   } = kit
   return {
     // T1486 Data Encrypted for Impact（本編）
@@ -299,6 +302,38 @@ export default function impact(kit: Kit): SceneMap {
         })
         showAlert(0, -2, 2.6, 5, t, 3.0, 4.5)
         if (t > 5.6) showCheck(0, 3.6, 3.2, t, 5.8)
+      },
+    },
+    // T1657 Financial Theft
+    T1657: {
+      hits: [3.6],
+      run(t) {
+        view.target = [3.5, 7.0]
+        view.height = 17
+        storyState(14)
+        view.actor = attacker
+        applyPose(defender, standing(-2, 5, 0.4))
+        // 上司や取引先を装った送金の指示を送り、だまされた担当者にお金（黄色い箱）を振り込ませる
+        const clerk = employees[3].position
+        if (t < 1.7) flyTo(mail, aboveAttacker(), [clerk.x, 1.9, clerk.z + 0.1], t, 0.4, 1.6, 3.2, 5)
+        showAlert(0, clerk.x, 2.3, clerk.z, t, 1.6, 2.4)
+        hopInPlace(employees[3], t, 1.8, 2.4, 0.15)
+        yellowCubes.forEach((coin, i) => {
+          const start = 2.2 + i * 0.4
+          const p = progress(t, start, start + 1.2)
+          if (p <= 0) return
+          coin.visible = true
+          coin.material.color.setHex(0xf6c531)
+          coin.scale.set(0.4, 0.4, 0.4)
+          coin.rotation.y = t * 4
+          arcBetween(
+            coin,
+            [clerk.x, 1.6, clerk.z + 0.9],
+            [ATTACKER_SPOT[0] - 0.6 + i * 0.6, 3.0, ATTACKER_SPOT[1]],
+            smooth(p),
+            4,
+          )
+        })
       },
     },
   }

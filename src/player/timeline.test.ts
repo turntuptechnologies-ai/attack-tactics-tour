@@ -96,16 +96,16 @@ describe('step', () => {
 })
 
 describe('場面の検索', () => {
-  it('同じ技術が複数の戦術にあるときは、専用の場面があるほうを選ぶ', () => {
-    // Scheduled Task は実行（簡易表示）が先に並ぶが、専用の場面は永続化にある
+  it('同じ技術が複数の戦術にあるときは、本編、専用の場面、簡易表示の順に選ぶ', () => {
+    // Scheduled Task は、実行（専用の場面）が先に並ぶが、本編は永続化にある
     const scene = timeline[indexOfTechnique(timeline, 'T1053')]
     expect(scene.kind).toBe('story')
     expect(TACTICS[scene.tactic].id).toBe('TA0003')
   })
 
   it('戦術を指定すれば、その戦術の場面を選べる', () => {
-    const scene = timeline[indexOfExample(timeline, tacticIndex('TA0002'), 'T1053')]
-    expect(scene.kind).toBe('simple')
+    expect(timeline[indexOfExample(timeline, tacticIndex('TA0002'), 'T1053')].kind).toBe('extra')
+    expect(timeline[indexOfExample(timeline, tacticIndex('TA0004'), 'T1053')].kind).toBe('simple')
   })
 })
 
@@ -120,8 +120,8 @@ describe('parseHash と hashFor', () => {
   })
 
   it('戦術と技術の組は、その戦術に載っている技術の場面を指す', () => {
-    const hit = parseHash(timeline, '#TA0002-T1053')!
-    expect(timeline[hit.index]).toMatchObject({ kind: 'simple', tactic: tacticIndex('TA0002') })
+    const hit = parseHash(timeline, '#TA0004-T1053')!
+    expect(timeline[hit.index]).toMatchObject({ kind: 'simple', tactic: tacticIndex('TA0004') })
   })
 
   it('-t を付けると、その時刻で止める', () => {

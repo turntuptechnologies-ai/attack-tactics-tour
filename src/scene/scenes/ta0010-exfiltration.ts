@@ -24,6 +24,8 @@ export default function exfiltration(kit: Kit): SceneMap {
     relayBot,
     pulseRings,
     bobHeight,
+    glass,
+    popIn,
   } = kit
   return {
     // T1041 Exfiltration Over C2 Channel（本編）
@@ -231,6 +233,34 @@ export default function exfiltration(kit: Kit): SceneMap {
           const data = racks[i].data
           arcBetween(data, pileSpot(i), [receiver[0] - 0.5 + i * 0.5, 1.6, receiver[1] + 0.2], smooth(p), 6)
           if (p < 1) data.rotation.y = t * 5
+        }
+      },
+    },
+    // T1537 Transfer Data to Cloud Account
+    T1537: {
+      hits: [3.8],
+      run(t) {
+        view.target = [-0.5, 5.0]
+        view.height = 22
+        storyState(13)
+        // 標的が使っているクラウド（雲）の中で、攻撃者が持つ別のアカウント（箱）へデータを移す。回線の監視を通らない
+        const theirs = [-6.5, 5.4, 2.0]
+        const mine = [3.0, 5.4, 12.6]
+        popIn(cloud, theirs[0], theirs[1] + Math.sin(view.time * 2) * 0.1, theirs[2], t, 0.2, 1.7)
+        cloud.rotation.y = 0.6
+        glass.visible = true
+        glass.scale.set(2.4, 1.6, 1.6)
+        glass.position.set(mine[0], mine[1], mine[2])
+        glass.material.opacity = 0.35
+        for (let i = 0; i < 3; i++) {
+          const data = racks[i].data
+          const start = 0.9 + i * 0.6
+          const p = progress(t, start, start + 1.6)
+          const shelf = [theirs[0] - 0.7 + i * 0.7, theirs[1] + 1.5, theirs[2]]
+          if (p <= 0) data.position.set(shelf[0], shelf[1], shelf[2])
+          else arcBetween(data, shelf, [mine[0] - 0.7 + i * 0.7, mine[1], mine[2]], smooth(p), 1.5)
+          data.scale.set(0.45, 0.45, 0.45)
+          if (p > 0 && p < 1) data.rotation.y = t * 5
         }
       },
     },

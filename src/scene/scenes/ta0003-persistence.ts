@@ -334,5 +334,58 @@ export default function persistence(kit: Kit): SceneMap {
           jumpMalware(t, 3.6, 4.2, deep, aboveHost(0), 0.9, MALWARE_SIZE * overshoot(progress(t, 3.6, 3.9)))
       },
     },
+    // T1078 Valid Accounts
+    T1078: {
+      hits: [4.2],
+      run(t) {
+        view.target = [1.2, 4.6]
+        view.height = 11.5
+        storyState(4)
+        // 手に入れた正規のアカウント（鍵を持った人形）。マルウェアが消されても、これで正面から入り直せる
+        const pose = walk(
+          [
+            [0, 0.2, 5.4],
+            [2.8, 0.2, 5.4],
+            [3.6, 1.2, 3.6],
+            [7, 1.2, 3.6],
+          ],
+          t,
+          0.6,
+        )
+        impostor.visible = true
+        applyPose(impostor, pose)
+        key.visible = true
+        key.scale.set(0.7, 0.7, 0.7)
+        key.rotation.y = view.time * 2
+        key.position.set(pose.x, pose.y + 2.5, pose.z)
+        // マルウェア本体は見つかって駆除される
+        const near = smooth(progress(t, 1.2, 1.8)) * (1 - smooth(progress(t, 2.4, 2.8)))
+        placeSensor(
+          lerp(0.5, HOST_SPOT[0], near),
+          lerp(3.3, 2.7, near) + Math.sin(view.time * 3) * 0.1,
+          lerp(3.5, HOST_SPOT[1], near),
+        )
+        if (t > 1.8 && t < 2.2) {
+          const ray = cyanBeams[2]
+          ray.visible = true
+          ray.rotation.set(0, 0, 0)
+          ray.position.set(HOST_SPOT[0], 1.6, HOST_SPOT[1])
+          ray.scale.set(0.3, 1.8, 0.3)
+        }
+        if (t >= 1.9 && t < 3.6)
+          placeMalware(HOST_SPOT[0], 0, HOST_SPOT[1], MALWARE_SIZE * (1 - progress(t, 1.9, 2.2)))
+        else if (t >= 3.6)
+          jumpMalware(
+            t,
+            3.6,
+            4.2,
+            [1.2, 1.0, 3.6],
+            aboveHost(0),
+            0.6,
+            MALWARE_SIZE * overshoot(progress(t, 3.6, 3.9)),
+          )
+        showCross(pose.x, 3.4, pose.z, t, 5.6)
+      },
+    },
   }
 }

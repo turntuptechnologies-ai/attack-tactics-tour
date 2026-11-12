@@ -31,6 +31,9 @@ export default function commandAndControl(kit: Kit): SceneMap {
     hammer,
     markCompromised,
     c2Tower,
+    trustedProcess,
+    trustedProcessEyes,
+    popIn,
   } = kit
   return {
     // T1071 Application Layer Protocol（本編）
@@ -275,6 +278,34 @@ export default function commandAndControl(kit: Kit): SceneMap {
           const old = spots[(now + 2) % 3]
           showCross(old[0], 3.6, old[1], t, 4.8)
         }
+      },
+    },
+    // T1219 Remote Access Tools
+    T1219: {
+      hits: [3.0],
+      run(t) {
+        view.target = [1.5, 4.5]
+        view.height = 21
+        storyState(12)
+        view.actor = attacker
+        showOperatorOrb(t)
+        // 業務でも使われる正規の遠隔操作ソフトを入れ、その通信（水色の線）を指令の通り道にする
+        const tool = [SERVER_SPOT[0] + 1.3, SERVER_SPOT[1] + 0.4]
+        const from = [TOWER_SPOT[0], 2.9, TOWER_SPOT[1]]
+        const to = [tool[0], 1.0, tool[1]]
+        popIn(trustedProcess, tool[0], 0, tool[1], t, 0.6, 1.4)
+        trustedProcess.rotation.y = 0.6
+        trustedProcessEyes.visible = false
+        if (t > 1.4) stretchBetween(cyanBeams[0], from, to, 0.09)
+        if (t > 1.8)
+          for (let i = 0; i < 4; i++) {
+            const p = ((t - 1.8) * 0.5 + i * 0.25) % 1
+            const cube = pinkCubes[i]
+            cube.visible = true
+            cube.scale.set(0.26, 0.26, 0.26)
+            cube.position.set(lerp(from[0], to[0], p), lerp(from[1], to[1], p), lerp(from[2], to[2], p))
+          }
+        showCross(tool[0], 2.3, tool[1], t, 5.4)
       },
     },
   }
