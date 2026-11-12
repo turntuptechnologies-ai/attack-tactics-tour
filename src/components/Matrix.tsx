@@ -8,10 +8,12 @@ type Props = {
   techniqueId?: string
   /** その戦術の、その技術の場面へ飛ぶ */
   onPick(tactic: number, techniqueId: string): void
+  /** 光らせる技術のID（攻撃グループが使った技術）。選んでいなければ null */
+  used: Set<string> | null
 }
 
 /** ATT&CK マトリックス。動画のある技術はボタンになっていて、押すとその場面に飛ぶ */
-export function Matrix({ tactic, techniqueId, onPick }: Props) {
+export function Matrix({ tactic, techniqueId, onPick, used }: Props) {
   const wrap = useRef<HTMLDivElement>(null)
   const cols = useRef<(HTMLDivElement | null)[]>([])
 
@@ -28,7 +30,7 @@ export function Matrix({ tactic, techniqueId, onPick }: Props) {
 
   return (
     <div className="mxwrap" ref={wrap}>
-      <div className="matrix">
+      <div className={used ? 'matrix picking' : 'matrix'}>
         {TACTICS.map((t, k) => (
           <div
             key={t.id}
@@ -59,7 +61,7 @@ export function Matrix({ tactic, techniqueId, onPick }: Props) {
                 <button
                   key={tech.id}
                   type="button"
-                  className={`te ex${kind}${playing ? ' on' : ''}`}
+                  className={`te ex${kind}${used?.has(tech.id) ? ' used' : ''}${playing ? ' on' : ''}`}
                   title="この場面を再生"
                   onClick={() => onPick(k, tech.id)}
                 >

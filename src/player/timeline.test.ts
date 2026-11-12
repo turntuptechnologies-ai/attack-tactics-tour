@@ -9,7 +9,9 @@ import {
   indexOfExample,
   indexOfTechnique,
   parseHash,
+  playlistOf,
   step,
+  stepWithin,
   storyLoopSeconds,
 } from './timeline'
 
@@ -105,6 +107,42 @@ describe('場面の検索', () => {
       const scene = timeline[indexOfExample(timeline, tacticIndex(id), 'T1053')]
       expect(scene).toMatchObject({ kind: 'extra', tactic: tacticIndex(id) })
     }
+  })
+})
+
+describe('決めた技術だけを順にたどる', () => {
+  it('playlistOf は、渡した技術の場面を、戦術の並び（左から右）の順に返す', () => {
+    const list = playlistOf(timeline, ['T1486', 'T1566', 'T1059'])
+    expect(list.map((i) => timeline[i].techniqueId)).toEqual(['T1566', 'T1059', 'T1486'])
+    expect(list).toEqual([...list].sort((a, b) => a - b))
+  })
+
+  it('同じ技術が複数の戦術にあれば、それぞれの場面が入る', () => {
+    const list = playlistOf(timeline, ['T1053'])
+    expect(list.map((i) => TACTICS[timeline[i].tactic].id)).toEqual(['TA0002', 'TA0003', 'TA0004'])
+  })
+
+  it('導入とまとめは入らず、知らない技術は無視する', () => {
+    expect(playlistOf(timeline, [])).toEqual([])
+    expect(playlistOf(timeline, ['T0000'])).toEqual([])
+    for (const i of playlistOf(timeline, ['T1566'])) expect(timeline[i].techniqueId).toBe('T1566')
+  })
+
+  it('stepWithin は並びの中を進み、端で回る', () => {
+    const list = [3, 8, 20]
+    expect(stepWithin(list, 3, 1)).toBe(8)
+    expect(stepWithin(list, 20, 1)).toBe(3)
+    expect(stepWithin(list, 8, -1)).toBe(3)
+    expect(stepWithin(list, 3, -1)).toBe(20)
+  })
+
+  it('並びの外の場面にいても、そこから先（前）の最初の場面へ進む', () => {
+    const list = [3, 8, 20]
+    expect(stepWithin(list, 10, 1)).toBe(20)
+    expect(stepWithin(list, 10, -1)).toBe(8)
+    expect(stepWithin(list, 0, 1)).toBe(3)
+    expect(stepWithin(list, 99, 1)).toBe(3)
+    expect(stepWithin([], 5, 1)).toBe(5)
   })
 })
 

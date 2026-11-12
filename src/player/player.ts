@@ -8,7 +8,16 @@ import { createWorld } from '../scene/world'
 import { TACTICS } from '../data/tactics'
 import type { Caption } from '../data/types'
 import { placeLabels } from './labels'
-import { buildTimeline, captionAt, hashFor, LEAD, parseHash, step, type TimelineScene } from './timeline'
+import {
+  buildTimeline,
+  captionAt,
+  hashFor,
+  LEAD,
+  parseHash,
+  step,
+  stepWithin,
+  type TimelineScene,
+} from './timeline'
 
 /** 毎フレーム位置を変える重ね表示。React を通さず、要素を直接動かす */
 export type Overlay = {
@@ -42,6 +51,8 @@ export class Player {
   private lead = 0
   private playing = true
   private includeExtras = false
+  /** 決めた場面だけを順にたどるときの、場面の添字の並び（攻撃グループの技術など）。無ければ null */
+  private playlist: number[] | null = null
   private raf = 0
   private last = 0
   private width = 0
@@ -102,16 +113,28 @@ export class Player {
   }
 
   next() {
-    this.show(step(this.timeline, this.index, 1, this.includeExtras))
+    this.show(this.neighbour(1))
   }
 
   /** 場面の途中なら先頭に戻し、先頭付近なら前の場面へ */
   prev() {
-    this.show(this.time > 1.5 ? this.index : step(this.timeline, this.index, -1, this.includeExtras))
+    this.show(this.time > 1.5 ? this.index : this.neighbour(-1))
   }
 
   setIncludeExtras(on: boolean) {
     this.includeExtras = on
+  }
+
+  /** 決めた場面だけを順にたどる（null で、ふつうの順に戻す）。いま再生している場面は変えない */
+  setPlaylist(playlist: number[] | null) {
+    this.playlist = playlist?.length ? playlist : null
+  }
+
+  /** 次（dir=1）または前（dir=-1）に再生する場面 */
+  private neighbour(dir: 1 | -1) {
+    return this.playlist
+      ? stepWithin(this.playlist, this.index, dir)
+      : step(this.timeline, this.index, dir, this.includeExtras)
   }
 
   private setPlaying(playing: boolean) {
@@ -137,7 +160,7 @@ export class Player {
       if (this.lead > 0) this.lead -= dt
       else this.time += dt
       if (this.time >= this.timeline[this.index].duration) {
-        this.index = step(this.timeline, this.index, 1, this.includeExtras)
+        this.index = this.neighbour(1)
         this.time = 0
         // 技術が替わったことが分かるよう、名前を見せる間を置く（導入とまとめには名前が無いので置かない）
         this.lead = this.timeline[this.index].techniqueId ? LEAD : 0
