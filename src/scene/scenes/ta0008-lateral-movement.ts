@@ -36,6 +36,8 @@ export default function lateralMovement(kit: Kit): SceneMap {
     placeMalware,
     bobHeight,
     user,
+    pinkBeams,
+    database,
   } = kit
   return {
     // T1021 Remote Services（本編）
@@ -312,6 +314,43 @@ export default function lateralMovement(kit: Kit): SceneMap {
         else token.position.set(pose.x, pose.y + 2.0, pose.z)
         if (t > 3.3) markCompromised(1, -2.3, 2.6, overshoot(progress(t, 3.3, 3.6)))
         showCross(-2.3, 2.6, 2.6, t, 5.6)
+      },
+    },
+    // T1072 Software Deployment Tools
+    T1072: {
+      hits: [3.6],
+      run(t) {
+        view.target = [-0.6, 2.6]
+        view.height = 13
+        storyState(10)
+        // 端末をまとめて管理する仕組み（台帳）。これを乗っ取れば、配布の機能でどの端末にも送り込める
+        const hub = [-0.4, 1.4, 0.4]
+        database.visible = true
+        database.scale.set(0.9, 0.9, 0.9)
+        database.position.set(hub[0], 0, hub[2])
+        database.rotation.y = 0.6
+        if (t > 0.5 && t < 1.3) stretchBetween(pinkBeams[0], aboveHost(0.9), hub, 0.09)
+        employees.forEach((employee, i) => {
+          if (i === 2) return // ここはすでに入り込んでいる端末
+          const start = 1.5 + i * 0.3
+          const seat = employee.position
+          const to = [seat.x + 0.95, 0.3, seat.z + 0.2]
+          const p = progress(t, start, start + 0.9)
+          if (p > 0 && p < 1) {
+            const cube = pinkCubes[i]
+            cube.visible = true
+            cube.scale.set(0.28, 0.28, 0.28)
+            arcBetween(cube, hub, to, smooth(p), 1.8)
+          }
+          if (t >= start + 0.9) {
+            const bot = bots[4 + i]
+            const size = overshoot(progress(t, start + 0.9, start + 1.2))
+            bot.visible = true
+            bot.scale.set(size, size, size)
+            bot.position.set(to[0], Math.abs(Math.sin(t * 6 + i)) * 0.2, to[2])
+            bot.rotation.y = 0.6
+          }
+        })
       },
     },
   }

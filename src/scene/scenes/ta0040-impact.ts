@@ -45,6 +45,13 @@ export default function impact(kit: Kit): SceneMap {
     mail,
     aboveAttacker,
     flyTo,
+    mails,
+    cyanBeams,
+    TOWER_SPOT,
+    pinkCubes,
+    attackerScan,
+    pulseRings,
+    documents,
   } = kit
   return {
     // T1486 Data Encrypted for Impact（本編）
@@ -334,6 +341,225 @@ export default function impact(kit: Kit): SceneMap {
             4,
           )
         })
+      },
+    },
+    // T1489 Service Stop
+    T1489: {
+      hits: [3.0],
+      run(t) {
+        view.target = [-0.5, -1.0]
+        view.height = 15
+        storyState(14)
+        applyPose(defender, standing(4.8, -3, -Math.PI / 2))
+        // 業務を支えているサービス（サーバーから端末への水色の線）を、ひとつずつ止めていく
+        employees.forEach((employee, i) => {
+          const rack = racks[i]
+          const stop = 0.8 + i * 0.6
+          const seat = employee.position
+          if (t < stop || t > 5.4 + i * 0.15)
+            stretchBetween(cyanBeams[i], [rack.x, 1.6, RACK_Z + 0.6], [seat.x, 1.0, seat.z + 0.9], 0.06)
+          else {
+            rack.lights.color.setHex(0x1a1d24)
+            hopInPlace(employee, t, stop, stop + 0.8, 0.15)
+          }
+        })
+        showAlert(0, 4.8, 2.2, -3, t, 3.0, 4.5)
+      },
+    },
+    // T1561 Disk Wipe
+    T1561: {
+      hits: [3.2],
+      run(t) {
+        view.target = [0, -3.4]
+        view.height = 13.5
+        storyState(14)
+        applyPose(defender, standing(4.8, -3, -Math.PI / 2))
+        // 記録装置の中身を、端からまるごと消していく
+        const sweep = progress(t, 0.6, 3.0)
+        if (t > 0.6 && t < 3.0) {
+          attackerScan.visible = true
+          attackerScan.scale.set(0.5, 3.0, 1.8)
+          attackerScan.position.set(lerp(racks[0].x - 1, racks[5].x + 1, sweep), 1.6, RACK_Z)
+          attackerScan.material.opacity = 0.5
+        }
+        racks.forEach((rack, i) => {
+          const wiped = 0.6 + ((rack.x + 7) / 14) * 2.4
+          const restore = 5.2 + i * 0.15
+          rack.data.position.set(rack.x, 2.72, RACK_Z)
+          if (t > wiped) {
+            const size = 0.6 * (1 - smooth(progress(t, wiped, wiped + 0.3)))
+            rack.data.scale.set(size, size, size)
+            rack.data.visible = size > 0.02
+            if (t < restore + 0.7) rack.lights.color.setHex(0x1a1d24)
+          }
+          if (t > restore) {
+            rack.backup.visible = true
+            rack.backup.position.y = 2.72 + (1 - bounce(progress(t, restore, restore + 0.7))) * 7
+          }
+        })
+        showAlert(0, 4.8, 2.2, -3, t, 3.2, 4.5)
+      },
+    },
+    // T1667 Email Bombing
+    T1667: {
+      hits: [3.4],
+      run(t) {
+        view.target = [3.5, 7.0]
+        view.height = 17
+        storyState(14)
+        view.actor = attacker
+        applyPose(defender, standing(-2, 5, 0.4))
+        // 大量のメールを一気に送りつけ、大事な連絡を埋もれさせる
+        const clerk = employees[3].position
+        mails.forEach((item, i) => {
+          if (t < 0.4 + i * 0.28 || t > 5.0) return
+          item.visible = true
+          arcBetween(
+            item,
+            aboveAttacker(),
+            [clerk.x - 0.5 + i * 0.33, 1.9, clerk.z],
+            ((t - 0.4) * 0.9 + i * 0.25) % 1,
+            3.2 + i * 0.3,
+          )
+          item.rotation.y = t * 5
+        })
+        // 受信箱に積もっていく
+        for (let i = 0; i < 4; i++) {
+          const start = 1.4 + i * 0.5
+          if (t < start || t > 5.6) continue
+          const cube = pinkCubes[i]
+          const size = 0.3 * overshoot(progress(t, start, start + 0.3))
+          cube.visible = true
+          cube.scale.set(size, size, size)
+          cube.position.set(clerk.x - 0.3 + (i % 2) * 0.35, 1.0 + (i > 1 ? 0.32 : 0), clerk.z + 0.9)
+        }
+        hopInPlace(employees[3], t, 1.6, 4.4, 0.1)
+        showAlert(0, clerk.x, 2.6, clerk.z, t, 2.2, 4.5)
+      },
+    },
+    // T1499 Endpoint Denial of Service
+    T1499: {
+      hits: [3.0],
+      run(t) {
+        view.target = [1.5, 3.5]
+        view.height = 22
+        storyState(14)
+        view.actor = attacker
+        applyPose(defender, standing(4.8, -3, -Math.PI / 2))
+        // ひとつのサーバーに、処理しきれないほどの要求を浴びせ、資源を使い切らせて止める
+        const target = racks[3]
+        const seat = employees[2].position
+        const down = t > 2.8 && t < 5.4
+        if (t > 0.6 && t < 5.2)
+          for (let i = 0; i < 6; i++) {
+            const cube = pinkCubes[i]
+            cube.visible = true
+            cube.scale.set(0.24, 0.24, 0.24)
+            arcBetween(
+              cube,
+              [TOWER_SPOT[0], 2.9, TOWER_SPOT[1]],
+              [target.x, 2.0, RACK_Z],
+              ((t - 0.6) * 1.2 + i / 6) % 1,
+              5,
+            )
+          }
+        if (t > 1.4 && !down && t < 2.8)
+          target.lights.color.setHex(Math.sin(t * 30) > 0 ? 0xff4a3d : 0xf6c531)
+        if (down) target.lights.color.setHex(0x1a1d24)
+        // 本来の利用者は、使えなくなる
+        if (down) showCross(seat.x, 2.6, seat.z, t, 2.8)
+        else stretchBetween(cyanBeams[0], [target.x, 1.6, RACK_Z + 0.6], [seat.x, 1.0, seat.z + 0.9], 0.06)
+      },
+    },
+    // T1565 Data Manipulation
+    T1565: {
+      hits: [3.2],
+      run(t) {
+        view.target = [-1.5, -3.4]
+        view.height = 11
+        storyState(14)
+        applyPose(defender, standing(4.8, -3, -Math.PI / 2))
+        // データを消さずに、中身だけをこっそり書き換える。気づかれないまま、業務の判断が狂っていく
+        for (let i = 0; i < 3; i++) {
+          const rack = racks[i]
+          const start = 1.0 + i * 0.7
+          const record = documents[i]
+          record.visible = true
+          record.scale.set(1, 1, 1)
+          record.position.set(rack.x, 3.3, RACK_Z)
+          record.rotation.set(0, 0.6 + smooth(progress(t, start, start + 0.6)) * Math.PI, 0)
+          if (t > start - 0.2 && t < start + 0.4)
+            stretchBetween(pinkBeams[i], [SERVER_SPOT[0], 1.2, SERVER_SPOT[1]], [rack.x, 3.3, RACK_Z], 0.07)
+          if (t > start + 0.3 && t < 5.8) {
+            const stain = pinkCubes[i]
+            stain.visible = true
+            stain.scale.set(0.22, 0.22, 0.22)
+            stain.position.set(rack.x + 0.3, 3.75, RACK_Z + 0.1)
+          }
+        }
+        // 防御側が気づくのは、ずっとあと
+        showAlert(0, 4.8, 2.2, -3, t, 5.2, 7)
+      },
+    },
+    // T1495 Firmware Corruption
+    T1495: {
+      hits: [3.0],
+      run(t) {
+        view.target = [0.5, -3.4]
+        view.height = 12
+        storyState(14)
+        applyPose(defender, standing(4.8, -3, -Math.PI / 2))
+        // 機器の土台（ファームウェア）を壊す。データを戻しても動かず、機器ごと交換するしかなくなる
+        for (let i = 0; i < 2; i++) {
+          const rack = racks[2 + i]
+          const start = 0.8 + i * 0.8
+          const p = progress(t, start, start + 0.9)
+          if (p > 0 && p < 1) {
+            const cube = pinkCubes[i]
+            cube.visible = true
+            cube.scale.set(0.3, 0.3, 0.3)
+            arcBetween(
+              cube,
+              [SERVER_SPOT[0], 1.2, SERVER_SPOT[1]],
+              [rack.x, 0.2, RACK_Z + 0.7],
+              smooth(p),
+              1.2,
+            )
+          }
+          if (t > start + 0.9)
+            rack.lights.color.setHex(t < start + 1.5 && Math.sin(t * 30) > 0 ? 0xff4a3d : 0x1a1d24)
+          if (t > 5.0) {
+            rack.backup.visible = true
+            rack.backup.position.y = 2.72 + (1 - bounce(progress(t, 5.0 + i * 0.2, 5.7 + i * 0.2))) * 7
+          }
+        }
+        showAlert(0, 4.8, 2.2, -3, t, 3.0, 4.5)
+        showCross((racks[2].x + racks[3].x) / 2, 4.2, RACK_Z, t, 6.1)
+      },
+    },
+    // T1529 System Shutdown/Reboot
+    T1529: {
+      hits: [2.8],
+      run(t) {
+        view.target = [0, -1.5]
+        view.height = 15
+        storyState(14)
+        applyPose(defender, standing(4.8, -3, -Math.PI / 2))
+        // 機器を強制的に止めたり、何度も再起動させたりして、仕事にならなくする
+        const looping = t > 0.8 && t < 5.2
+        const off = looping && Math.floor((t - 0.8) / 0.9) % 2 === 0
+        if (off) racks.forEach((rack) => rack.lights.color.setHex(0x1a1d24))
+        if (looping)
+          pulseRings.forEach((ring, j) => {
+            const phase = ((t - 0.8) / 0.9 + j * 0.5) % 1
+            const scale = 1 + phase * 16
+            ring.visible = true
+            ring.scale.set(scale, 0.02, scale)
+            ring.position.set(0, 0.08, RACK_Z)
+            ring.material.opacity = 0.5 * (1 - phase)
+          })
+        employees.forEach((employee, i) => hopInPlace(employee, t, 1.0 + i * 0.2, 4.6, 0.08))
+        showAlert(0, 4.8, 2.2, -3, t, 2.8, 4.5)
       },
     },
   }

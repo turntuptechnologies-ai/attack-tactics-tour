@@ -26,6 +26,10 @@ export default function exfiltration(kit: Kit): SceneMap {
     bobHeight,
     glass,
     popIn,
+    bots,
+    malware,
+    documents,
+    flyTo,
   } = kit
   return {
     // T1041 Exfiltration Over C2 Channel（本編）
@@ -261,6 +265,62 @@ export default function exfiltration(kit: Kit): SceneMap {
           else arcBetween(data, shelf, [mine[0] - 0.7 + i * 0.7, mine[1], mine[2]], smooth(p), 1.5)
           data.scale.set(0.45, 0.45, 0.45)
           if (p > 0 && p < 1) data.rotation.y = t * 5
+        }
+      },
+    },
+    // T1700 AI-Enabled Exfiltration
+    T1700: {
+      hits: [4.4],
+      run(t) {
+        view.target = [-1.5, 4.0]
+        view.height = 21
+        storyState(13)
+        // 業務で使われているAIの助手（ロボット）。細工した指示を読ませると、任された正規の道具でデータを外へ送ってしまう
+        const aide = [-3.4, -1.0]
+        const drive = [-7, 5.2, 9]
+        const note = documents[0]
+        relayBot.visible = true
+        relayBot.scale.set(1.3, 1.3, 1.3)
+        relayBot.position.set(aide[0], t > 1.6 && t < 4.4 ? Math.abs(Math.sin(t * 6)) * 0.15 : 0, aide[1])
+        relayBot.rotation.y = 0.6
+        popIn(cloud, drive[0], drive[1], drive[2], t, 0.3, 1.6)
+        cloud.rotation.y = 0.6
+        if (t > 0.5 && t < 1.9) {
+          flyTo(note, [SERVER_SPOT[0], 1.4, SERVER_SPOT[1]], [aide[0], 1.9, aide[1]], t, 0.5, 1.5, 1.2, 5)
+          note.scale.set(0.8, 0.8, 0.8)
+        }
+        for (let i = 0; i < 3; i++) {
+          const start = 1.8 + i * 0.5
+          const p = progress(t, start, start + 1.6)
+          if (p <= 0) continue
+          const data = racks[i].data
+          arcBetween(data, pileSpot(i), [drive[0] - 0.7 + i * 0.7, drive[1] + 1.5, drive[2]], smooth(p), 3)
+          if (p < 1) data.rotation.y = t * 5
+        }
+      },
+    },
+    // T1020 Automated Exfiltration
+    T1020: {
+      hits: [4.4],
+      run(t) {
+        view.target = [1.5, 4.5]
+        view.height = 21
+        storyState(13)
+        showC2Link(t)
+        // 人が操作しなくても、仕掛けた仕組み（小さな機械）が、集めたそばから自動で送り続ける
+        const feeder = bots[6]
+        feeder.visible = true
+        feeder.scale.set(1.1, 1.1, 1.1)
+        feeder.position.set(SERVER_SPOT[0] - 2.8, Math.abs(Math.sin(t * 8)) * 0.2, SERVER_SPOT[1] + 1.4)
+        feeder.rotation.y = 0.6
+        // マルウェア本体は、その間じっとしている
+        malware.scale.y *= 0.6
+        for (let i = 0; i < 4; i++) {
+          const start = 0.6 + i * 0.8
+          const p = progress(t, start, start + 1.4)
+          if (p <= 0) continue
+          arcBetween(racks[i].data, pileSpot(i), stolenSpot(i), smooth(p), 4)
+          if (p < 1) racks[i].data.rotation.y = t * 5
         }
       },
     },

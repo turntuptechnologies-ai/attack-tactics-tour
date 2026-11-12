@@ -283,5 +283,40 @@ export default function collection(kit: Kit): SceneMap {
         }
       },
     },
+    // T1125 Video Capture
+    T1125: {
+      hits: [4.0],
+      run(t) {
+        view.target = [-2, 1.0]
+        view.height = 12
+        storyState(11)
+        // 乗っ取った端末のカメラで、周りの様子を撮る
+        const lens = [-2.3, 0.9, 2.6]
+        const subject = employees[0].position
+        if (t > 0.5 && t < 4.4) {
+          const flash = [1.0, 1.8, 2.6].some((at) => t > at && t < at + 0.2)
+          stretchBetween(glass, lens, [subject.x, 1.2, subject.z], 1.2)
+          glass.material.opacity = flash ? 0.75 : 0.25
+        }
+        for (let i = 0; i < 3; i++) {
+          const start = 1.0 + i * 0.8
+          if (t < start + 0.1) continue
+          const shot = documents[i]
+          const size = 0.8 * overshoot(progress(t, start + 0.1, start + 0.4))
+          flyTo(
+            shot,
+            [lens[0], 1.7, lens[2]],
+            [SERVER_SPOT[0] - 0.7 + i * 0.7, 0.5, SERVER_SPOT[1] + 1.5],
+            t,
+            start + 0.3,
+            start + 1.3,
+            2.5,
+            5,
+          )
+          shot.scale.set(size, size, size)
+          if (t >= start + 1.3) shot.rotation.y = 0.6
+        }
+      },
+    },
   }
 }

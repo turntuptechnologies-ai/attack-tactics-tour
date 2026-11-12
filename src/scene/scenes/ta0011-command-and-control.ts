@@ -34,6 +34,10 @@ export default function commandAndControl(kit: Kit): SceneMap {
     trustedProcess,
     trustedProcessEyes,
     popIn,
+    checkpoint,
+    scanPlane,
+    YELLOW_CUBE_X,
+    yellowCubes,
   } = kit
   return {
     // T1071 Application Layer Protocol（本編）
@@ -306,6 +310,88 @@ export default function commandAndControl(kit: Kit): SceneMap {
             cube.position.set(lerp(from[0], to[0], p), lerp(from[1], to[1], p), lerp(from[2], to[2], p))
           }
         showCross(tool[0], 2.3, tool[1], t, 5.4)
+      },
+    },
+    // T1008 Fallback Channels
+    T1008: {
+      hits: [3.6],
+      run(t) {
+        view.target = [-0.5, 5]
+        view.height = 22
+        storyState(12)
+        view.actor = attacker
+        showOperatorOrb(t)
+        // 主の通り道が止められたときのために、予備の通り道を用意しておく
+        const from = [TOWER_SPOT[0], 2.9, TOWER_SPOT[1]]
+        const to = [SERVER_SPOT[0], 0.7, SERVER_SPOT[1]]
+        const spare = [-7.5, 0.7, 11]
+        const legs = [from, spare, to]
+        relayBot.visible = true
+        relayBot.scale.set(1.2, 1.2, 1.2)
+        relayBot.position.set(spare[0], bobHeight(), spare[2])
+        relayBot.rotation.y = 0.6
+        if (t < 1.8) {
+          stretchBetween(c2Link, from, to, 0.1)
+          c2Link.material.opacity = 0.45 + 0.25 * Math.sin(t * 8)
+        } else if (t < 4.6) showCross((from[0] + to[0]) / 2, 3.4, (from[2] + to[2]) / 2, t, 1.8)
+        if (t > 2.6) {
+          stretchBetween(pinkBeams[0], from, spare, 0.09)
+          stretchBetween(pinkBeams[1], spare, to, 0.09)
+          for (let i = 0; i < 3; i++) {
+            const along = (((t - 2.6) * 0.45 + i / 3) % 1) * 2
+            const j = Math.min(1, Math.floor(along))
+            const q = along - j
+            const cube = pinkCubes[i]
+            cube.visible = true
+            cube.scale.set(0.28, 0.28, 0.28)
+            cube.position.set(
+              lerp(legs[j][0], legs[j + 1][0], q),
+              lerp(legs[j][1], legs[j + 1][1], q),
+              lerp(legs[j][2], legs[j + 1][2], q),
+            )
+          }
+        }
+        if (t > 3.4 && t < 4.6) malware.position.y = Math.abs(Math.sin((t - 3.4) * 6)) * 0.3
+      },
+    },
+    // T1571 Non-Standard Port
+    T1571: {
+      hits: [2.8],
+      run(t) {
+        view.target = [-1.5, 5]
+        view.height = 22
+        storyState(12)
+        view.actor = attacker
+        showOperatorOrb(t)
+        // 門（ふだん使う口）は見張られている。見張られていない、ふつうは使わない口のほうを通す
+        const port = [YELLOW_CUBE_X[0], 2.5, 6.5]
+        const legs = [[TOWER_SPOT[0], 2.9, TOWER_SPOT[1]], port, [SERVER_SPOT[0], 0.7, SERVER_SPOT[1]]]
+        const drawn = progress(t, 0.6, 1.6) * 2
+        const hole = yellowCubes[0]
+        checkpoint.visible = true
+        scanPlane.visible = true
+        scanPlane.position.set(0, 1.45, 9.3)
+        scanPlane.material.opacity = 0.3 + 0.15 * Math.sin(t * 8)
+        hole.visible = true
+        hole.material.color.setHex(0xf6c531)
+        hole.scale.set(0.5, 0.5, 0.5)
+        hole.rotation.y = view.time
+        if (drawn > 0) stretchBetween(c2Link, legs[0], legs[1], 0.09)
+        if (drawn > 1) stretchBetween(pinkBeams[0], legs[1], legs[2], 0.09)
+        if (t > 1.6)
+          for (let i = 0; i < 4; i++) {
+            const along = (((t - 1.6) * 0.4 + i * 0.25) % 1) * 2
+            const j = Math.min(1, Math.floor(along))
+            const q = along - j
+            const cube = pinkCubes[i]
+            cube.visible = true
+            cube.scale.set(0.28, 0.28, 0.28)
+            cube.position.set(
+              lerp(legs[j][0], legs[j + 1][0], q),
+              lerp(legs[j][1], legs[j + 1][1], q),
+              lerp(legs[j][2], legs[j + 1][2], q),
+            )
+          }
       },
     },
   }
