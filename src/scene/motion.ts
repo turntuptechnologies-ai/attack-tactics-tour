@@ -8,25 +8,25 @@ export type Vec3 = readonly number[]
 export type Pose = { x: number; y: number; z: number; rot: number; sq: number }
 
 /** 0〜1 に収める */
-export const cl = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x)
+export const clamp01 = (x: number) => (x < 0 ? 0 : x > 1 ? 1 : x)
 
 /** t が a から b へ進む割合を 0〜1 で返す（範囲の外は 0 か 1） */
-export const seg = (t: number, a: number, b: number) => cl((t - a) / (b - a))
+export const progress = (t: number, a: number, b: number) => clamp01((t - a) / (b - a))
 
 /** 出だしと終わりをなめらかにする */
-export const sm = (x: number) => x * x * (3 - 2 * x)
+export const smooth = (x: number) => x * x * (3 - 2 * x)
 
 export const lerp = (a: number, b: number, p: number) => a + (b - a) * p
 
 /** 少し行き過ぎてから戻る（ぽんと現れる動き） */
-export const back = (x: number) => {
-  x = cl(x)
+export const overshoot = (x: number) => {
+  x = clamp01(x)
   return 1 + 2.7 * Math.pow(x - 1, 3) + 1.7 * Math.pow(x - 1, 2)
 }
 
 /** 落ちてきて弾む */
 export const bounce = (x: number) => {
-  x = cl(x)
+  x = clamp01(x)
   const n = 7.5625
   const d = 2.75
   if (x < 1 / d) return n * x * x
@@ -47,7 +47,7 @@ export const bounce = (x: number) => {
  * keys は [時刻, x, z] の並び。位置が変わる区間は跳ねて移動し、同じ位置が続く区間はその場で待つ。
  * rot0 は、まだ一度も動いていないときの向き（省略時は奥向き）。
  */
-export function track(keys: readonly Vec3[], t: number, rot0?: number): Pose {
+export function walk(keys: readonly Vec3[], t: number, rot0?: number): Pose {
   let i = 0
   while (i < keys.length - 2 && t >= keys[i + 1][0]) i++
   const a = keys[i]
@@ -68,7 +68,7 @@ export function track(keys: readonly Vec3[], t: number, rot0?: number): Pose {
   const k = Math.min(n - 1, Math.floor(u))
   const f = u - k
   const e = Math.min(1, f / 0.75)
-  const q = (k + sm(e)) / n
+  const q = (k + smooth(e)) / n
   return {
     x: lerp(a[1], b[1], q),
     y: Math.sin(Math.PI * e) * 0.6,
@@ -79,14 +79,14 @@ export function track(keys: readonly Vec3[], t: number, rot0?: number): Pose {
 }
 
 /** [時刻, 値] の並びを、なめらかにつないだ値を返す */
-export function path(t: number, ks: readonly Vec3[]): number {
+export function keyframes(t: number, ks: readonly Vec3[]): number {
   let i = 0
   while (i < ks.length - 2 && t >= ks[i + 1][0]) i++
-  return lerp(ks[i][1], ks[i + 1][1], sm(seg(t, ks[i][0], ks[i + 1][0])))
+  return lerp(ks[i][1], ks[i + 1][1], smooth(progress(t, ks[i][0], ks[i + 1][0])))
 }
 
 /** 姿勢を物に当てはめる */
-export function put(o: Object3D, r: Pose) {
+export function applyPose(o: Object3D, r: Pose) {
   o.position.set(r.x, r.y, r.z)
   o.rotation.set(0, r.rot, 0)
   const s = r.sq
@@ -95,12 +95,12 @@ export function put(o: Object3D, r: Pose) {
 }
 
 /** a から b へ、高さ h の山なりで進んだ位置に物を置く（p は 0〜1） */
-export function arc(o: Object3D, a: Vec3, b: Vec3, p: number, h: number) {
+export function arcBetween(o: Object3D, a: Vec3, b: Vec3, p: number, h: number) {
   o.position.set(lerp(a[0], b[0], p), lerp(a[1], b[1], p) + Math.sin(Math.PI * p) * h, lerp(a[2], b[2], p))
 }
 
 /** 箱を a から b へ渡した細い線（光線）にする。w は太さ */
-export function beam(m: Object3D, a: Vec3, b: Vec3, w: number) {
+export function stretchBetween(m: Object3D, a: Vec3, b: Vec3, w: number) {
   m.visible = true
   m.position.set((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, (a[2] + b[2]) / 2)
   m.scale.set(w, w, Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]))
