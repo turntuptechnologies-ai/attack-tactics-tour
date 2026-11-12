@@ -34,8 +34,10 @@ img {
   --display: 'DotGothic16', 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif;
   --body: 'Zen Kaku Gothic New', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', 'Meiryo', sans-serif;
 }
+/* 暗い配色。OS の設定に従う。ただし、ページの根元に data-theme が付いていれば、そちらを優先する
+   （claude.ai の Artifact は、配色の切り替えをこの属性で伝えてくる）。2 か所の値は同じにしておくこと */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
     --bg: #0f181b;
     --panel: #17242a;
     --fg: #e4efec;
@@ -49,6 +51,20 @@ img {
     --seg-done: #8ea5cc;
     color-scheme: dark;
   }
+}
+:root[data-theme='dark'] {
+  --bg: #0f181b;
+  --panel: #17242a;
+  --fg: #e4efec;
+  --muted: #9ab0b0;
+  --line: #2b3d44;
+  --sky: #0b1426;
+  --attack: #ff6a5e;
+  --defend: #6f9dff;
+  --chip-fg: #0f181b;
+  --seg: #2b3956;
+  --seg-done: #8ea5cc;
+  color-scheme: dark;
 }
 body {
   background: var(--bg);
