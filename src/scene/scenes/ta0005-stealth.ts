@@ -56,6 +56,7 @@ export default function stealth(kit: Kit): SceneMap {
     jumpMalware,
     showSparks,
     sensorVisits,
+    DEFENDER_SPOT,
   } = kit
   return {
     // T1036 Masquerading（本編）
@@ -73,10 +74,10 @@ export default function stealth(kit: Kit): SceneMap {
           defender,
           walk(
             [
-              [0, -5, 5.4],
-              [1.6, -5, 5.4],
-              [4.4, 6, 5.4],
-              [7, 6, 5.4],
+              [0, -5, 5.0],
+              [1.6, -5, 5.0],
+              [4.4, 6, 5.0],
+              [7, 6, 5.0],
             ],
             t,
             0,
@@ -88,7 +89,7 @@ export default function stealth(kit: Kit): SceneMap {
     T1070: {
       hits: [3.8],
       run(t) {
-        view.target = [1.2, 4.2]
+        view.target = [0.8, 3.8]
         view.height = 10
         storyState(6) // Indicator Removal
         applyPose(
@@ -97,8 +98,8 @@ export default function stealth(kit: Kit): SceneMap {
             [
               [0, HOST_SPOT[0], HOST_SPOT[1]],
               [0.8, HOST_SPOT[0], HOST_SPOT[1]],
-              [2.4, 0.3, 5.5],
-              [2.7, 0.3, 5.5],
+              [2.4, -1.2, 3.5],
+              [2.7, -1.2, 3.5],
               [3.7, HOST_SPOT[0], HOST_SPOT[1]],
               [7, HOST_SPOT[0], HOST_SPOT[1]],
             ],
@@ -114,19 +115,19 @@ export default function stealth(kit: Kit): SceneMap {
           cube.visible = scale > 0.01
           cube.scale.set(0.34 * scale, 0.06, 0.34 * scale)
           cube.position.set(
-            lerp(HOST_SPOT[0], 0.3, amount) + (i & 1 ? 0.2 : -0.2),
+            lerp(HOST_SPOT[0], -1.2, amount) + (i & 1 ? 0.2 : -0.2),
             0.04,
-            lerp(HOST_SPOT[1], 5.5, amount),
+            lerp(HOST_SPOT[1], 3.5, amount),
           )
         }
         applyPose(
           defender,
           walk(
             [
-              [0, -5, 5.4],
-              [4.6, -5, 5.4],
-              [6.2, -0.6, 5.3],
-              [7, -0.6, 5.3],
+              [0, -5, 5.0],
+              [4.6, -5, 5.0],
+              [6.2, -2.8, 4.8],
+              [7, -2.8, 4.8],
             ],
             t,
             0,
@@ -221,18 +222,18 @@ export default function stealth(kit: Kit): SceneMap {
           defender,
           walk(
             [
-              [0, -5, 5.4],
-              [2.4, -5, 5.4],
-              [4.4, 5.5, 5.4],
-              [4.6, 5.5, 5.4],
-              [5.6, 1.0, 5.3],
-              [7, 1.0, 5.3],
+              [0, -5, 5.0],
+              [2.4, -5, 5.0],
+              [4.4, 5.5, 5.0],
+              [4.6, 5.5, 5.0],
+              [5.6, 2.6, 4.9],
+              [7, 2.6, 4.9],
             ],
             t,
             0,
           ),
         )
-        showAlert(0, 1.0, 2.6, 5.3, t, 5.6, 7)
+        showAlert(0, 2.6, 2.6, 4.9, t, 5.6, 7)
       },
     },
     // T1497 Virtualization/Sandbox Evasion
@@ -529,12 +530,12 @@ export default function stealth(kit: Kit): SceneMap {
         // 調べる人が、解析の道具（水色の線）をつないでくる。つながれていると気づいたら、おとなしいふりをして、離れるまで待つ
         const pose = walk(
           [
-            [0, -2, 5],
-            [0.6, -2, 5],
-            [1.5, 0.2, 4.6],
-            [3.1, 0.2, 4.6],
-            [3.9, -2, 5],
-            [7, -2, 5],
+            [0, DEFENDER_SPOT[0], DEFENDER_SPOT[1]],
+            [0.6, DEFENDER_SPOT[0], DEFENDER_SPOT[1]],
+            [1.5, 3.6, 2.6],
+            [3.1, 3.6, 2.6],
+            [3.9, DEFENDER_SPOT[0], DEFENDER_SPOT[1]],
+            [7, DEFENDER_SPOT[0], DEFENDER_SPOT[1]],
           ],
           t,
           0.4,
@@ -542,7 +543,7 @@ export default function stealth(kit: Kit): SceneMap {
         const watched = t > 1.5 && t < 3.2
         applyPose(defender, pose)
         if (watched) {
-          stretchBetween(cyanBeams[0], [0.2, 1.4, 4.6], aboveHost(0.7), 0.07)
+          stretchBetween(cyanBeams[0], [3.6, 1.4, 2.6], aboveHost(0.7), 0.07)
           malware.position.y = 0
           malware.scale.y *= 0.55
           crown.visible = false
@@ -587,9 +588,9 @@ export default function stealth(kit: Kit): SceneMap {
         const spot = [-0.6, 3.0]
         const scattered = [
           [-2.0, 0.25, 2.2],
-          [-1.2, 0.25, 4.4],
+          [-1.4, 0.25, 3.6],
           [0.4, 0.25, 1.8],
-          [0.6, 0.25, 4.6],
+          [0.4, 0.25, 1.2],
         ]
         const joined = smooth(progress(t, 2.4, 3.0))
         const whole = bots[6]
@@ -696,7 +697,7 @@ export default function stealth(kit: Kit): SceneMap {
           if (t < start) continue
           const log = documents[i]
           const size = 0.7 * overshoot(progress(t, start, start + 0.3))
-          flyTo(log, eye, [-1.4 + i * 0.6, 0.5, 4.6], t, start + 0.1, start + 0.8, 0.5, 5)
+          flyTo(log, eye, [-1.9 + i * 0.7, 0.5, 3.4], t, start + 0.1, start + 0.8, 0.5, 5)
           log.scale.set(size, size, size)
           if (t >= start + 0.8) log.rotation.y = 0.6
         }
@@ -707,7 +708,7 @@ export default function stealth(kit: Kit): SceneMap {
         // 記録されないまま動く
         if (t > 2.4 && t < 4.6) malware.position.y = Math.abs(Math.sin((t - 2.4) * 6)) * 0.3
         showSparks(HOST_SPOT[0], 1.0, HOST_SPOT[1], t, 2.6)
-        showAlert(0, -2, 2.2, 5, t, 5.4, 6.8)
+        showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.4, 6.8)
       },
     },
     // T1574 Hijack Execution Flow
@@ -866,7 +867,7 @@ export default function stealth(kit: Kit): SceneMap {
         view.height = 10.5
         storyState(6)
         // 手当たり次第に壊すと、機械が止まってすぐ気づかれる。動かすのに必要なファイル（黄色い印）はわざと避けて、目立たないものだけに手を付ける
-        const at = (i: number) => [-2.2 + i * 0.8, 1.4, 2.4]
+        const at = (i: number) => [-2.5 + i * 0.8, 1.0, 3.0]
         for (let i = 0; i < 4; i++) {
           const file = documents[i]
           const vital = i % 2 === 1
@@ -894,7 +895,7 @@ export default function stealth(kit: Kit): SceneMap {
           }
         }
         // 機械は動き続けているので、見張りは気づかない
-        showAlert(0, -2, 2.2, 5, t, 5.6, 6.8)
+        showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.6, 6.8)
       },
     },
     // T1684 Social Engineering
@@ -1080,7 +1081,7 @@ export default function stealth(kit: Kit): SceneMap {
           beam.scale.set(0.3, 2.8, 0.3)
         }
         if (t > 3.2 && t < 4.6) showCheck(seat[0], 2.6, seat[1], t, 3.2)
-        showAlert(0, -2, 2.2, 5, t, 5.4, 6.8)
+        showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.4, 6.8)
       },
     },
     // T1220 XSL Script Processing
@@ -1117,7 +1118,7 @@ export default function stealth(kit: Kit): SceneMap {
           hidden.position.set(recipe.position.x + 0.1, recipe.position.y - 0.25, recipe.position.z + 0.1)
         }
         if (t > 2.4) {
-          flyTo(result, [tool[0], 1.2, tool[1]], [tool[0] - 1.4, 0.5, tool[1] + 1.6], t, 2.4, 3.2, 0.8, 5)
+          flyTo(result, [tool[0], 1.2, tool[1]], [tool[0] - 1.5, 0.5, tool[1] + 0.6], t, 2.4, 3.2, 0.8, 5)
           result.scale.set(0.8, 0.8, 0.8)
           if (t >= 3.2) result.rotation.y = 0.6
         }

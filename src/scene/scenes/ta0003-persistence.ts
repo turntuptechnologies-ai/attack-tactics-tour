@@ -57,6 +57,7 @@ export default function persistence(kit: Kit): SceneMap {
     showCheck,
     showSparks,
     wipeThenReturn,
+    DEFENDER_SPOT,
   } = kit
   return {
     // T1053 Scheduled Task/Job（本編）
@@ -145,7 +146,7 @@ export default function persistence(kit: Kit): SceneMap {
             defender,
             walk(
               [
-                [4.6, -2, 5],
+                [4.6, DEFENDER_SPOT[0], DEFENDER_SPOT[1]],
                 [5.6, 2.2, 2.4],
                 [7, 2.2, 2.4],
               ],
@@ -191,7 +192,7 @@ export default function persistence(kit: Kit): SceneMap {
             defender,
             walk(
               [
-                [4.6, -2, 5],
+                [4.6, DEFENDER_SPOT[0], DEFENDER_SPOT[1]],
                 [5.6, 2.0, 4.9],
                 [7, 2.0, 4.9],
               ],
@@ -259,7 +260,7 @@ export default function persistence(kit: Kit): SceneMap {
             defender,
             walk(
               [
-                [4.6, -2, 5],
+                [4.6, DEFENDER_SPOT[0], DEFENDER_SPOT[1]],
                 [5.6, 2.4, 2.8],
                 [7, 2.4, 2.8],
               ],
@@ -311,7 +312,7 @@ export default function persistence(kit: Kit): SceneMap {
             defender,
             walk(
               [
-                [4.6, -2, 5],
+                [4.6, DEFENDER_SPOT[0], DEFENDER_SPOT[1]],
                 [5.6, 2.2, 4.9],
                 [7, 2.2, 4.9],
               ],
@@ -440,7 +441,7 @@ export default function persistence(kit: Kit): SceneMap {
         view.height = 10.5
         storyState(4)
         // 起動やログオンのたびに読み上げられる手順書。そこへ一行を書き足しておけば、消されても、次の起動でまた動く
-        const page = [-0.4, 1.7, 2.5]
+        const page = [-1.6, 1.7, 2.5]
         const script = documents[0]
         const line = pinkCubes[0]
         script.visible = true
@@ -493,7 +494,7 @@ export default function persistence(kit: Kit): SceneMap {
           mine.rotation.y = 0.6
           stretchBetween(pinkBeams[1], [app[0], app[1] + 0.6, app[2]], [sky[0], sky[1] - 0.5, sky[2]], 0.06)
         }
-        if (t >= 5.0) showCross(app[0], app[1] + 1.4, app[2], t, 5.4)
+        if (t >= 5.0) showCross(app[0] + 0.2, app[1] - 1.2, app[2] + 1.4, t, 5.4)
       },
     },
     // T1554 Compromise Host Software Binary
@@ -560,7 +561,7 @@ export default function persistence(kit: Kit): SceneMap {
         storyState(4)
         // 従業員がログオンする、ファイルを開く。そうした出来事（黄色い箱）に、自分のコードを結び付けておく
         const desk = [3.5, 1.6, 4.4]
-        const hook = [2.6, 0.5, 5.0]
+        const hook = [2.2, 0.5, 3.9]
         const planted = pinkCubes[0]
         const event = yellowCubes[0]
         if (t > 0.5 && t < 5.6) {
@@ -616,7 +617,7 @@ export default function persistence(kit: Kit): SceneMap {
         if (t > 2.8 && t < 3.6)
           stretchBetween(pinkBeams[1], [-2.6, 1.6, 10.6], [hole[0], hole[1], hole[2] + 0.7], 0.07)
         if (t < 5.2) showCross(hole[0], 4.2, hole[2] + 0.5, t, 3.2)
-        showAlert(0, -2, 2.2, 5, t, 5.2, 6.6)
+        showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.2, 6.6)
       },
     },
     // T1133 External Remote Services
@@ -684,7 +685,7 @@ export default function persistence(kit: Kit): SceneMap {
           const p = smooth(progress(t, start, start + 0.6))
           const size = 0.9 * overshoot(progress(t, start, start + 0.3))
           const x = lerp(mold[0], mold[0] - 1.3 - i * 1.1, p)
-          const z = lerp(mold[1], mold[1] + 0.9 + i * 0.3, p)
+          const z = lerp(mold[1], mold[1] + 0.5 - i * 0.9, p)
           const mark = pinkCubes[1 + i]
           copy.visible = true
           copy.scale.set(size, size, size)
@@ -811,7 +812,7 @@ export default function persistence(kit: Kit): SceneMap {
         // 眠らずに動き続ける
         if (t > 2.4 && t < 4.6) malware.position.y = Math.abs(Math.sin((t - 2.4) * 6)) * 0.25
         showSparks(HOST_SPOT[0], 0.9, HOST_SPOT[1], t, 2.8)
-        showAlert(0, -2, 2.2, 5, t, 5.2, 6.6)
+        showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.2, 6.6)
       },
     },
     // T1205 Traffic Signaling

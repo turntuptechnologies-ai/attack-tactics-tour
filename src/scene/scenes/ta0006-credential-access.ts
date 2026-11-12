@@ -44,7 +44,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
     T1003: {
       hits: [3.8],
       run(t) {
-        view.target = [0, 3.6]
+        view.target = [-1.0, 3.0]
         view.height = 12.5
         storyState(8) // Credential Access
         ;[0, 1, 3].forEach((ei, j) => {
@@ -259,7 +259,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
         storyState(8)
         // ログイン済みのしるし（クッキー）。これを盗めば、パスワードなしでその人としてサービスに入れる
         const screen = [3.5, 2.0, 4.4]
-        const service = [0.2, 4.6, 0.6]
+        const service = [0.0, 3.7, 1.6]
         popIn(cloud, service[0], service[1], service[2], t, 0.2, 1.2)
         cloud.rotation.y = 0.6
         if (t > 0.4 && t < 4.6) stretchBetween(cyanBeams[0], screen, service, 0.05)
@@ -270,8 +270,8 @@ export default function credentialAccess(kit: Kit): SceneMap {
         else arcBetween(token, screen, aboveHost(2.9), smooth(progress(t, 1.4, 2.4)), 1.0)
         // 盗んだしるしを出すと、マルウェアも同じサービスに通されてしまう
         if (t > 2.6 && t < 4.6) stretchBetween(pinkBeams[0], aboveHost(2.9), service, 0.06)
-        if (t > 3.0 && t < 4.6) showCheck(service[0], service[1] + 1.7, service[2], t, 3.0)
-        showCross(service[0], service[1] + 1.7, service[2], t, 5.4)
+        if (t > 3.0 && t < 4.6) showCheck(service[0], service[1] + 1.15, service[2], t, 3.0)
+        showCross(service[0], service[1] + 1.15, service[2], t, 5.4)
       },
     },
     // T1040 Network Sniffing
@@ -400,7 +400,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
         }
         if (t > 2.0) {
           const size = 0.4 * overshoot(progress(t, 2.0, 2.3))
-          flyTo(token, anvil, [service[0], service[1] - 1.0, service[2]], t, 2.5, 3.4, 1.0, 6)
+          flyTo(token, anvil, [service[0] + 1.0, service[1] - 0.9, service[2] + 1.0], t, 2.5, 3.4, 1.0, 6)
           token.scale.set(size, size, size)
         }
         if (t > 3.4 && t < 5.2) showCheck(service[0], service[1] + 1.15, service[2], t, 3.4)
@@ -493,7 +493,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
         view.height = 11
         storyState(8)
         // 攻撃者のアプリ（小さな機械）が、従業員に「連携を許可しますか」と求める。許可すると、サービスがアプリに通行証（水色の箱）を渡してしまう
-        const app = [2.3, 0, 5.2]
+        const app = [2.0, 0, 3.9]
         const service = [4.6, 4.8, 0.8]
         const rogue = bots[6]
         const size = overshoot(progress(t, 0.5, 0.9))
@@ -542,7 +542,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
             flyTo(
               appKey,
               aboveHost(2.6),
-              [service[0] - 1.3, service[1] - 0.3, service[2]],
+              [service[0] + 1.2, service[1] - 0.7, service[2] + 0.9],
               t,
               2.2,
               3.2,
@@ -659,7 +659,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
         // ファイルや設定の中に、パスワードが平文のまま書かれている。探して回るだけで、鍵が見つかる
         const spots = [
           [-1.6, 0.5, 2.2],
-          [-0.2, 0.5, 4.4],
+          [0.2, 0.5, 1.2],
           [3.4, 0.5, 1.6],
         ]
         const sweep = progress(t, 0.6, 3.0)

@@ -43,6 +43,7 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
     clock,
     clockHand,
     showCheck,
+    DEFENDER_SPOT,
   } = kit
   return {
     // T1068 Exploitation for Privilege Escalation（本編）
@@ -360,7 +361,7 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
         storyState(5)
         // 高い権限のプログラムが、起動のときに読み上げる手順書。そこへ、自分の一行を書き足す
         const script = documents[0]
-        const page = [-0.4, 1.7, 2.5]
+        const page = [-1.0, 1.7, 3.3]
         const line = pinkCubes[0]
         script.visible = true
         script.scale.set(1.6, 1.6, 1.6)
@@ -501,8 +502,8 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
           flyTo(key, [3.4, 3.4, 4.2], [pose.x, 1.5, pose.z], t, 0.2, 1.1, 0.6, 6)
           if (t >= 1.1) key.rotation.y = 0.6
         }
-        showCheck(0.1, 2.5, 3.0, t, 2.5)
-        showAlert(0, -2, 2.2, 5, t, 5.4, 6.8)
+        showCheck(-0.9, 2.9, 3.0, t, 2.5)
+        showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.4, 6.8)
       },
     },
   }

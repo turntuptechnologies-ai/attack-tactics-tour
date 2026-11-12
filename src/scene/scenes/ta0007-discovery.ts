@@ -45,6 +45,7 @@ export default function discovery(kit: Kit): SceneMap {
     hopInPlace,
     probeFromHost,
     takeNote,
+    DEFENDER_SPOT,
   } = kit
   return {
     // T1046 Network Service Discovery（本編）
@@ -249,7 +250,7 @@ export default function discovery(kit: Kit): SceneMap {
     T1069: {
       hits: [3.0],
       run(t) {
-        view.target = [0, 3.2]
+        view.target = [-1.0, 2.2]
         view.height = 12.5
         storyState(9)
         // だれがどの権限のグループに入っているかを調べる。左の二人が管理者のグループ（囲み）
@@ -435,7 +436,7 @@ export default function discovery(kit: Kit): SceneMap {
         yellowCubes.forEach((service, i) => {
           const found = 1.0 + i * 0.7
           const angle = view.time * 0.8 + i * 2.09
-          const at = [sky[0] + Math.cos(angle) * 1.9, sky[1] - 1.0, sky[2] + Math.sin(angle) * 0.9]
+          const at = [sky[0] + Math.cos(angle) * 1.9, sky[1] - 1.7, sky[2] + 1.0 + Math.sin(angle) * 0.6]
           service.visible = true
           service.material.color.setHex(t > found && t < 4.6 ? 0xff6fd8 : 0xf6c531)
           service.scale.set(0.36, 0.36, 0.36)
@@ -663,7 +664,8 @@ export default function discovery(kit: Kit): SceneMap {
         probeFromHost(0, store, t, 0.6, 2.4)
         for (let i = 0; i < 3; i++) takeNote(i, [store[0], 2.0, store[2]], t, 1.2 + i * 0.6)
         // 防御側の様子をうかがう
-        if (t > 3.0 && t < 4.4) stretchBetween(pinkBeams[1], aboveHost(2.8), [-2, 1.6, 5], 0.03)
+        if (t > 3.0 && t < 4.4)
+          stretchBetween(pinkBeams[1], aboveHost(2.8), [DEFENDER_SPOT[0], 1.6, DEFENDER_SPOT[1]], 0.03)
       },
     },
     // T1135 Network Share Discovery
@@ -766,7 +768,7 @@ export default function discovery(kit: Kit): SceneMap {
         storyState(9)
         // 端末に、何がつながっているか。USBメモリ（水色の箱）、プリンター（小さな機械）。つながっている機器から、この端末の使われ方が見えてくる
         const usb = [4.4, 1.0, 4.9]
-        const printer = [2.5, 0, 5.2]
+        const printer = [2.1, 0, 3.9]
         token.visible = true
         token.scale.set(0.3, 0.3, 0.3)
         token.position.set(usb[0], usb[1], usb[2])
@@ -823,8 +825,8 @@ export default function discovery(kit: Kit): SceneMap {
         storyState(9)
         // 端末に入っているソフトを、ひとつずつ調べる。業務のソフト、開発の道具、そして守りの製品（錠）。古い版のまま残っているものが、次のねらい目になる
         const shelf = [
-          [-2.2, 2.4],
-          [-1.1, 2.9],
+          [-2.4, 3.4],
+          [-1.3, 2.2],
           [0.0, 3.4],
         ]
         trustedProcess.visible = true
@@ -874,7 +876,7 @@ export default function discovery(kit: Kit): SceneMap {
           clockHand.rotation.z = -1.0
         }
         yellowCubes.forEach((region, i) => {
-          const at = [-2.6 + i * 1.3, 0.3, 2.2 + i * 0.7]
+          const at = [-2.6 + i * 1.3, 0.3, 1.9 + i * 0.5]
           region.visible = true
           region.material.color.setHex(i === 1 && decided ? 0xff6fd8 : 0xf6c531)
           region.scale.set(0.9, 0.12, 0.9)
@@ -886,7 +888,7 @@ export default function discovery(kit: Kit): SceneMap {
           const pin = pinkCubes[0]
           pin.visible = true
           pin.scale.set(0.24, 0.5, 0.24)
-          pin.position.set(-1.3, 0.5 + (1 - bounce(progress(t, 2.6, 3.2))) * 3, 2.9)
+          pin.position.set(-1.3, 0.5 + (1 - bounce(progress(t, 2.6, 3.2))) * 3, 2.4)
         }
       },
     },
@@ -897,9 +899,9 @@ export default function discovery(kit: Kit): SceneMap {
         view.target = [1.0, 4.6]
         view.height = 12.5
         storyState(9)
-        // この端末は、ネットワークのどこにいるのか。自分の住所、外へ出る出口（門のそばの機器）、名前を引く先（台帳）を、端末の設定から読み取る
-        const exit = [1.4, 0.8, 6.0]
-        const names = [-1.2, 1.4, 3.6]
+        // この端末は、ネットワークのどこにいるのか。自分の住所、外へ出る出口（小さな機械）、名前を引く先（台帳）を、端末の設定から読み取る
+        const exit = [-0.6, 0.8, 3.6]
+        const names = [-2.2, 1.4, 2.2]
         relayBot.visible = true
         relayBot.scale.set(0.9, 0.9, 0.9)
         relayBot.position.set(exit[0], 0, exit[2])

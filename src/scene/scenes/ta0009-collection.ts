@@ -32,6 +32,9 @@ export default function collection(kit: Kit): SceneMap {
     cloud,
     showCross,
     showAlert,
+    DEFENDER_SPOT,
+    defender,
+    standing,
   } = kit
   return {
     // T1005 Data from Local System（本編）
@@ -41,6 +44,8 @@ export default function collection(kit: Kit): SceneMap {
         view.target = [-1.5, -3.2]
         view.height = 10.5
         storyState(11) // Collection
+        // いつもの立ち位置（事務室の右奥）はこの画角に入らないので、サーバー室の手前に立たせる
+        applyPose(defender, standing(1.6, -1.2, -Math.PI / 2))
         for (let i = 0; i < 4; i++) {
           const rack = racks[i],
             start = 0.6 + i * 0.6,
@@ -86,6 +91,8 @@ export default function collection(kit: Kit): SceneMap {
         view.target = [-1.5, -3.0]
         view.height = 9.5
         storyState(11) // Archive Collected Data
+        // いつもの立ち位置（事務室の右奥）はこの画角に入らないので、サーバー室の手前に立たせる
+        applyPose(defender, standing(1.6, -1.2, -Math.PI / 2))
         const centre = [-1.2, 0.5, -2.2],
           q = smooth(progress(t, 1.0, 2.2)),
           size = 0.6 * (1 - 0.9 * smooth(progress(t, 1.8, 2.4)))
@@ -465,7 +472,7 @@ export default function collection(kit: Kit): SceneMap {
         documents.forEach((file, i) => {
           const start = 1.4 + i * 0.45
           const to = pileSpot(i)
-          const hang = [store[0] - 0.9 + i * 0.6, store[1] - 1.1, store[2]]
+          const hang = [store[0] - 0.5 + i * 0.6, store[1] - 1.8, store[2] + 1.2]
           file.visible = t > 0.3
           file.scale.set(0.8, 0.8, 0.8)
           flyTo(file, hang, [to[0], 0.5, to[2] + 0.9], t, start, start + 1.3, 1.2, 5)
@@ -536,7 +543,7 @@ export default function collection(kit: Kit): SceneMap {
           file.scale.set(size, size, size)
           if (t >= start + 1.2) file.rotation.y = 0.6
         })
-        showAlert(0, -2, 2.2, 5, t, 5.2, 6.6)
+        showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.2, 6.6)
       },
     },
     // T1025 Data from Removable Media

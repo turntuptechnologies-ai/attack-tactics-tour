@@ -35,7 +35,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
     T1595: {
       hits: [3.9],
       run(t) {
-        view.target = [0.5, 9.5]
+        view.target = [-1.0, 7.3]
         view.height = 15 // Reconnaissance
         const pose = walk(
           [
@@ -132,7 +132,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
     T1593: {
       hits: [4],
       run(t) {
-        view.target = [0.5, 10.5]
+        view.target = [-0.7, 8.7]
         view.height = 14
         applyPose(attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1], -1.2))
         applyPose(defender, standing(-3, 4.6, 0.4)) // Search Open Websites/Domains
@@ -162,7 +162,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
     T1596: {
       hits: [3.1],
       run(t) {
-        view.target = [0, 9.5]
+        view.target = [-1.5, 7.3]
         view.height = 15
         applyPose(attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1], -1.2))
         applyPose(defender, standing(-3, 4.6, 0.4)) // Search Open Technical Databases
@@ -232,7 +232,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
     T1590: {
       hits: [3.6],
       run(t) {
-        view.target = [0.5, 9.2]
+        view.target = [-1.0, 7.0]
         view.height = 15
         applyPose(attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1]))
         applyPose(defender, standing(-3, 4.6, 0.4))

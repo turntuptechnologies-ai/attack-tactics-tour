@@ -52,14 +52,15 @@ export default function impact(kit: Kit): SceneMap {
     attackerScan,
     pulseRings,
     documents,
+    DEFENDER_SPOT,
   } = kit
   return {
     // T1486 Data Encrypted for Impact（本編）
     T1486: {
       hits: [2.4],
       run(t) {
-        view.target = [0, -3.2]
-        view.height = 13.5
+        view.target = [-1.2, -4.6]
+        view.height = 15
         storyState(14) // Impact
         applyPose(defender, standing(4.8, -3, -Math.PI / 2))
         for (let i = 0; i < 4; i++) {
@@ -143,7 +144,7 @@ export default function impact(kit: Kit): SceneMap {
         view.height = 15
         storyState(14)
         view.actor = attacker
-        applyPose(defender, standing(-2, 5, 0.4)) // Network Denial of Service
+        applyPose(defender, standing(DEFENDER_SPOT[0], DEFENDER_SPOT[1], 0.4)) // Network Denial of Service
         for (let j = 0; j < 16; j++) {
           const bot = bots[j + 4],
             start = 0.3 + (j % 8) * 0.15,
@@ -229,7 +230,7 @@ export default function impact(kit: Kit): SceneMap {
         view.height = 17
         storyState(14)
         view.actor = attacker
-        applyPose(defender, standing(-2, 5, 0.4)) // Defacement
+        applyPose(defender, standing(DEFENDER_SPOT[0], DEFENDER_SPOT[1], 0.4)) // Defacement
         applyPose(
           attacker,
           walk(
@@ -291,7 +292,7 @@ export default function impact(kit: Kit): SceneMap {
         view.target = [0, 1.0]
         view.height = 15
         storyState(14)
-        applyPose(defender, standing(-2, 5, 0.4))
+        applyPose(defender, standing(DEFENDER_SPOT[0], DEFENDER_SPOT[1], 0.4))
         // 従業員のアカウントを消したりパスワードを変えたりして、だれも入れなくする
         employees.forEach((employee, i) => {
           const start = 0.6 + i * 0.5
@@ -319,7 +320,7 @@ export default function impact(kit: Kit): SceneMap {
         view.height = 17
         storyState(14)
         view.actor = attacker
-        applyPose(defender, standing(-2, 5, 0.4))
+        applyPose(defender, standing(DEFENDER_SPOT[0], DEFENDER_SPOT[1], 0.4))
         // 上司や取引先を装った送金の指示を送り、だまされた担当者にお金（黄色い箱）を振り込ませる
         const clerk = employees[3].position
         if (t < 1.7) flyTo(mail, aboveAttacker(), [clerk.x, 1.9, clerk.z + 0.1], t, 0.4, 1.6, 3.2, 5)
@@ -408,7 +409,7 @@ export default function impact(kit: Kit): SceneMap {
         view.height = 17
         storyState(14)
         view.actor = attacker
-        applyPose(defender, standing(-2, 5, 0.4))
+        applyPose(defender, standing(DEFENDER_SPOT[0], DEFENDER_SPOT[1], 0.4))
         // 大量のメールを一気に送りつけ、大事な連絡を埋もれさせる
         const clerk = employees[3].position
         mails.forEach((item, i) => {

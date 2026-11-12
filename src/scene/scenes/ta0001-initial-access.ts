@@ -403,7 +403,7 @@ export default function initialAccess(kit: Kit): SceneMap {
         view.height = 13
         storyState(2)
         // 不正な小型の機器を中へ持ち込み、社内のネットワークにつないで入口にする
-        const landed = [5.0, 4.9]
+        const landed = [4.9, 3.9]
         const drop = smooth(progress(t, 0.8, 2.2))
         relayBot.visible = t > 0.4
         relayBot.scale.set(0.9, 0.9, 0.9)
@@ -466,7 +466,7 @@ export default function initialAccess(kit: Kit): SceneMap {
         view.height = 14
         storyState(2)
         // 社内の無線LAN（輪）は、壁の外まで届いている。そこへ接続して入り込む
-        const ap = [6.8, 0.8, 4.8]
+        const ap = [6.6, 0.8, 3.9]
         const pose = walk(
           [
             [0, ATTACKER_SPOT[0], ATTACKER_SPOT[1]],

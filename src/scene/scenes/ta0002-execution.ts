@@ -581,7 +581,7 @@ export default function execution(kit: Kit): SceneMap {
         view.height = 10.5
         storyState(3)
         // 正規のプログラムどうしは、決まった通り道（水色の線）でやり取りしている。そこへ頼みごとを流すと、相手のプログラムが代わりに動かしてくれる
-        const from = [0.2, 0.9, 4.4]
+        const from = [0.4, 0.9, 1.4]
         const to = [-1.8, 0.9, 2.2]
         const sender = bots[4]
         const request = pinkCubes[6]

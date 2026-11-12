@@ -243,7 +243,7 @@ export function createKit(w: World) {
    * 本編はひとつの侵入が続いていく話なので、あとの戦術ほど、すでに起きたことが積み重なっている。
    */
   function storyState(k: number) {
-    applyPose(w.defender, standing(-2, 5, 0.4))
+    applyPose(w.defender, standing(w.DEFENDER_SPOT[0], w.DEFENDER_SPOT[1], 0.4))
     if (k >= 2) {
       w.c2Tower.visible = true
       applyPose(w.attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1]))
