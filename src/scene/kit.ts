@@ -373,6 +373,38 @@ export function createKit(w: World) {
     }
   }
 
+  /**
+   * 永続化の見せ方。見張りが t0 にマルウェアを見つけて消すが、t1 に from（残しておいた仕掛け）から戻ってくる。
+   * 水色の線は 3 本目（cyanBeams[2]）を使う。
+   */
+  function wipeThenReturn(t: number, t0: number, t1: number, from: Vec3) {
+    const over = smooth(progress(t, t0 - 0.6, t0)) * (1 - smooth(progress(t, t0 + 0.6, t0 + 1.1)))
+    placeSensor(
+      lerp(0.5, HOST_SPOT[0], over),
+      lerp(3.3, 2.7, over) + Math.sin(view.time * 3) * 0.1,
+      lerp(3.5, HOST_SPOT[1], over),
+    )
+    if (t > t0 && t < t0 + 0.4) {
+      const ray = w.cyanBeams[2]
+      ray.visible = true
+      ray.rotation.set(0, 0, 0)
+      ray.position.set(HOST_SPOT[0], 1.6, HOST_SPOT[1])
+      ray.scale.set(0.3, 1.8, 0.3)
+    }
+    if (t > t0 + 0.1 && t < t1)
+      placeMalware(HOST_SPOT[0], 0, HOST_SPOT[1], MALWARE_SIZE * (1 - progress(t, t0 + 0.1, t0 + 0.4)))
+    else if (t >= t1)
+      jumpMalware(
+        t,
+        t1,
+        t1 + 0.7,
+        from,
+        aboveHost(0),
+        1.0,
+        MALWARE_SIZE * overshoot(progress(t, t1, t1 + 0.3)),
+      )
+  }
+
   return {
     ...w,
     view,
@@ -399,6 +431,7 @@ export function createKit(w: World) {
     sensorArrives,
     showOperatorOrb,
     showSparks,
+    wipeThenReturn,
   }
 }
 
