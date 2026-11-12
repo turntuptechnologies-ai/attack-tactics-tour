@@ -1,6 +1,6 @@
 // TA0005 ステルス（Stealth）の場面。
 import type { Kit } from '../kit'
-import { progress, smooth, lerp, walk, applyPose, overshoot, stretchBetween } from '../motion'
+import { progress, smooth, lerp, walk, applyPose, overshoot, stretchBetween, arcBetween } from '../motion'
 import type { SceneMap } from './types'
 
 export default function stealth(kit: Kit): SceneMap {
@@ -30,6 +30,32 @@ export default function stealth(kit: Kit): SceneMap {
     pinkBeams,
     bots,
     cloud,
+    attacker,
+    employees,
+    key,
+    user,
+    token,
+    impostor,
+    hammer,
+    truckB,
+    relayBot,
+    checkpoint,
+    ATTACKER_SPOT,
+    TOWER_SPOT,
+    YELLOW_CUBE_X,
+    yellowCubes,
+    pulseRings,
+    database,
+    openGate,
+    standing,
+    placeMalware,
+    aboveAttacker,
+    showCross,
+    showCheck,
+    hopInPlace,
+    jumpMalware,
+    showSparks,
+    sensorVisits,
   } = kit
   return {
     // T1036 Masquerading（本編）
@@ -368,6 +394,735 @@ export default function stealth(kit: Kit): SceneMap {
             0,
           ),
         )
+      },
+    },
+    // T1134 Access Token Manipulation
+    T1134: {
+      hits: [3.4],
+      run(t) {
+        view.target = [0.8, 3.4]
+        view.height = 10.5
+        storyState(6)
+        // 別の利用者（人形）の身分のしるし（水色の箱）を借りて動く。記録には、その利用者がやったこととして残る
+        const owner = [-0.6, 3.8]
+        const worn = t > 2.2
+        user.visible = true
+        applyPose(user, standing(owner[0], owner[1], 0.6))
+        token.visible = true
+        token.scale.set(0.4, 0.4, 0.4)
+        token.rotation.y = view.time * 2
+        if (t < 1.2) token.position.set(owner[0], 2.3 + Math.sin(view.time * 4) * 0.06, owner[1])
+        else arcBetween(token, [owner[0], 2.3, owner[1]], aboveHost(2.5), smooth(progress(t, 1.2, 2.2)), 0.8)
+        if (t > 0.6 && t < 1.3) stretchBetween(pinkBeams[0], aboveHost(0.9), [owner[0], 2.3, owner[1]], 0.07)
+        crown.visible = !worn
+        sensorVisits(t, 2.4, 4.4, HOST_SPOT[0], HOST_SPOT[1], true)
+        if (t > 3.3 && t < 4.4) showCheck(HOST_SPOT[0], 4.4, HOST_SPOT[1], t, 3.3)
+      },
+    },
+    // T1696 Anti-Automation Evasion
+    T1696: {
+      hits: [3.0],
+      run(t) {
+        view.target = [0.6, 9.6]
+        view.height = 15
+        storyState(6)
+        view.actor = attacker
+        // 入口には「人間かどうか」を確かめる検査がある。問題を解く係（左のロボット）に答えを出させて、自動の機械を人として通す
+        const solver = [-2.6, 11.2]
+        checkpoint.visible = true
+        scanPlane.visible = true
+        scanPlane.position.set(0, 1.45, 9.3)
+        scanPlane.material.opacity = 0.3 + 0.15 * Math.sin(t * 8)
+        relayBot.visible = true
+        relayBot.scale.set(1.1, 1.1, 1.1)
+        relayBot.position.set(solver[0], 0, solver[1])
+        relayBot.rotation.y = t > 0.8 && t < 4.4 ? t * 6 : 0.6
+        for (let i = 0; i < 3; i++) {
+          const start = 1.0 + i * 0.9
+          const p = progress(t, start, start + 1.8)
+          const robot = bots[4 + i]
+          if (t > 5.2) continue
+          robot.visible = p < 1
+          robot.scale.set(0.9, 0.9, 0.9)
+          robot.position.set(
+            lerp(2.0 - i * 0.2, 0, Math.min(1, p * 2)),
+            Math.abs(Math.sin(t * 8 + i)) * 0.12,
+            lerp(12.2 + i * 0.5, 7.4, p),
+          )
+          robot.rotation.y = Math.PI
+          if (p > 0.3 && p < 0.6)
+            stretchBetween(
+              pinkBeams[i],
+              [solver[0], 1.0, solver[1]],
+              [robot.position.x, 0.8, robot.position.z],
+              0.06,
+            )
+        }
+        if (t > 2.2 && t < 5.2) showCheck(0, 4.3, 9.3, t, 2.2)
+        showCross(0, 4.3, 9.3, t, 5.4)
+      },
+    },
+    // T1197 BITS Jobs
+    T1197: {
+      hits: [3.2],
+      run(t) {
+        view.target = [0.8, 5.8]
+        view.height = 14
+        storyState(6)
+        // OSに備わっている正規の運び役（トラック）。その荷台に載せてしまえば、門でも見張りにも、いつもの配送にしか見えない
+        const z = lerp(11.5, 3.4, smooth(progress(t, 0.6, 2.6)))
+        const load = pinkCubes[0]
+        truckB.visible = true
+        truckB.scale.set(0.5, 0.5, 0.5)
+        truckB.position.set(0, 0, z)
+        load.visible = t < 4.6
+        load.scale.set(0.3, 0.3, 0.3)
+        load.position.set(0, 1.25, z)
+        openGate(progress(t, 1.0, 1.5) - progress(t, 2.8, 3.3))
+        sensorVisits(t, 2.6, 4.4, 0, 3.4, true)
+        if (t > 3.2 && t < 4.4) showCheck(0, 4.4, 3.4, t, 3.2)
+        if (t > 4.6) {
+          load.visible = true
+          arcBetween(load, [0, 1.25, 3.4], aboveHost(2.6), smooth(progress(t, 4.6, 5.2)), 0.8)
+        }
+      },
+    },
+    // T1612 Build Image on Host
+    T1612: {
+      hits: [3.2],
+      run(t) {
+        view.target = [0.6, 3.2]
+        view.height = 10.5
+        storyState(6)
+        // 持ち込むのは、検査を通る無害なひな形（ガラスの箱）だけ。不正な部分は、持ち込んだあとで、その場で組み足す
+        const box = [-0.6, 2.9]
+        const base = bots[4]
+        const added = pinkCubes[6]
+        glass.visible = true
+        glass.scale.set(1.5, 1.6, 1.5)
+        glass.position.set(box[0], 0.8, box[1])
+        glass.material.opacity = 0.35
+        base.visible = true
+        base.scale.set(0.9, 0.9, 0.9)
+        base.position.set(box[0], t > 3.1 && t < 4.4 ? Math.abs(Math.sin((t - 3.1) * 6)) * 0.2 : 0, box[1])
+        base.rotation.y = 0.6
+        if (t < 1.5) showCheck(box[0], 2.7, box[1], t, 0.2)
+        if (t > 1.5 && t < 3.0) {
+          hammer.visible = true
+          hammer.position.set(box[0] + 1.0, 0.9, box[1] + 0.3)
+          hammer.rotation.z = 0.3 + Math.abs(Math.cos(((t - 1.5) * Math.PI) / 0.5))
+        }
+        if (t > 1.8) {
+          flyTo(added, aboveHost(2.2), [box[0], 1.15, box[1]], t, 1.8, 2.6, 0.8, 6)
+          added.scale.set(0.28, 0.28, 0.28)
+        }
+        showSparks(box[0], 1.0, box[1], t, 3.1)
+      },
+    },
+    // T1622 Debugger Evasion
+    T1622: {
+      hits: [3.9],
+      run(t) {
+        view.target = [1.2, 3.8]
+        view.height = 10
+        storyState(6)
+        // 調べる人が、解析の道具（水色の線）をつないでくる。つながれていると気づいたら、おとなしいふりをして、離れるまで待つ
+        const pose = walk(
+          [
+            [0, -2, 5],
+            [0.6, -2, 5],
+            [1.5, 0.2, 4.6],
+            [3.1, 0.2, 4.6],
+            [3.9, -2, 5],
+            [7, -2, 5],
+          ],
+          t,
+          0.4,
+        )
+        const watched = t > 1.5 && t < 3.2
+        applyPose(defender, pose)
+        if (watched) {
+          stretchBetween(cyanBeams[0], [0.2, 1.4, 4.6], aboveHost(0.7), 0.07)
+          malware.position.y = 0
+          malware.scale.y *= 0.55
+          crown.visible = false
+        }
+        if (t > 1.4 && t < 1.9) showAlert(0, HOST_SPOT[0], 2.6, HOST_SPOT[1], t, 1.4, 1.9)
+        if (t > 3.6 && t < 4.6) malware.position.y = Math.abs(Math.sin((t - 3.6) * 7)) * 0.4
+        showSparks(HOST_SPOT[0], 1.0, HOST_SPOT[1], t, 3.6)
+      },
+    },
+    // T1678 Delay Execution
+    T1678: {
+      hits: [3.6],
+      run(t) {
+        view.target = [1.4, 3.6]
+        view.height = 10
+        storyState(6)
+        // 見張りが観察している間は、意味のない動きをぐるぐる繰り返すだけ。観察の時間が切れて見張りが離れてから、本当の動きを始める
+        const idle = t > 0.6 && t < 3.2
+        if (idle) {
+          const angle = (t - 0.6) * 4
+          malware.position.set(HOST_SPOT[0] + Math.cos(angle) * 0.6, 0, HOST_SPOT[1] + Math.sin(angle) * 0.6)
+          malware.rotation.y = -angle
+        }
+        sensorVisits(t, 0.4, 3.4, HOST_SPOT[0], HOST_SPOT[1])
+        if (t > 0.9 && t < 3.3) {
+          popIn(clock, HOST_SPOT[0], 4.6, HOST_SPOT[1], t, 0.9, 0.9)
+          clock.rotation.y = 0.6
+          clockHand.rotation.z = -progress(t, 1.0, 3.0) * Math.PI * 2
+        }
+        if (t > 3.4 && t < 4.6) malware.position.y = Math.abs(Math.sin((t - 3.4) * 7)) * 0.4
+        showSparks(HOST_SPOT[0], 1.0, HOST_SPOT[1], t, 3.4)
+      },
+    },
+    // T1140 Deobfuscate/Decode Files or Information
+    T1140: {
+      hits: [3.4],
+      run(t) {
+        view.target = [0.6, 3.2]
+        view.height = 10.5
+        storyState(6)
+        // ばらばらにして隠しておいた断片は、見張りが見ても意味が分からない。使う直前に、元の形に組み立て直す
+        const spot = [-0.6, 3.0]
+        const scattered = [
+          [-2.0, 0.25, 2.2],
+          [-1.2, 0.25, 4.4],
+          [0.4, 0.25, 1.8],
+          [0.6, 0.25, 4.6],
+        ]
+        const joined = smooth(progress(t, 2.4, 3.0))
+        const whole = bots[6]
+        scattered.forEach((at, i) => {
+          const piece = pinkCubes[i]
+          if (joined >= 1) return
+          piece.visible = true
+          piece.scale.set(0.24, 0.24, 0.24)
+          piece.position.set(
+            lerp(at[0], spot[0], joined),
+            lerp(at[1], 0.6, joined),
+            lerp(at[2], spot[1], joined),
+          )
+          piece.rotation.set(i, i * 2, 0)
+        })
+        sensorVisits(t, 0.5, 2.3, -0.6, 3.2, true)
+        if (t > 3.0) {
+          const size = overshoot(progress(t, 3.0, 3.3))
+          whole.visible = true
+          whole.scale.set(size, size, size)
+          whole.position.set(spot[0], Math.abs(Math.sin((t - 3.0) * 6)) * 0.2, spot[1])
+          whole.rotation.y = 0.6
+        }
+        showSparks(spot[0], 0.9, spot[1], t, 3.3, 4, 3)
+      },
+    },
+    // T1006 Direct Volume Access
+    T1006: {
+      hits: [3.2],
+      run(t) {
+        view.target = [0.2, 3.0]
+        view.height = 10.5
+        storyState(6)
+        // ファイルは、ふつう受付（小さな門）を通して読む。そこで権限が確かめられ、記録も残る。受付を通らず、記録装置（台帳）の中身を直接読む
+        const disk = [-2.0, 2.2]
+        const desk = [-0.9, 4.0]
+        database.visible = true
+        database.scale.set(0.9, 0.9, 0.9)
+        database.position.set(disk[0], 0, disk[1])
+        database.rotation.y = 0.6
+        checkpoint.visible = true
+        checkpoint.position.set(desk[0], 0, desk[1])
+        checkpoint.rotation.y = Math.PI / 2
+        checkpoint.scale.set(0.55, 0.55, 0.55)
+        scanPlane.visible = true
+        scanPlane.position.set(desk[0], 0.85, desk[1])
+        scanPlane.rotation.y = Math.PI / 2
+        scanPlane.scale.set(2.0, 1.6, 0.08)
+        scanPlane.material.opacity = 0.3 + 0.15 * Math.sin(t * 8)
+        if (t > 0.8 && t < 4.4)
+          stretchBetween(pinkBeams[0], [HOST_SPOT[0], 0.2, HOST_SPOT[1] - 0.6], [disk[0], 0.2, disk[1]], 0.08)
+        for (let i = 0; i < 3; i++) {
+          const start = 1.6 + i * 0.5
+          if (t < start) continue
+          const page = documents[i]
+          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
+          flyTo(page, [disk[0], 0.5, disk[1]], aboveHost(2.4 + i * 0.5), t, start + 0.1, start + 1.0, 0.6, 5)
+          page.scale.set(size, size, size)
+          if (t >= start + 1.0) page.rotation.y = 0.6
+        }
+      },
+    },
+    // T1480 Execution Guardrails
+    T1480: {
+      hits: [3.4],
+      run(t) {
+        view.target = [0.8, 3.2]
+        view.height = 10.5
+        storyState(6)
+        // ここは本当に、ねらった相手の環境か。目じるし（黄色い箱）をひとつずつ確かめ、全部そろったときだけ動く。調べる人の環境では、何も起きない
+        const armed = t > 2.8
+        yellowCubes.forEach((fact, i) => {
+          const checked = 0.9 + i * 0.6
+          fact.visible = true
+          fact.material.color.setHex(t > checked + 0.3 ? 0xff6fd8 : 0xf6c531)
+          fact.scale.set(0.4, 0.4, 0.4)
+          fact.position.set(-1.8 + i * 0.75, 1.4, 2.4)
+          fact.rotation.y = 0.6
+          if (t > checked && t < checked + 0.4)
+            stretchBetween(pinkBeams[i], aboveHost(0.9), [-1.8 + i * 0.75, 1.4, 2.4], 0.07)
+        })
+        if (!armed) {
+          malware.position.y = 0
+          malware.scale.y *= 0.55
+          crown.visible = false
+        } else if (t < 4.4) malware.position.y = Math.abs(Math.sin((t - 2.8) * 7)) * 0.35
+        showSparks(HOST_SPOT[0], 1.0, HOST_SPOT[1], t, 3.0)
+      },
+    },
+    // T1211 Exploitation for Stealth
+    T1211: {
+      hits: [2.8],
+      run(t) {
+        view.target = [1.0, 3.6]
+        view.height = 10
+        storyState(6)
+        // 見張りは、見たことを記録（紙）に書き続けている。見張りの弱点を突くと、浮かんだまま固まって、記録が止まる
+        const eye = [0.5, 3.3, 3.5]
+        const frozen = t > 1.8 && t < 5.4
+        const exploit = pinkCubes[6]
+        if (frozen) placeSensor(eye[0], eye[1], eye[2], 0.18)
+        for (let i = 0; i < 2; i++) {
+          const start = 0.2 + i * 0.7
+          if (t < start) continue
+          const log = documents[i]
+          const size = 0.7 * overshoot(progress(t, start, start + 0.3))
+          flyTo(log, eye, [-1.4 + i * 0.6, 0.5, 4.6], t, start + 0.1, start + 0.8, 0.5, 5)
+          log.scale.set(size, size, size)
+          if (t >= start + 0.8) log.rotation.y = 0.6
+        }
+        if (t > 0.9 && t < 1.8) {
+          flyTo(exploit, aboveHost(1.2), eye, t, 0.9, 1.8, 1.2, 8)
+          exploit.scale.set(0.3, 0.3, 0.3)
+        }
+        // 記録されないまま動く
+        if (t > 2.4 && t < 4.6) malware.position.y = Math.abs(Math.sin((t - 2.4) * 6)) * 0.3
+        showSparks(HOST_SPOT[0], 1.0, HOST_SPOT[1], t, 2.6)
+        showAlert(0, -2, 2.2, 5, t, 5.4, 6.8)
+      },
+    },
+    // T1574 Hijack Execution Flow
+    T1574: {
+      hits: [3.4],
+      run(t) {
+        view.target = [0.6, 3.0]
+        view.height = 10.5
+        storyState(6)
+        // 正規のプログラムが読み込む部品を、自分のものにすり替えておく。動いているのは正規のプログラムなので、見張りは通り過ぎる
+        const program = [-1.0, 2.6]
+        const planted = [-1.0, 1.4, 4.0]
+        const fakePart = pinkCubes[6]
+        trustedProcess.visible = true
+        trustedProcess.scale.set(1.5, 1.5, 1.5)
+        trustedProcess.position.set(
+          program[0],
+          t > 2.4 && t < 4.4 ? Math.abs(Math.sin((t - 2.4) * 6)) * 0.15 : 0,
+          program[1],
+        )
+        trustedProcess.rotation.y = 0.6
+        trustedProcessEyes.visible = false
+        if (t > 0.5 && t < 2.4) {
+          if (t < 1.6) flyTo(fakePart, aboveHost(2.2), planted, t, 0.5, 1.4, 1.0, 6)
+          else flyTo(fakePart, planted, [program[0], 1.3, program[1]], t, 1.9, 2.4, 0.3)
+          fakePart.scale.set(0.32, 0.32, 0.32)
+        }
+        if (t > 1.4 && t < 2.0) stretchBetween(cyanBeams[0], [program[0], 1.0, program[1]], planted, 0.06)
+        showSparks(program[0], 1.2, program[1], t, 2.4)
+        sensorVisits(t, 2.6, 4.4, program[0], program[1], true)
+        if (t > 3.4 && t < 4.4) showCheck(program[0], 4.6, program[1], t, 3.4)
+      },
+    },
+    // T1202 Indirect Command Execution
+    T1202: {
+      hits: [3.0],
+      run(t) {
+        view.target = [0.6, 3.2]
+        view.height = 10.5
+        storyState(6)
+        // 見張りは、マルウェアが自分でコマンドを動かさないかを見ている。だから自分では動かさず、別の正規の道具（小さな機械）にことづけて、動かしてもらう
+        const helper = [-1.4, 3.2]
+        const tool = bots[4]
+        const message = pinkCubes[6]
+        tool.visible = true
+        tool.scale.set(1, 1, 1)
+        tool.position.set(
+          helper[0],
+          t > 2.4 && t < 4.4 ? Math.abs(Math.sin((t - 2.4) * 6)) * 0.2 : 0,
+          helper[1],
+        )
+        tool.rotation.y = 0.6
+        sensorVisits(t, 0.4, 4.6, HOST_SPOT[0], HOST_SPOT[1], true)
+        // マルウェア自身は、じっとしている
+        malware.position.y = 0
+        if (t > 1.2 && t < 2.4) {
+          message.visible = true
+          message.scale.set(0.22, 0.14, 0.22)
+          message.position.set(
+            lerp(HOST_SPOT[0], helper[0], smooth(progress(t, 1.2, 2.4))),
+            0.12,
+            lerp(HOST_SPOT[1], helper[1], smooth(progress(t, 1.2, 2.4))),
+          )
+        }
+        showSparks(helper[0], 0.9, helper[1], t, 2.5)
+      },
+    },
+    // T1542 Pre-OS Boot
+    T1542: {
+      hits: [2.4],
+      run(t) {
+        view.target = [1.2, 3.6]
+        view.height = 10
+        storyState(6)
+        // 電源が入ってから、OSと見張りが動き出すまでの、わずかな時間。その「OSより前」にひそんでおけば、見張りが来たときには、もう用は済んでいる
+        const arrive = smooth(progress(t, 2.8, 3.6))
+        placeSensor(0.5, lerp(9, 3.3, arrive) + Math.sin(view.time * 3) * 0.1, 3.5)
+        // 電源が入る
+        if (t > 0.4 && t < 2.6)
+          pulseRings.forEach((ring, j) => {
+            const phase = ((t - 0.4) * 0.8 + j * 0.5) % 1
+            const scale = 1 + phase * 7
+            ring.visible = true
+            ring.scale.set(scale, 0.02, scale)
+            ring.position.set(HOST_SPOT[0], 0.08, HOST_SPOT[1])
+            ring.material.opacity = 0.5 * (1 - phase)
+          })
+        if (t < 0.6) placeMalware(HOST_SPOT[0], 0, HOST_SPOT[1], 0)
+        else if (t < 2.8) malware.position.y = Math.abs(Math.sin((t - 0.6) * 6)) * 0.3
+        else {
+          // OSが立ち上がったあとは、床の下にいる
+          malware.position.y = -1.9 * arrive
+          crown.visible = arrive < 0.3
+        }
+        if (t < 0.6) crown.visible = false
+        showSparks(HOST_SPOT[0], 1.0, HOST_SPOT[1], t, 1.2)
+        if (t > 3.8 && t < 4.6) sensorVisits(t, 3.6, 5.0, HOST_SPOT[0], HOST_SPOT[1], true)
+      },
+    },
+    // T1055 Process Injection
+    T1055: {
+      hits: [3.2],
+      run(t) {
+        view.target = [0.6, 3.0]
+        view.height = 10.5
+        storyState(6)
+        // 動いている正規のプログラムの中へ、自分ごと入り込む。外から見えるのは、いつもの正規のプログラムだけ
+        const host = [-0.9, 2.8]
+        const inside = t > 2.0 && t < 5.6
+        trustedProcess.visible = true
+        trustedProcess.scale.set(1.9, 1.9, 1.9)
+        trustedProcess.position.set(host[0], 0, host[1])
+        trustedProcess.rotation.y = 0.6
+        trustedProcessEyes.visible = inside
+        if (t > 1.0 && t < 5.6) {
+          const shrink = t < 2.0 ? 1 - smooth(progress(t, 1.6, 2.0)) : 0
+          jumpMalware(t, 1.0, 2.0, aboveHost(0), [host[0], 0.6, host[1]], 1.2, ADMIN_MALWARE_SIZE * shrink)
+          crown.visible = false
+        }
+        sensorVisits(t, 2.4, 4.4, host[0], host[1], true)
+        if (t > 3.2 && t < 4.4) showCheck(host[0], 4.8, host[1], t, 3.2)
+        showCross(host[0], 2.8, host[1], t, 5.6)
+      },
+    },
+    // T1620 Reflective Code Loading
+    T1620: {
+      hits: [3.0],
+      run(t) {
+        view.target = [0.8, 3.2]
+        view.height = 10.5
+        storyState(6)
+        // 見張りが調べるのは、ディスクに置かれたファイル（床の紙）。コードをファイルにせず、メモリ（宙）に直接読み込んで動かせば、床には何も残らない
+        const memory = aboveHost(2.8)
+        const code = pinkCubes[6]
+        for (let i = 0; i < 3; i++) {
+          const file = documents[i]
+          file.visible = true
+          file.scale.set(0.9, 0.9, 0.9)
+          file.position.set(-1.8 + i * 0.8, 0.12, 2.6 + (i & 1) * 0.8)
+          file.rotation.set(Math.PI / 2, 0, 0.3 * i)
+        }
+        sensorVisits(t, 0.6, 4.4, -1.0, 3.0, true)
+        if (t > 1.2 && t < 4.6) {
+          flyTo(code, [TOWER_SPOT[0], 2.9, TOWER_SPOT[1]], memory, t, 1.2, 2.4, 2.4, 6)
+          code.scale.set(0.34, 0.34, 0.34)
+          if (t >= 2.4) code.rotation.set(t * 4, t * 6, 0)
+        }
+        showSparks(memory[0], memory[1], memory[2], t, 2.6)
+      },
+    },
+    // T1679 Selective Exclusion
+    T1679: {
+      hits: [3.0],
+      run(t) {
+        view.target = [0.4, 3.0]
+        view.height = 10.5
+        storyState(6)
+        // 手当たり次第に壊すと、機械が止まってすぐ気づかれる。動かすのに必要なファイル（黄色い印）はわざと避けて、目立たないものだけに手を付ける
+        const at = (i: number) => [-2.2 + i * 0.8, 1.4, 2.4]
+        for (let i = 0; i < 4; i++) {
+          const file = documents[i]
+          const vital = i % 2 === 1
+          const touched = 0.9 + i * 0.5
+          const spot = at(i)
+          file.visible = true
+          file.scale.set(0.9, 0.9, 0.9)
+          file.position.set(spot[0], spot[1], spot[2])
+          file.rotation.y = 0.6
+          if (vital) {
+            const badge = yellowCubes[(i - 1) / 2]
+            badge.visible = true
+            badge.material.color.setHex(0xf6c531)
+            badge.scale.set(0.2, 0.2, 0.2)
+            badge.position.set(spot[0], spot[1] + 0.6, spot[2])
+            continue
+          }
+          if (t > touched && t < touched + 0.4) stretchBetween(pinkBeams[i], aboveHost(0.9), spot, 0.07)
+          if (t > touched + 0.3 && t < 5.6) {
+            const mark = pinkCubes[i]
+            mark.visible = true
+            mark.scale.set(0.24, 0.24, 0.24)
+            mark.position.set(spot[0], spot[1] + 0.6, spot[2])
+            mark.rotation.y = view.time * 2
+          }
+        }
+        // 機械は動き続けているので、見張りは気づかない
+        showAlert(0, -2, 2.2, 5, t, 5.6, 6.8)
+      },
+    },
+    // T1684 Social Engineering
+    T1684: {
+      hits: [3.2],
+      run(t) {
+        view.target = [2.8, 7.6]
+        view.height = 16
+        storyState(6)
+        view.actor = attacker
+        // 機械ではなく、人をだます。それらしい話（外からの線）で急がせて、従業員自身の手で承認させる。機械の側には、ほとんど跡が残らない
+        const desk = [3.5, 1.4, 4.4]
+        const caller = [ATTACKER_SPOT[0], 1.6, ATTACKER_SPOT[1]]
+        const given = key
+        if (t > 0.6 && t < 2.6) stretchBetween(pinkBeams[0], caller, desk, 0.05 + 0.02 * Math.sin(t * 20))
+        hopInPlace(employees[2], t, 1.4, 2.4, 0.1)
+        if (t > 2.2 && t < 5.2) {
+          flyTo(given, desk, aboveAttacker(), t, 2.2, 3.2, 2.4, 6)
+          given.scale.set(0.8, 0.8, 0.8)
+          if (t >= 3.2) given.rotation.y = view.time * 2
+        }
+        if (t > 2.2 && t < 3.4) showCheck(desk[0], 3.0, desk[2], t, 2.2)
+        showCross(desk[0], 3.0, desk[2], t, 5.4)
+      },
+    },
+    // T1216 System Script Proxy Execution
+    T1216: {
+      hits: [3.2],
+      run(t) {
+        view.target = [0.6, 3.0]
+        view.height = 10.5
+        storyState(6)
+        // OSに付属する、署名の付いた正規のスクリプト（印のある紙）。これに不正な処理をことづけて、スクリプトの動作として動かす
+        const page = [-0.9, 1.6, 2.8]
+        const script = documents[0]
+        const seal = yellowCubes[0]
+        const payload = pinkCubes[6]
+        script.visible = true
+        script.scale.set(1.5, 1.5, 1.5)
+        script.position.set(
+          page[0],
+          page[1] + (t > 2.2 && t < 4.4 ? Math.abs(Math.sin((t - 2.2) * 6)) * 0.12 : 0),
+          page[2],
+        )
+        script.rotation.y = 0.6
+        seal.visible = true
+        seal.material.color.setHex(0xf6c531)
+        seal.scale.set(0.2, 0.2, 0.2)
+        seal.position.set(page[0] + 0.25, script.position.y - 0.4, page[2] + 0.15)
+        if (t > 0.8 && t < 2.2) {
+          flyTo(payload, aboveHost(2.2), page, t, 0.8, 2.0, 1.0, 6)
+          payload.scale.set(0.3, 0.3, 0.3)
+        }
+        showSparks(page[0], 1.4, page[2], t, 2.2)
+        sensorVisits(t, 2.6, 4.4, page[0], page[2], true)
+        if (t > 3.3 && t < 4.4) showCheck(page[0], 4.6, page[2], t, 3.3)
+      },
+    },
+    // T1221 Template Injection
+    T1221: {
+      hits: [3.0],
+      run(t) {
+        view.target = [2.8, 7.6]
+        view.height = 16
+        storyState(6)
+        // 届いた文書そのものには、不正なものは何も入っていない。開いたときに、文書が外へ「ひな形」を取りに行き、そこで初めて不正な中身が入ってくる
+        const desk = [2.7, 1.4, 4.7]
+        const outside = [TOWER_SPOT[0], 2.9, TOWER_SPOT[1]]
+        const opened = smooth(progress(t, 1.0, 1.4))
+        const file = documents[0]
+        const fetched = pinkCubes[6]
+        file.visible = true
+        file.scale.set(1.0, 1.0, 1.0)
+        file.position.set(desk[0], desk[1] + opened * 0.5, desk[2])
+        file.rotation.set((1 - opened) * (Math.PI / 2), 0.6, 0)
+        if (t < 1.0) showCheck(desk[0], 3.0, desk[2], t, 0.2)
+        hopInPlace(employees[2], t, 0.9, 1.3, 0.12)
+        if (t > 1.4 && t < 2.9) stretchBetween(cyanBeams[0], [desk[0], desk[1] + 0.5, desk[2]], outside, 0.05)
+        if (t > 1.8 && t < 2.9) {
+          flyTo(fetched, outside, [desk[0], desk[1] + 0.5, desk[2]], t, 1.8, 2.8, 2.0, 6)
+          fetched.scale.set(0.3, 0.3, 0.3)
+        }
+        showSparks(desk[0], desk[1] + 0.5, desk[2], t, 2.8)
+        showCross((desk[0] + outside[0]) / 2, 4.4, (desk[2] + outside[2]) / 2, t, 5.4)
+      },
+    },
+    // T1205 Traffic Signaling
+    T1205: {
+      hits: [3.0],
+      run(t) {
+        view.target = [0.8, 6.2]
+        view.height = 15
+        storyState(6)
+        // 通信の口（黄色い箱）は、ふだん閉じている（灰色）。外から調べても、何も開いていない。決めた合図が届いたときだけ、少しのあいだ開く
+        const port = [YELLOW_CUBE_X[1], 2.5, 6.6]
+        const open = t > 2.6 && t < 4.4
+        const entry = yellowCubes[1]
+        const knock = pinkCubes[6]
+        entry.visible = true
+        entry.material.color.setHex(open ? 0xff6fd8 : 0x4a4f5c)
+        entry.scale.set(0.5, 0.5, 0.5)
+        // 見張りが調べる
+        if (t > 0.5 && t < 1.6) stretchBetween(cyanBeams[0], [0.5, 3.3, 3.5], port, 0.06)
+        if (t > 1.0 && t < 1.8) showCheck(port[0], 4.2, port[2], t, 1.0)
+        if (t > 2.0 && t < 2.6) {
+          flyTo(knock, [TOWER_SPOT[0], 2.9, TOWER_SPOT[1]], port, t, 2.0, 2.6, 2.0, 6)
+          knock.scale.set(0.3, 0.3, 0.3)
+        }
+        if (open) {
+          stretchBetween(pinkBeams[0], [TOWER_SPOT[0], 2.9, TOWER_SPOT[1]], port, 0.08)
+          stretchBetween(pinkBeams[1], port, aboveHost(1.0), 0.08)
+        }
+      },
+    },
+    // T1127 Trusted Developer Utilities Proxy Execution
+    T1127: {
+      hits: [3.0],
+      run(t) {
+        view.target = [0.6, 3.2]
+        view.height = 10.5
+        storyState(6)
+        // 開発用の正規の道具（かなづち）は、署名もあって信頼されている。これに組み立てさせれば、できあがるまで、見張りには不正なものが見えない
+        const bench = [-0.8, 0.5, 3.0]
+        const built = bots[6]
+        for (let i = 0; i < 2; i++) {
+          const start = 0.5 + i * 0.5
+          if (t < start || t > 2.6) continue
+          const source = documents[i]
+          flyTo(
+            source,
+            aboveHost(2.2),
+            [bench[0] - 0.3 + i * 0.6, bench[1], bench[2]],
+            t,
+            start,
+            start + 0.8,
+            0.9,
+            5,
+          )
+          source.scale.set(0.7, 0.7, 0.7)
+          if (t >= start + 0.8) source.rotation.set(Math.PI / 2, 0, 0)
+        }
+        hammer.visible = true
+        hammer.position.set(bench[0] + 0.8, 0.9, bench[2] + 0.2)
+        hammer.rotation.z = t > 1.5 && t < 2.7 ? 0.3 + Math.abs(Math.cos(((t - 1.5) * Math.PI) / 0.4)) : 1.2
+        sensorVisits(t, 0.8, 2.8, bench[0], bench[2], true)
+        if (t > 1.6 && t < 2.8) showCheck(bench[0], 4.6, bench[2], t, 1.6)
+        if (t > 2.6) {
+          const size = overshoot(progress(t, 2.6, 2.9))
+          built.visible = true
+          built.scale.set(size, size, size)
+          built.position.set(bench[0], Math.abs(Math.sin((t - 2.6) * 6)) * 0.2, bench[2])
+          built.rotation.y = 0.6
+        }
+        showSparks(bench[0], 0.9, bench[2], t, 2.9)
+      },
+    },
+    // T1078 Valid Accounts
+    T1078: {
+      hits: [3.4],
+      run(t) {
+        view.target = [0.5, 3.4]
+        view.height = 15
+        storyState(6)
+        // 正規のアカウント（人形）で、ふつうの利用者と同じように操作する。見張りが端から順に見て回っても、従業員のひとりにしか見えない
+        const seat = [0.2, 4.2]
+        const sweep = progress(t, 1.6, 4.2)
+        const x = lerp(-6.5, 6.5, sweep)
+        const gone = smooth(progress(t, 0.4, 1.0)) * (1 - smooth(progress(t, 5.6, 6.2)))
+        placeMalware(HOST_SPOT[0], 0, HOST_SPOT[1], ADMIN_MALWARE_SIZE * (1 - gone))
+        crown.visible = gone < 0.3
+        if (gone > 0.3) {
+          impostor.visible = true
+          applyPose(impostor, standing(seat[0], seat[1], 0))
+          impostor.scale.multiplyScalar(overshoot(progress(t, 0.8, 1.2)))
+          impostor.scale.y *= 1 + Math.sin(view.time * 3 + 1) * 0.03
+        }
+        if (t > 1.6 && t < 4.2) {
+          const beam = cyanBeams[0]
+          placeSensor(x, 3.4 + Math.sin(view.time * 3) * 0.1, 3.4)
+          beam.visible = true
+          beam.rotation.set(0, 0, 0)
+          beam.position.set(x, 1.7, 3.4)
+          beam.scale.set(0.3, 2.8, 0.3)
+        }
+        if (t > 3.2 && t < 4.6) showCheck(seat[0], 2.6, seat[1], t, 3.2)
+        showAlert(0, -2, 2.2, 5, t, 5.4, 6.8)
+      },
+    },
+    // T1220 XSL Script Processing
+    T1220: {
+      hits: [3.2],
+      run(t) {
+        view.target = [0.4, 3.2]
+        view.height = 10.5
+        storyState(6)
+        // データの形を整える正規の道具は、「変換の手順書」を読んで働く。その手順書にスクリプトを埋め込んでおくと、変換のついでに動かしてくれる
+        const tool = [-1.0, 2.8]
+        const data = documents[0]
+        const recipe = documents[1]
+        const result = documents[2]
+        const hidden = pinkCubes[6]
+        trustedProcess.visible = true
+        trustedProcess.scale.set(1.5, 1.5, 1.5)
+        trustedProcess.position.set(
+          tool[0],
+          t > 2.3 && t < 4.4 ? Math.abs(Math.sin((t - 2.3) * 6)) * 0.15 : 0,
+          tool[1],
+        )
+        trustedProcess.rotation.y = 0.6
+        trustedProcessEyes.visible = false
+        if (t > 0.4 && t < 2.3) {
+          flyTo(data, [-3.4, 1.2, 4.2], [tool[0], 1.2, tool[1]], t, 0.4, 2.2, 0.4, 0)
+          data.scale.set(0.8, 0.8, 0.8)
+          data.rotation.y = 0.6
+          flyTo(recipe, aboveHost(2.2), [tool[0], 1.6, tool[1]], t, 0.8, 2.2, 0.9, 0)
+          recipe.scale.set(0.8, 0.8, 0.8)
+          recipe.rotation.y = 0.6
+          hidden.visible = true
+          hidden.scale.set(0.16, 0.16, 0.16)
+          hidden.position.set(recipe.position.x + 0.1, recipe.position.y - 0.25, recipe.position.z + 0.1)
+        }
+        if (t > 2.4) {
+          flyTo(result, [tool[0], 1.2, tool[1]], [tool[0] - 1.4, 0.5, tool[1] + 1.6], t, 2.4, 3.2, 0.8, 5)
+          result.scale.set(0.8, 0.8, 0.8)
+          if (t >= 3.2) result.rotation.y = 0.6
+        }
+        showSparks(tool[0], 1.2, tool[1], t, 2.4)
+        sensorVisits(t, 2.8, 4.6, tool[0], tool[1], true)
       },
     },
   }
