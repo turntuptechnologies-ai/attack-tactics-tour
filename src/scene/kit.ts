@@ -405,6 +405,22 @@ export function createKit(w: World) {
       )
   }
 
+  /**
+   * ステルスの見せ方。見張りが t0〜t1 のあいだ、(x, z) の真上まで調べに来て、何も見つけずに戻る。
+   * ray を true にすると、真下を照らす（水色の線の 3 本目 cyanBeams[2] を使う）。
+   */
+  function sensorVisits(t: number, t0: number, t1: number, x: number, z: number, ray = false) {
+    const near = smooth(progress(t, t0, t0 + 0.6)) * (1 - smooth(progress(t, t1 - 0.5, t1)))
+    placeSensor(lerp(0.5, x, near), lerp(3.3, 3.0, near) + Math.sin(view.time * 3) * 0.1, lerp(3.5, z, near))
+    if (ray && t > t0 + 0.6 && t < t1 - 0.5) {
+      const beam = w.cyanBeams[2]
+      beam.visible = true
+      beam.rotation.set(0, 0, 0)
+      beam.position.set(x, 1.5, z)
+      beam.scale.set(0.3, 2.4, 0.3)
+    }
+  }
+
   return {
     ...w,
     view,
@@ -432,6 +448,7 @@ export function createKit(w: World) {
     showOperatorOrb,
     showSparks,
     wipeThenReturn,
+    sensorVisits,
   }
 }
 
