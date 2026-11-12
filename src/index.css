@@ -106,6 +106,78 @@ header p {
   width: 100%;
   height: 100%;
 }
+/* 番の切り替わり。縁は、替わった瞬間に太く光ってから細い光に落ち着く */
+.rim {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  animation: rim-pulse 0.9s ease-out both;
+}
+.rim.a {
+  --rim: var(--attack);
+}
+.rim.d {
+  --rim: var(--defend);
+}
+@keyframes rim-pulse {
+  0% {
+    box-shadow:
+      inset 0 0 0 10px var(--rim),
+      inset 0 0 70px 12px var(--rim);
+    opacity: 0.95;
+  }
+  100% {
+    box-shadow:
+      inset 0 0 0 2px var(--rim),
+      inset 0 0 22px 0 var(--rim);
+    opacity: 0.5;
+  }
+}
+/* 防御側の番に替わった瞬間だけ、札を中央に大きく出す */
+.turnflash {
+  position: absolute;
+  left: 50%;
+  /* 広い画面で、舞台に重なる場面名の札（左上）に触れない高さ */
+  top: 29%;
+  font-family: var(--display);
+  font-size: clamp(18px, 4.4vw, 38px);
+  padding: 4px 18px;
+  color: var(--chip-fg);
+  background: var(--defend);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  animation: turn-flash 1.2s ease-out both;
+}
+@keyframes turn-flash {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.6);
+  }
+  14% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  62% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -110%) scale(0.85);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rim {
+    animation: none;
+    box-shadow: inset 0 0 0 2px var(--rim);
+    opacity: 0.5;
+  }
+  .turnflash {
+    display: none;
+  }
+}
 .fade {
   position: absolute;
   inset: 0;

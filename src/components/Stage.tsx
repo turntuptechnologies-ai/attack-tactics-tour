@@ -103,6 +103,13 @@ export function Stage({ now, onPlayer, onChange, onPlaying, onError }: Props) {
             <i key={t.id} className={i === current ? 'on' : i < done ? 'done' : ''} />
           ))}
         </div>
+        {/* 番が替わったことを、舞台の縁の色と、中央に一瞬出る札で知らせる。key を変えて、替わるたびに動きをやり直す */}
+        {now && side && <div key={`rim-${now.index}-${side}`} className={`rim ${side}`} />}
+        {now && side === 'd' && (
+          <div key={`flash-${now.index}`} className="turnflash" aria-hidden="true">
+            防御側のターン
+          </div>
+        )}
         <div className="fade" ref={fade} />
       </div>
     </div>
