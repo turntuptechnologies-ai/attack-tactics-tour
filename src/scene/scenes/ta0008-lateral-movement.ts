@@ -1,6 +1,6 @@
 // TA0008 水平展開（Lateral Movement）の場面。
 import type { Kit } from '../kit'
-import { progress, smooth, lerp, overshoot, walk, applyPose, arcBetween } from '../motion'
+import { progress, smooth, lerp, overshoot, walk, applyPose, arcBetween, stretchBetween } from '../motion'
 import type { SceneMap } from './types'
 
 export default function lateralMovement(kit: Kit): SceneMap {
@@ -32,6 +32,9 @@ export default function lateralMovement(kit: Kit): SceneMap {
     showCheck,
     showAlert,
     documents,
+    cyanBeams,
+    placeMalware,
+    bobHeight,
   } = kit
   return {
     // T1021 Remote Services（本編）
@@ -255,6 +258,30 @@ export default function lateralMovement(kit: Kit): SceneMap {
               overshoot(progress(t, start + 0.9, start + 1.2)),
             )
         }
+      },
+    },
+    // T1563 Remote Service Session Hijacking
+    T1563: {
+      hits: [3.6],
+      run(t) {
+        view.target = [-1.6, 0.6]
+        view.height = 13
+        storyState(10)
+        // 従業員がサーバーに開いたままにしているリモート接続（水色の線）。これを乗っ取って移動する
+        const seat = employees[1].position
+        const from = [seat.x, 1.0, seat.z + 0.9]
+        const to = [racks[1].x, 1.4, RACK_Z + 0.7]
+        if (t < 5.4) stretchBetween(cyanBeams[0], from, to, 0.08)
+        // まず接続の出どころの端末へ行き、そこから接続に乗ってサーバーへ
+        const toDesk = smooth(progress(t, 0.6, 1.6))
+        const ride = smooth(progress(t, 2.2, 3.6))
+        const x =
+          ride > 0 ? lerp(from[0] + 0.9, to[0] + 0.9, ride) : lerp(HOST_SPOT[0], from[0] + 0.9, toDesk)
+        const z = ride > 0 ? lerp(from[2], to[2] + 0.6, ride) : lerp(HOST_SPOT[1], from[2], toDesk)
+        const lift = ride > 0 ? Math.sin(Math.PI * ride) * 0.3 : Math.sin(Math.PI * toDesk) * 1.0
+        placeMalware(x, lift + (ride >= 1 ? bobHeight() : 0), z, ADMIN_MALWARE_SIZE)
+        // 防御側は、使われていない接続を切る
+        showCross((from[0] + to[0]) / 2, 3.2, (from[2] + to[2]) / 2, t, 5.4)
       },
     },
   }

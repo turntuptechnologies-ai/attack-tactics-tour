@@ -27,6 +27,9 @@ export default function execution(kit: Kit): SceneMap {
     showAlert,
     jumpMalware,
     sensorArrives,
+    cyanBeams,
+    trustedProcess,
+    trustedProcessEyes,
   } = kit
   return {
     // T1059 Command and Scripting Interpreter（本編）
@@ -246,6 +249,51 @@ export default function execution(kit: Kit): SceneMap {
             box[0] + Math.sin(i * 2.1 + p * 5) * 0.45,
             0.7 + p * 1.9,
             box[1] + Math.cos(i * 2.1 + p * 5) * 0.45,
+          )
+        }
+        sensorArrives(t)
+      },
+    },
+    // T1574 Hijack Execution Flow
+    T1574: {
+      hits: [3.4],
+      run(t) {
+        view.target = [0.8, 3.0]
+        view.height = 10
+        storyState(3)
+        // 正規のプログラムは、動くときに部品を読み込む。先に見つかる場所へ、偽の部品を置いておく
+        const px = -0.9
+        const pz = 2.4
+        const planted = [-0.9, 1.4, 1.4]
+        const real = documents[0]
+        const fakePart = pinkCubes[0]
+        trustedProcess.visible = true
+        trustedProcess.scale.set(1.5, 1.5, 1.5)
+        trustedProcess.position.set(px, 0, pz)
+        trustedProcess.rotation.y = 0.6
+        trustedProcessEyes.visible = t > 3.2
+        real.visible = true
+        real.scale.set(0.9, 0.9, 0.9)
+        real.position.set(-0.9, 1.4, 0.3)
+        real.rotation.y = 0.6
+        if (t > 0.5 && t < 3.2) {
+          if (t < 2.4) flyTo(fakePart, aboveHost(1.2), planted, t, 0.5, 1.5, 1.4, 6)
+          else flyTo(fakePart, planted, [px, 1.3, pz], t, 2.6, 3.2, 0.4)
+          fakePart.scale.set(0.34, 0.34, 0.34)
+        }
+        // プログラムが部品を探しにいき（水色の線）、手前にある偽物のほうを先に読み込む
+        if (t > 2.0 && t < 2.7) stretchBetween(cyanBeams[0], [px, 1.0, pz], planted, 0.06)
+        for (let i = 1; i < 5; i++) {
+          const p = progress(t, 3.0 + i * 0.2, 4.0 + i * 0.2)
+          if (p <= 0 || p >= 1) continue
+          const spark = pinkCubes[i]
+          const size = 0.28 * (1 - p * 0.6)
+          spark.visible = true
+          spark.scale.set(size, size, size)
+          spark.position.set(
+            px + Math.sin(i * 2.1 + p * 5) * 0.5,
+            1.2 + p * 2.0,
+            pz + Math.cos(i * 2.1 + p * 5) * 0.5,
           )
         }
         sensorArrives(t)

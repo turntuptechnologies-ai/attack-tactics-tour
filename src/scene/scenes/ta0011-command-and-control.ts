@@ -30,6 +30,7 @@ export default function commandAndControl(kit: Kit): SceneMap {
     showOperatorOrb,
     hammer,
     markCompromised,
+    c2Tower,
   } = kit
   return {
     // T1071 Application Layer Protocol（本編）
@@ -239,6 +240,41 @@ export default function commandAndControl(kit: Kit): SceneMap {
           relayBot.rotation.y = t * 4
         } else if (second >= 1)
           markCompromised(5, SERVER_SPOT[0] - 1.3, SERVER_SPOT[1] + 0.6, overshoot(progress(t, 4.0, 4.3)))
+      },
+    },
+    // T1568 Dynamic Resolution
+    T1568: {
+      hits: [2.6],
+      run(t) {
+        view.target = [-0.5, 5.2]
+        view.height = 22
+        storyState(12)
+        view.actor = attacker
+        showOperatorOrb(t)
+        // 指令サーバーの居場所を、仕組みで次々に切り替える。ひとつ止められても、もう別の場所にいる
+        const spots = [
+          [TOWER_SPOT[0], TOWER_SPOT[1]],
+          [-3.5, 13.2],
+          [-8.0, 9.5],
+        ]
+        const now = Math.floor(Math.max(0, t - 0.6) / 1.3) % 3
+        const from = [spots[now][0], 2.9, spots[now][1]]
+        const to = [SERVER_SPOT[0], 0.7, SERVER_SPOT[1]]
+        c2Tower.position.set(spots[now][0], 0, spots[now][1])
+        stretchBetween(c2Link, from, to, 0.1)
+        c2Link.material.opacity = 0.45 + 0.25 * Math.sin(t * 8)
+        for (let i = 0; i < 3; i++) {
+          const p = (t * 0.6 + i / 3) % 1
+          const cube = pinkCubes[i]
+          cube.visible = true
+          cube.scale.set(0.3, 0.3, 0.3)
+          cube.position.set(lerp(from[0], to[0], p), lerp(from[1], to[1], p), lerp(from[2], to[2], p))
+        }
+        // 防御側が前の居場所を止めても（×）、通信はもう別の場所へ移っている
+        if (t > 4.6) {
+          const old = spots[(now + 2) % 3]
+          showCross(old[0], 3.6, old[1], t, 4.8)
+        }
       },
     },
   }

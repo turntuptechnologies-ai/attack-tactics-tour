@@ -29,6 +29,7 @@ export default function defenseImpairment(kit: Kit): SceneMap {
     padlock,
     flyTo,
     showAlert,
+    gateGuard,
   } = kit
   return {
     // T1685 Disable or Modify Tools（本編）
@@ -208,6 +209,40 @@ export default function defenseImpairment(kit: Kit): SceneMap {
         padlock.position.set(at[0] + open * 0.9, lerp(at[1] + 1.1, 0.3, open * open), at[2])
         if (t > 0.9 && t < 1.7) stretchBetween(pinkBeams[0], aboveHost(0.8), [at[0], at[1] + 1.1, at[2]], 0.1)
         showAlert(0, -2, 2.6, 5, t, 5.0, 7)
+      },
+    },
+    // T1689 Downgrade Attack
+    T1689: {
+      hits: [3.3],
+      run(t) {
+        view.target = [1.2, 6.4]
+        view.height = 13
+        storyState(7)
+        // 入口の守り（盾）を外させ、古くて弱い方式（薄い板）に切り替えさせる
+        const down = smooth(progress(t, 1.4, 2.2)) * (1 - smooth(progress(t, 5.4, 6.0)))
+        gateGuard.visible = true
+        gateGuard.position.set(0, 3.2 + down * 6, 7.15)
+        if (down > 0.05) {
+          glass.visible = true
+          glass.scale.set(2.6, 2.0, 0.1)
+          glass.position.set(0, 1.2, 7.05)
+          glass.material.opacity = 0.3 * down
+        }
+        if (t > 0.7 && t < 1.5) stretchBetween(pinkBeams[0], aboveHost(0.9), [0, 3.2, 7.0], 0.1)
+        // 弱い方式なら、外からの通信が通り抜けてしまう
+        if (t > 2.4 && t < 5.2)
+          for (let i = 0; i < 4; i++) {
+            const p = ((t - 2.4) * 0.6 + i * 0.25) % 1
+            const cube = pinkCubes[i]
+            cube.visible = true
+            cube.scale.set(0.28, 0.28, 0.28)
+            cube.position.set(
+              lerp(TOWER_SPOT[0], HOST_SPOT[0], p),
+              lerp(2.9, 0.9, p) + Math.sin(Math.PI * p) * 1.2,
+              lerp(TOWER_SPOT[1], HOST_SPOT[1], p),
+            )
+          }
+        if (t > 5.6) showCheck(0, 4.7, 7.0, t, 5.8)
       },
     },
   }

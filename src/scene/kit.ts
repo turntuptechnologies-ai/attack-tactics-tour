@@ -216,6 +216,7 @@ export function createKit(w: World) {
     w.implant.scale.set(1, 1, 1)
     w.stairs.scale.set(1, 1, 1)
     w.c2Tower.scale.set(1, 1, 1)
+    w.c2Tower.position.set(TOWER_SPOT[0], 0, TOWER_SPOT[1])
     w.segmentWallMaterial.color.setHex(0x6f9dff)
     for (const r of racks) {
       r.lights.color.setHex(0x4dff9a)

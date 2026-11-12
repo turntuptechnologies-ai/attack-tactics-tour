@@ -5,6 +5,7 @@ import { overshoot, progress } from '../scene/motion'
 import { createScenes, type Scenes } from '../scene/scenes'
 import type { SceneDef } from '../scene/scenes/types'
 import { createWorld } from '../scene/world'
+import { TACTICS } from '../data/tactics'
 import type { Caption } from '../data/types'
 import { placeLabels } from './labels'
 import { buildTimeline, captionAt, hashFor, parseHash, step, type TimelineScene } from './timeline'
@@ -143,7 +144,7 @@ export class Player {
     if (scene.kind === 'intro') return this.scenes.intro
     if (scene.kind === 'outro') return this.scenes.outro
     if (scene.kind === 'simple') return this.scenes.simple(scene.tactic, scene.variant ?? 0)
-    return this.scenes.techniques[scene.techniqueId!]
+    return this.scenes.technique(TACTICS[scene.tactic].id, scene.techniqueId!)!
   }
 
   private resize() {

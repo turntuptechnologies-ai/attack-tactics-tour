@@ -41,6 +41,7 @@ export default function impact(kit: Kit): SceneMap {
     hopInPlace,
     showAlert,
     yellowCubes,
+    employees,
   } = kit
   return {
     // T1486 Data Encrypted for Impact（本編）
@@ -271,6 +272,33 @@ export default function impact(kit: Kit): SceneMap {
           )
         })
         showAlert(0, 4.8, 2.2, -3, t, 3.2, 4.5)
+      },
+    },
+    // T1531 Account Access Removal
+    T1531: {
+      hits: [2.6],
+      run(t) {
+        view.target = [0, 1.0]
+        view.height = 15
+        storyState(14)
+        applyPose(defender, standing(-2, 5, 0.4))
+        // 従業員のアカウントを消したりパスワードを変えたりして、だれも入れなくする
+        employees.forEach((employee, i) => {
+          const start = 0.6 + i * 0.5
+          const seat = employee.position
+          if (t > start && t < start + 0.4)
+            stretchBetween(pinkBeams[i], [SERVER_SPOT[0], 1.2, SERVER_SPOT[1]], [seat.x, 2.0, seat.z], 0.06)
+          if (t < start || t > 5.4 + i * 0.15) return
+          const lock = racks[i].lock
+          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
+          lock.visible = true
+          lock.scale.set(size, size, size)
+          lock.rotation.y = 0.6
+          lock.position.set(seat.x, 2.5 + Math.sin(view.time * 4 + i) * 0.06, seat.z)
+          hopInPlace(employee, t, start + 0.3, start + 1.2, 0.15)
+        })
+        showAlert(0, -2, 2.6, 5, t, 3.0, 4.5)
+        if (t > 5.6) showCheck(0, 3.6, 3.2, t, 5.8)
       },
     },
   }

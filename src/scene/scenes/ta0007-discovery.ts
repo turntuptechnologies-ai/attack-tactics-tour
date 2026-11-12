@@ -1,6 +1,6 @@
 // TA0007 探索（Discovery）の場面。
 import type { Kit } from '../kit'
-import { progress, lerp, overshoot, stretchBetween } from '../motion'
+import { progress, lerp, overshoot, stretchBetween, smooth } from '../motion'
 import type { SceneMap } from './types'
 
 export default function discovery(kit: Kit): SceneMap {
@@ -27,6 +27,7 @@ export default function discovery(kit: Kit): SceneMap {
     showAlert,
     scanPlane,
     flyTo,
+    glass,
   } = kit
   return {
     // T1046 Network Service Discovery（本編）
@@ -225,6 +226,46 @@ export default function discovery(kit: Kit): SceneMap {
           doc.scale.set(size, size, size)
           if (t >= start + 1.0) doc.rotation.y = 0.6
         })
+      },
+    },
+    // T1069 Permission Groups Discovery
+    T1069: {
+      hits: [3.0],
+      run(t) {
+        view.target = [0, 3.2]
+        view.height = 12.5
+        storyState(9)
+        // だれがどの権限のグループに入っているかを調べる。左の二人が管理者のグループ（囲み）
+        const a = employees[0].position
+        const b = employees[1].position
+        const middle = [(a.x + b.x) / 2, (a.z + b.z) / 2]
+        const shown = smooth(progress(t, 1.0, 1.6))
+        if (t > 0.5 && t < 1.1) stretchBetween(pinkBeams[0], aboveHost(0.9), [b.x, 1.2, b.z], 0.07)
+        if (shown > 0.02) {
+          glass.visible = true
+          glass.scale.set(4.4 * shown, 2.4, 3.4 * shown)
+          glass.position.set(middle[0], 1.2, middle[1] + 0.4)
+          glass.material.opacity = 0.3
+        }
+        if (t > 1.6) {
+          const size = 0.9 * overshoot(progress(t, 1.6, 1.9))
+          key.visible = true
+          key.scale.set(size, size, size)
+          key.position.set(middle[0], 3.4 + Math.sin(view.time * 4) * 0.08, middle[1])
+          key.rotation.y = view.time * 2
+        }
+        // それ以外の人には、ふつうの利用者のしるしが付く
+        for (let i = 0; i < 2; i++) {
+          const seat = employees[2 + i].position
+          const start = 2.2 + i * 0.4
+          if (t < start) continue
+          const cube = pinkCubes[i]
+          const size = 0.3 * overshoot(progress(t, start, start + 0.3))
+          cube.visible = true
+          cube.scale.set(size, size, size)
+          cube.position.set(seat.x, 2.4 + Math.sin(view.time * 4 + i) * 0.08, seat.z)
+          cube.rotation.y = view.time * 2
+        }
       },
     },
   }

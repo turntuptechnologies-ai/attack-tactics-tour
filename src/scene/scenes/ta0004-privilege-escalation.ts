@@ -28,6 +28,8 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
     jumpMalware,
     documents,
     database,
+    impostor,
+    standing,
   } = kit
   return {
     // T1068 Exploitation for Privilege Escalation（本編）
@@ -225,6 +227,37 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
           malware.scale.set(size, size, size)
         }
         showCross(book[0], 3.3, book[1], t, 5.4)
+      },
+    },
+    // T1098 Account Manipulation
+    T1098: {
+      hits: [3.4],
+      run(t) {
+        view.target = [0.4, 2.4]
+        view.height = 10.5
+        storyState(5)
+        // 攻撃者が使えるアカウント（人形）に、管理者の役割（水色の札）を付け足す
+        const who = [-1.6, 1.6]
+        const roles = [-0.2, 0.9]
+        impostor.visible = true
+        applyPose(impostor, standing(who[0], who[1], 0.6))
+        database.visible = true
+        database.scale.set(0.8, 0.8, 0.8)
+        database.position.set(roles[0], 0, roles[1])
+        database.rotation.y = 0.6
+        if (t > 0.7 && t < 1.5) stretchBetween(pinkBeams[0], aboveHost(0.8), [roles[0], 1.0, roles[1]], 0.09)
+        if (t > 1.3) {
+          flyTo(token, [roles[0], 1.7, roles[1]], [who[0], 2.4, who[1]], t, 1.6, 2.6, 1.2, 5)
+          if (t >= 2.6) token.rotation.y = view.time * 2
+        }
+        // 役割を得たアカウントの権限を、マルウェアが使う
+        if (t > 2.7 && t < 3.3) stretchBetween(pinkBeams[1], [who[0], 1.2, who[1]], aboveHost(1.4), 0.07)
+        if (t > 3.0) {
+          const size = lerp(MALWARE_SIZE, ADMIN_MALWARE_SIZE, overshoot(progress(t, 3.0, 3.4)))
+          crown.visible = true
+          malware.scale.set(size, size, size)
+        }
+        showCross(who[0], 3.4, who[1], t, 5.4)
       },
     },
   }

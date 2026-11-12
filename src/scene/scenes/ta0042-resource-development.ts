@@ -32,6 +32,7 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
     scanPlane,
     showAlert,
     documents,
+    database,
   } = kit
   return {
     // T1583 Acquire Infrastructure（本編）
@@ -179,6 +180,42 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
           popIn(documents[i], x, 2.6 + Math.sin(view.time * 4 + i) * 0.06, z, t, start + 0.5, 0.8)
           documents[i].rotation.y = 0.6
         })
+      },
+    },
+    // T1584 Compromise Infrastructure
+    T1584: {
+      hits: [2.8],
+      run(t) {
+        view.target = [0.2, 11.2]
+        view.height = 12.5
+        applyPose(attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1], -1.2))
+        applyPose(defender, standing(2, 5, 0.4))
+        // よその人が運営しているサーバー。これを乗っ取って、自分の攻撃の拠点にする
+        const server = [-1.6, 12.0]
+        const owner = [server[0] - 1.7, server[1] + 0.4]
+        database.visible = true
+        database.scale.set(1, 1, 1)
+        database.position.set(server[0], 0, server[1])
+        database.rotation.y = 0.6
+        user.visible = true
+        applyPose(user, standing(owner[0], owner[1], 0.6))
+        if (t > 0.8 && t < 2.4)
+          stretchBetween(
+            pinkBeams[0],
+            [ATTACKER_SPOT[0], 1.6, ATTACKER_SPOT[1]],
+            [server[0], 1.2, server[1]],
+            0.08,
+          )
+        if (t > 2.3) {
+          const flag = pinkCubes[0]
+          const size = 0.45 * overshoot(progress(t, 2.3, 2.6))
+          flag.visible = true
+          flag.scale.set(size, size, size)
+          flag.position.set(server[0], 2.2 + Math.sin(view.time * 4) * 0.06, server[1])
+          flag.rotation.y = view.time * 2
+        }
+        // 持ち主は、自分のサーバーが使われていることに気づきにくい
+        showAlert(0, owner[0], 2.4, owner[1], t, 5.0, 7)
       },
     },
   }

@@ -26,6 +26,7 @@ export default function stealth(kit: Kit): SceneMap {
     placeSensor,
     aboveHost,
     flyTo,
+    cyanBeams,
   } = kit
   return {
     // T1036 Masquerading（本編）
@@ -288,6 +289,40 @@ export default function stealth(kit: Kit): SceneMap {
           lerp(3.3, 3.9, near) + Math.sin(view.time * 3) * 0.1,
           lerp(3.5, pz, near),
         )
+      },
+    },
+    // T1014 Rootkit
+    T1014: {
+      hits: [3.6],
+      run(t) {
+        view.target = [1.5, 3.6]
+        view.height = 9.5
+        storyState(6)
+        // OSの深いところへ沈み込み、一覧や検査から見えなくなる
+        const sunk = smooth(progress(t, 0.8, 1.8)) * (1 - smooth(progress(t, 5.6, 6.2)))
+        malware.position.y = -1.9 * sunk
+        crown.visible = sunk < 0.3
+        // 沈んだ場所には、うっすら跡だけが残る
+        if (sunk > 0.05) {
+          const mark = pinkCubes[0]
+          mark.visible = true
+          mark.scale.set(0.9 * sunk, 0.03, 0.9 * sunk)
+          mark.position.set(HOST_SPOT[0], 0.03, HOST_SPOT[1])
+        }
+        // 見張りが真上から調べても、何も見つからない
+        const near = smooth(progress(t, 2.2, 2.8)) * (1 - smooth(progress(t, 4.0, 4.5)))
+        placeSensor(
+          lerp(0.5, HOST_SPOT[0], near),
+          lerp(3.3, 2.6, near) + Math.sin(view.time * 3) * 0.1,
+          lerp(3.5, HOST_SPOT[1], near),
+        )
+        if (t > 2.8 && t < 3.8) {
+          const ray = cyanBeams[2]
+          ray.visible = true
+          ray.rotation.set(0, 0, 0)
+          ray.position.set(HOST_SPOT[0], 1.3, HOST_SPOT[1])
+          ray.scale.set(0.3, 2.2, 0.3)
+        }
       },
     },
   }
