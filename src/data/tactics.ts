@@ -1,6 +1,6 @@
 // 戦術と、専用の場面で描いている技術。各戦術の examples の先頭が本編（ひとつの侵入の流れ）で通る技術、
 // 残りは同じ戦術を別の手口で進めた場合の例。文面はここだけを直せば、字幕・マトリックス・一覧表に反映される。
-// 型の絵（簡易表示）で見せる残りの技術は more-techniques.ts にある。
+// 専用の場面がまだ無い技術を仮置きするときは more-techniques.ts に書く（いまは空）。
 import { MORE_TECHNIQUES } from './more-techniques'
 import type { Tactic } from './types'
 
