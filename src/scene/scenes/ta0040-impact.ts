@@ -40,6 +40,7 @@ export default function impact(kit: Kit): SceneMap {
     showCheck,
     hopInPlace,
     showAlert,
+    yellowCubes,
   } = kit
   return {
     // T1486 Data Encrypted for Impact（本編）
@@ -237,6 +238,39 @@ export default function impact(kit: Kit): SceneMap {
           wallMaterials[x].color.setHex(on ? ((x + Math.floor(t * 4)) & 1 ? 0xff6fd8 : 0xd63f35) : 0xd9dde4)
         }
         showCheck(0, 4.1, 6.9, t, 6.2)
+      },
+    },
+    // T1496 Resource Hijacking
+    T1496: {
+      hits: [2.8],
+      run(t) {
+        view.target = [1.5, 4]
+        view.height = 22
+        storyState(14)
+        view.actor = attacker
+        applyPose(defender, standing(4.8, -3, -Math.PI / 2))
+        // サーバーの計算資源を勝手に使い続け、掘り当てた分（黄色い箱）は攻撃者が受け取る
+        racks.forEach((rack, i) => {
+          if (t > 0.5 + i * 0.2 && t < 5.4 + i * 0.15)
+            rack.lights.color.setHex(Math.sin(t * 18 + i) > 0 ? 0xf6c531 : 0xff8a2a)
+        })
+        yellowCubes.forEach((coin, i) => {
+          const rack = racks[i * 2]
+          const cycle = (t - 1.0 - i * 0.5) / 1.6
+          if (cycle < 0 || t > 5.2) return
+          coin.visible = true
+          coin.material.color.setHex(0xf6c531)
+          coin.scale.set(0.4, 0.4, 0.4)
+          coin.rotation.y = t * 4
+          arcBetween(
+            coin,
+            [rack.x, 3.3, RACK_Z],
+            [ATTACKER_SPOT[0] - 0.6 + i * 0.6, 3.0, ATTACKER_SPOT[1]],
+            cycle % 1,
+            5,
+          )
+        })
+        showAlert(0, 4.8, 2.2, -3, t, 3.2, 4.5)
       },
     },
   }

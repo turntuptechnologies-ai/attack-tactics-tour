@@ -183,5 +183,47 @@ export default function reconnaissance(kit: Kit): SceneMap {
         })
       },
     },
+    // T1594 Search Victim-Owned Websites
+    T1594: {
+      hits: [3.9],
+      run(t) {
+        view.target = [0, 9.5]
+        view.height = 14
+        // 標的が公開しているWebサイト（外に面したサーバー）を読みに行き、載っている情報を持ち帰る
+        const site = [-3.2, 8.0]
+        database.visible = true
+        database.scale.set(1, 1, 1)
+        database.position.set(site[0], 0, site[1])
+        database.rotation.y = 0.6
+        const pose = walk(
+          [
+            [0, ATTACKER_SPOT[0], ATTACKER_SPOT[1]],
+            [0.3, ATTACKER_SPOT[0], ATTACKER_SPOT[1]],
+            [1.5, site[0] + 1.6, site[1] + 1.2],
+            [7, site[0] + 1.6, site[1] + 1.2],
+          ],
+          t,
+        )
+        applyPose(attacker, pose)
+        applyPose(defender, standing(-3, 4.6, 0.4))
+        documents.slice(0, 3).forEach((doc, i) => {
+          const start = 1.7 + i * 0.6
+          if (t < start) return
+          const size = 0.9 * overshoot(progress(t, start, start + 0.3))
+          flyTo(
+            doc,
+            [site[0], 2.0, site[1]],
+            [pose.x - 0.6 + i * 0.6, 3.0 + (i & 1) * 0.45, pose.z],
+            t,
+            start + 0.2,
+            start + 1.0,
+            1.2,
+            5,
+          )
+          doc.scale.set(size, size, size)
+          if (t >= start + 1.0) doc.rotation.y = 0.6
+        })
+      },
+    },
   }
 }

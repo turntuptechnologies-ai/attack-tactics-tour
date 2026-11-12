@@ -20,6 +20,7 @@ export default function exfiltration(kit: Kit): SceneMap {
     stolenSpot,
     storyState,
     showC2Link,
+    pinkCubes,
   } = kit
   return {
     // T1041 Exfiltration Over C2 Channel（本編）
@@ -161,6 +162,41 @@ export default function exfiltration(kit: Kit): SceneMap {
           arcBetween(racks[i].data, pileSpot(i), stolenSpot(i), smooth(p), 4)
           if (p < 1) racks[i].data.rotation.y = t * 5
         }
+      },
+    },
+    // T1030 Data Transfer Size Limits
+    T1030: {
+      hits: [4.2],
+      run(t) {
+        view.target = [1.5, 4.5]
+        view.height = 21
+        storyState(13)
+        const ends = showC2Link(t)
+        // ひとかたまりで送ると通信量で目立つので、小さく刻んで少しずつ送る
+        const sent = progress(t, 0.8, 4.2)
+        const source = racks[0].data
+        const received = racks[1].data
+        const from = pileSpot(0)
+        const to = stolenSpot(0)
+        const left = 0.6 * (1 - 0.85 * sent)
+        const got = 0.12 + 0.48 * sent
+        source.scale.set(left, left, left)
+        source.position.set(from[0], from[1], from[2])
+        received.visible = sent > 0.02
+        received.scale.set(got, got, got)
+        received.position.set(to[0], to[1], to[2])
+        if (t > 0.8 && t < 4.4)
+          for (let i = 0; i < 6; i++) {
+            const p = (t * 0.55 + i / 6) % 1
+            const cube = pinkCubes[i]
+            cube.visible = true
+            cube.scale.set(0.16, 0.16, 0.16)
+            cube.position.set(
+              lerp(ends[1][0], ends[0][0], p),
+              lerp(ends[1][1], ends[0][1], p) + 0.25,
+              lerp(ends[1][2], ends[0][2], p),
+            )
+          }
       },
     },
   }

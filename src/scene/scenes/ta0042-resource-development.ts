@@ -31,6 +31,7 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
     TOWER_SPOT,
     scanPlane,
     showAlert,
+    documents,
   } = kit
   return {
     // T1583 Acquire Infrastructure（本編）
@@ -153,6 +154,31 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
           scanPlane.material.opacity = 0.4
         }
         showAlert(0, centre[0], centre[1] + 2.6, centre[2], t, 6.0, 7)
+      },
+    },
+    // T1585 Establish Accounts
+    T1585: {
+      hits: [2.8],
+      run(t) {
+        view.target = [0.6, 11.2]
+        view.height = 12
+        applyPose(attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1], -1.2))
+        applyPose(defender, standing(2, 5, 0.4))
+        // 作り物の人物（アカウント）を次々に用意し、それぞれにもっともらしい経歴（書類）を持たせる
+        const personas = [user, impostor]
+        personas.forEach((figure, i) => {
+          const start = 0.6 + i * 1.1
+          const x = -0.4 - i * 1.7
+          const z = 12.4 - i * 0.5
+          const size = overshoot(progress(t, start, start + 0.35))
+          figure.visible = size > 0.01
+          applyPose(figure, standing(x, z, 0.6))
+          figure.scale.multiplyScalar(size)
+          if (t > start && t < start + 0.5)
+            stretchBetween(pinkBeams[i], [ATTACKER_SPOT[0], 1.6, ATTACKER_SPOT[1]], [x, 1.0, z], 0.06)
+          popIn(documents[i], x, 2.6 + Math.sin(view.time * 4 + i) * 0.06, z, t, start + 0.5, 0.8)
+          documents[i].rotation.y = 0.6
+        })
       },
     },
   }

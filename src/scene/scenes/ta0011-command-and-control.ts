@@ -28,6 +28,8 @@ export default function commandAndControl(kit: Kit): SceneMap {
     showC2Link,
     showCross,
     showOperatorOrb,
+    hammer,
+    markCompromised,
   } = kit
   return {
     // T1071 Application Layer Protocol（本編）
@@ -199,6 +201,44 @@ export default function commandAndControl(kit: Kit): SceneMap {
             cube.scale.set(0.28, 0.28, 0.28)
             cube.position.set(lerp(from[0], to[0], ph), lerp(from[1], to[1], ph), lerp(from[2], to[2], ph))
           }
+      },
+    },
+    // T1105 Ingress Tool Transfer
+    T1105: {
+      hits: [2.9],
+      run(t) {
+        view.target = [1.5, 4.5]
+        view.height = 21
+        storyState(12)
+        const ends = showC2Link(t)
+        view.actor = attacker
+        showOperatorOrb(t)
+        // 指令の通り道を使って、追加の道具を外から送り込む
+        const along = (p: number, lift: number) => [
+          lerp(ends[0][0], ends[1][0], p),
+          lerp(ends[0][1], ends[1][1], p) + lift,
+          lerp(ends[0][2], ends[1][2], p),
+        ]
+        const first = progress(t, 0.8, 2.8)
+        const second = progress(t, 2.0, 4.0)
+        hammer.visible = t > 0.8
+        hammer.scale.set(1.6, 1.6, 1.6)
+        if (first < 1) {
+          const at = along(first, 0.2)
+          hammer.position.set(at[0], at[1], at[2])
+          hammer.rotation.z = t * 6
+        } else {
+          hammer.position.set(SERVER_SPOT[0] + 1.1, 0.2 + bobHeight(), SERVER_SPOT[1] + 0.4)
+          hammer.rotation.z = 0.5
+        }
+        if (second > 0 && second < 1) {
+          const at = along(second, 0)
+          relayBot.visible = true
+          relayBot.scale.set(1, 1, 1)
+          relayBot.position.set(at[0], at[1], at[2])
+          relayBot.rotation.y = t * 4
+        } else if (second >= 1)
+          markCompromised(5, SERVER_SPOT[0] - 1.3, SERVER_SPOT[1] + 0.6, overshoot(progress(t, 4.0, 4.3)))
       },
     },
   }

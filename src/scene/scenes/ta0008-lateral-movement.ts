@@ -31,6 +31,7 @@ export default function lateralMovement(kit: Kit): SceneMap {
     showCross,
     showCheck,
     showAlert,
+    documents,
   } = kit
   return {
     // T1021 Remote Services（本編）
@@ -216,6 +217,44 @@ export default function lateralMovement(kit: Kit): SceneMap {
         token.rotation.y = t * 3
         if (t > 2.0 && t < 3.6) showCheck(SERVER_SPOT[0], 2.9, -0.9, t, 2.0)
         showCross(SERVER_SPOT[0], 2.9, -0.9, t, 5.2)
+      },
+    },
+    // T1080 Taint Shared Content
+    T1080: {
+      hits: [3.8],
+      run(t) {
+        view.target = [-1.2, 2.6]
+        view.height = 12.5
+        storyState(10)
+        // みんなが使う共有フォルダ。置かれたファイルに不正なコードを仕込み、開いた人の端末へ広がる
+        const share = [-0.6, 1.0, 1.2]
+        const taint = pinkCubes[0]
+        glass.visible = true
+        glass.scale.set(1.6, 1.4, 1.2)
+        glass.position.set(share[0], 0.72, share[2])
+        glass.material.opacity = 0.35
+        if (t < 1.6) {
+          flyTo(taint, aboveHost(1.2), share, t, 0.5, 1.5, 1.6, 6)
+          taint.scale.set(0.3, 0.3, 0.3)
+        }
+        for (let i = 0; i < 2; i++) {
+          const doc = documents[i]
+          const seat = employees[1 - i].position
+          const start = 2.0 + i * 0.5
+          const shelf = [share[0] - 0.3 + i * 0.6, 0.7, share[2]]
+          doc.visible = true
+          doc.scale.set(0.8, 0.8, 0.8)
+          doc.rotation.y = 0.6
+          if (t < start) doc.position.set(shelf[0], shelf[1], shelf[2])
+          else flyTo(doc, shelf, [seat.x, 1.9, seat.z + 0.2], t, start, start + 0.9, 1.6)
+          if (t > start + 0.9)
+            markCompromised(
+              1 + i,
+              seat.x + 0.95,
+              seat.z + 0.2,
+              overshoot(progress(t, start + 0.9, start + 1.2)),
+            )
+        }
       },
     },
   }
