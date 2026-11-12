@@ -104,8 +104,10 @@ describe('場面の検索', () => {
   })
 
   it('戦術を指定すれば、その戦術の場面を選べる', () => {
-    expect(timeline[indexOfExample(timeline, tacticIndex('TA0002'), 'T1053')].kind).toBe('extra')
-    expect(timeline[indexOfExample(timeline, tacticIndex('TA0004'), 'T1053')].kind).toBe('simple')
+    for (const id of ['TA0002', 'TA0004']) {
+      const scene = timeline[indexOfExample(timeline, tacticIndex(id), 'T1053')]
+      expect(scene).toMatchObject({ kind: 'extra', tactic: tacticIndex(id) })
+    }
   })
 })
 
@@ -121,7 +123,7 @@ describe('parseHash と hashFor', () => {
 
   it('戦術と技術の組は、その戦術に載っている技術の場面を指す', () => {
     const hit = parseHash(timeline, '#TA0004-T1053')!
-    expect(timeline[hit.index]).toMatchObject({ kind: 'simple', tactic: tacticIndex('TA0004') })
+    expect(timeline[hit.index]).toMatchObject({ kind: 'extra', tactic: tacticIndex('TA0004') })
   })
 
   it('-t を付けると、その時刻で止める', () => {
