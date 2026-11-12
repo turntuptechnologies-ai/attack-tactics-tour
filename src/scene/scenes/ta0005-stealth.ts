@@ -140,38 +140,48 @@ export default function stealth(kit: Kit): SceneMap {
     T1564: {
       hits: [2.6],
       run(t) {
-        view.target = [2.2, 3.8]
+        view.target = [1.2, 3.0]
         view.height = 9.5
         storyState(6) // Hide Artifacts
+        // 隠し場所。見る人から見て壁や机の陰にならない、開けた床の上にする
+        const spot = [0.3, 1.7]
         applyPose(
           malware,
           walk(
             [
               [0, HOST_SPOT[0], HOST_SPOT[1]],
               [0.6, HOST_SPOT[0], HOST_SPOT[1]],
-              [1.6, 2.3, 4.6],
-              [7, 2.3, 4.6],
+              [1.6, spot[0], spot[1]],
+              [7, spot[0], spot[1]],
             ],
             t,
           ),
         )
         malware.scale.multiplyScalar(ADMIN_MALWARE_SIZE)
         if (t >= 1.6) malware.rotation.y = 0.6
+        // hide が 1 のとき、隠れきっている。防御側が戻ってくる 5.6 秒から元に戻す
         const hide = smooth(progress(t, 1.7, 2.4)) * (1 - smooth(progress(t, 5.6, 6.2)))
         malware.scale.y *= 1 - 0.82 * hide
         crown.visible = hide < 0.5
-        // 持っているファイルも、机の陰に運んで見えにくくする
+        // 持っているファイルも一緒に運び、小さくして隠す
         const doc = documents[0]
         const carried = smooth(progress(t, 0.6, 1.6))
-        const size = 1 - 0.8 * hide
+        const size = 1 - 0.6 * hide
         doc.visible = true
         doc.rotation.y = 0.6
         doc.scale.set(size, size, size)
         doc.position.set(
-          lerp(HOST_SPOT[0] + 0.9, 3.1, carried),
-          lerp(1.5, 0.35, hide),
-          lerp(HOST_SPOT[1] + 0.3, 4.95, carried),
+          lerp(HOST_SPOT[0] + 0.9, spot[0] + 1.0, carried),
+          lerp(1.5, 0.4, hide),
+          lerp(HOST_SPOT[1] + 0.3, spot[1] + 0.3, carried),
         )
+        // 隠し属性の覆い。見る人には中が透けて見えるが、通りかかる防御側は気づかない
+        if (hide > 0.02) {
+          glass.visible = true
+          glass.scale.set(2.6 * hide, 1.1, 1.8 * hide)
+          glass.position.set(spot[0] + 0.5, 0.55, spot[1] + 0.15)
+          glass.material.opacity = 0.4 * hide
+        }
         applyPose(
           defender,
           walk(
