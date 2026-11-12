@@ -28,6 +28,9 @@ export type PlayerHooks = {
   onPlaying(playing: boolean): void
 }
 
+/** 自動で次の場面へ進むとき、次の技術の名前を見せておく秒数 */
+const LEAD = 1.2
+
 export class Player {
   readonly timeline = buildTimeline()
   private readonly renderer: THREE.WebGLRenderer
@@ -38,6 +41,8 @@ export class Player {
   private readonly projected = new THREE.Vector3()
   private index = 0
   private time = 0
+  /** 次の場面に入る前の「間」の残り秒数。この間は暗転したまま、次の技術の名前を見せる */
+  private lead = 0
   private playing = true
   private includeExtras = false
   private raf = 0
@@ -87,6 +92,7 @@ export class Player {
   show(index: number, fromUser = false) {
     this.index = index
     this.time = 0.02
+    this.lead = 0
     this.setPlaying(true)
     if (!fromUser) return
     const hash = hashFor(this.timeline, index)
@@ -122,6 +128,7 @@ export class Player {
     if (!target) return
     this.index = target.index
     this.time = target.pauseAt ?? 0.02
+    this.lead = 0
     if (target.pauseAt != null) this.setPlaying(false)
   }
 
@@ -130,10 +137,13 @@ export class Player {
     this.last = now
     if (this.playing) {
       this.kit.view.time += dt
-      this.time += dt
+      if (this.lead > 0) this.lead -= dt
+      else this.time += dt
       if (this.time >= this.timeline[this.index].duration) {
         this.index = step(this.timeline, this.index, 1, this.includeExtras)
         this.time = 0
+        // 技術が替わったことが分かるよう、名前を見せる間を置く（導入とまとめには名前が無いので置かない）
+        this.lead = this.timeline[this.index].techniqueId ? LEAD : 0
       }
     }
     this.draw()
@@ -264,6 +274,7 @@ export class Player {
     ])
     // 場面の変わり目は暗転でつなぐ
     overlay.fade.style.opacity = Math.max(0, 1 - Math.min(t, scene.duration - t) / 0.35).toFixed(2)
+    overlay.stage.classList.toggle('lead', this.lead > 0)
 
     const key = `${this.index}:${caption[0]}`
     if (key !== this.captionKey) {
