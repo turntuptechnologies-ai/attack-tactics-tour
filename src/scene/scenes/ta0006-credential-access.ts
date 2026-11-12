@@ -40,6 +40,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
     trustedProcess,
     flyPaper,
     aroundHost,
+    defenderNotices,
   } = kit
   return {
     // T1003 OS Credential Dumping（本編）
@@ -458,6 +459,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
         }
         if (t > 2.8 && t < 4.6) stretchBetween(pinkBeams[0], aboveHost(2.9), service, 0.06)
         if (t > 3.3 && t < 4.6) showCheck(service[0], service[1] + 1.15, service[2], t, 3.3)
+        defenderNotices(t)
       },
     },
     // T1528 Steal Application Access Token

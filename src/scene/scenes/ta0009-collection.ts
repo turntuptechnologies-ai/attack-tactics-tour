@@ -36,6 +36,8 @@ export default function collection(kit: Kit): SceneMap {
     standing,
     showRipples,
     flyPaper,
+    defenderBlocks,
+    defenderNotices,
   } = kit
   return {
     // T1005 Data from Local System（本編）
@@ -55,6 +57,7 @@ export default function collection(kit: Kit): SceneMap {
           arcBetween(rack.data, [rack.x, 2.72, RACK_Z], pileSpot(i), smooth(p), 1.5)
           if (p < 1) rack.data.rotation.y = t * 5
         }
+        defenderBlocks(t)
       },
     },
     // T1114 Email Collection
@@ -83,6 +86,7 @@ export default function collection(kit: Kit): SceneMap {
           mailItem.scale.set(scale, scale, scale)
           if (t >= start + 1.7) mailItem.rotation.y = 0.4
         })
+        defenderNotices(t)
       },
     },
     // T1560 Archive Collected Data
@@ -113,6 +117,7 @@ export default function collection(kit: Kit): SceneMap {
         }
         popIn(padlock, centre[0], 1.3, centre[2], t, 2.9, 0.6)
         padlock.rotation.y = 0.6
+        defenderNotices(t)
       },
     },
     // T1113 Screen Capture
@@ -149,6 +154,7 @@ export default function collection(kit: Kit): SceneMap {
             if (t >= start + 1.3) doc.rotation.y = 0.6
           }
         }
+        defenderNotices(t)
       },
     },
     // T1074 Data Staged
@@ -223,6 +229,7 @@ export default function collection(kit: Kit): SceneMap {
             0.85,
           )
         })
+        defenderBlocks(t)
       },
     },
     // T1119 Automated Collection
@@ -254,6 +261,7 @@ export default function collection(kit: Kit): SceneMap {
           )
           if (p < 1) rack.data.rotation.y = t * 6
         })
+        defenderNotices(t)
       },
     },
     // T1123 Audio Capture
@@ -277,6 +285,7 @@ export default function collection(kit: Kit): SceneMap {
           cube.scale.set(0.24, 0.24, 0.24)
           arcBetween(cube, mic, [SERVER_SPOT[0] - 0.9 + i * 0.6, 0.3, SERVER_SPOT[1] + 1.5], smooth(p), 2.0)
         }
+        defenderNotices(t)
       },
     },
     // T1125 Video Capture
@@ -312,6 +321,7 @@ export default function collection(kit: Kit): SceneMap {
           shot.scale.set(size, size, size)
           if (t >= start + 1.3) shot.rotation.y = 0.6
         }
+        defenderNotices(t)
       },
     },
     // T1557 Adversary-in-the-Middle
@@ -388,6 +398,7 @@ export default function collection(kit: Kit): SceneMap {
           const to = pileSpot(i)
           flyPaper(page, browser, [to[0], 0.5, to[2] + 0.9], t, start + 0.2, start + 1.3, 2.4, start)
         }
+        defenderBlocks(t)
       },
     },
     // T1115 Clipboard Data
@@ -422,6 +433,7 @@ export default function collection(kit: Kit): SceneMap {
           const to = pileSpot(i + 1)
           flyPaper(copy, board, [to[0], 0.5, to[2] + 0.9], t, start + 0.1, start + 1.1, 2.2, start)
         }
+        defenderNotices(t)
       },
     },
     // T1530 Data from Cloud Storage
@@ -452,6 +464,7 @@ export default function collection(kit: Kit): SceneMap {
           file.visible = t > 0.3
           if (t < start || t >= start + 1.3) file.rotation.y = 0.6
         })
+        defenderNotices(t)
       },
     },
     // T1602 Data from Configuration Repository
@@ -491,6 +504,7 @@ export default function collection(kit: Kit): SceneMap {
           )
         }
         if (t > 0.6 && t < 1.5) stretchBetween(pinkBeams[0], [SERVER_SPOT[0], 1.4, SERVER_SPOT[1]], hub, 0.08)
+        defenderNotices(t)
       },
     },
     // T1039 Data from Network Shared Drive
@@ -554,6 +568,7 @@ export default function collection(kit: Kit): SceneMap {
           const to = pileSpot(i)
           flyPaper(file, port, [to[0], 0.5, to[2] + 0.9], t, start + 0.2, start + 1.3, 2.4, start)
         }
+        defenderBlocks(t)
       },
     },
     // T1056 Input Capture
@@ -597,6 +612,7 @@ export default function collection(kit: Kit): SceneMap {
             0.9,
           )
         }
+        defenderNotices(t)
       },
     },
   }

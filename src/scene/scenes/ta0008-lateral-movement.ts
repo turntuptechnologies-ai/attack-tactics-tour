@@ -38,6 +38,8 @@ export default function lateralMovement(kit: Kit): SceneMap {
     user,
     pinkBeams,
     database,
+    defenderBlocks,
+    defenderNotices,
   } = kit
   return {
     // T1021 Remote Services（本編）
@@ -162,6 +164,7 @@ export default function lateralMovement(kit: Kit): SceneMap {
               overshoot(progress(t, start + 1.9, start + 2.2)),
             )
         })
+        defenderNotices(t)
       },
     },
     // T1210 Exploitation of Remote Services
@@ -261,6 +264,7 @@ export default function lateralMovement(kit: Kit): SceneMap {
               overshoot(progress(t, start + 0.9, start + 1.2)),
             )
         }
+        defenderBlocks(t)
       },
     },
     // T1563 Remote Service Session Hijacking

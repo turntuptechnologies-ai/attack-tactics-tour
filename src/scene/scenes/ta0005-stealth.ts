@@ -58,6 +58,8 @@ export default function stealth(kit: Kit): SceneMap {
     DEFENDER_SPOT,
     showRipples,
     flyPaper,
+    defenderBlocks,
+    defenderNotices,
   } = kit
   return {
     // T1036 Masquerading（本編）
@@ -84,6 +86,7 @@ export default function stealth(kit: Kit): SceneMap {
             0,
           ),
         )
+        defenderNotices(t)
       },
     },
     // T1070 Indicator Removal
@@ -171,6 +174,7 @@ export default function stealth(kit: Kit): SceneMap {
           scanPlane.material.opacity = 0.4
         }
         if (t > 3.8 && t < 4.6) malware.position.y = Math.abs(Math.sin((t - 3.8) * 7)) * 0.35
+        defenderNotices(t)
       },
     },
     // T1564 Hide Artifacts
@@ -278,6 +282,7 @@ export default function stealth(kit: Kit): SceneMap {
             )
           }
         }
+        defenderNotices(t)
       },
     },
     // T1218 System Binary Proxy Execution
@@ -320,6 +325,7 @@ export default function stealth(kit: Kit): SceneMap {
           lerp(3.3, 3.9, near) + Math.sin(view.time * 3) * 0.1,
           lerp(3.5, pz, near),
         )
+        defenderBlocks(t)
       },
     },
     // T1014 Rootkit
@@ -419,6 +425,7 @@ export default function stealth(kit: Kit): SceneMap {
         crown.visible = !worn
         sensorVisits(t, 2.4, 4.4, HOST_SPOT[0], HOST_SPOT[1], true)
         if (t > 3.3 && t < 4.4) showCheck(HOST_SPOT[0], 4.4, HOST_SPOT[1], t, 3.3)
+        defenderNotices(t)
       },
     },
     // T1696 Anti-Automation Evasion
@@ -519,6 +526,7 @@ export default function stealth(kit: Kit): SceneMap {
           added.scale.set(0.28, 0.28, 0.28)
         }
         showSparks(box[0], 1.0, box[1], t, 3.1)
+        defenderBlocks(t)
       },
     },
     // T1622 Debugger Evasion
@@ -658,6 +666,7 @@ export default function stealth(kit: Kit): SceneMap {
             start,
           )
         }
+        defenderNotices(t)
       },
     },
     // T1480 Execution Guardrails
@@ -685,6 +694,7 @@ export default function stealth(kit: Kit): SceneMap {
           crown.visible = false
         } else if (t < 4.4) malware.position.y = Math.abs(Math.sin((t - 2.8) * 7)) * 0.35
         showSparks(HOST_SPOT[0], 1.0, HOST_SPOT[1], t, 3.0)
+        defenderNotices(t)
       },
     },
     // T1211 Exploitation for Stealth
@@ -744,6 +754,7 @@ export default function stealth(kit: Kit): SceneMap {
         showSparks(program[0], 1.2, program[1], t, 2.4)
         sensorVisits(t, 2.6, 4.4, program[0], program[1], true)
         if (t > 3.4 && t < 4.4) showCheck(program[0], 4.6, program[1], t, 3.4)
+        defenderBlocks(t)
       },
     },
     // T1202 Indirect Command Execution
@@ -778,6 +789,7 @@ export default function stealth(kit: Kit): SceneMap {
           )
         }
         showSparks(helper[0], 0.9, helper[1], t, 2.5)
+        defenderNotices(t)
       },
     },
     // T1542 Pre-OS Boot
@@ -802,6 +814,7 @@ export default function stealth(kit: Kit): SceneMap {
         if (t < 0.6) crown.visible = false
         showSparks(HOST_SPOT[0], 1.0, HOST_SPOT[1], t, 1.2)
         if (t > 3.8 && t < 4.6) sensorVisits(t, 3.6, 5.0, HOST_SPOT[0], HOST_SPOT[1], true)
+        defenderNotices(t)
       },
     },
     // T1055 Process Injection
@@ -853,6 +866,7 @@ export default function stealth(kit: Kit): SceneMap {
           if (t >= 2.4) code.rotation.set(t * 4, t * 6, 0)
         }
         showSparks(memory[0], memory[1], memory[2], t, 2.6)
+        defenderNotices(t)
       },
     },
     // T1679 Selective Exclusion
@@ -948,6 +962,7 @@ export default function stealth(kit: Kit): SceneMap {
         showSparks(page[0], 1.4, page[2], t, 2.2)
         sensorVisits(t, 2.6, 4.4, page[0], page[2], true)
         if (t > 3.3 && t < 4.4) showCheck(page[0], 4.6, page[2], t, 3.3)
+        defenderBlocks(t)
       },
     },
     // T1221 Template Injection
@@ -1004,6 +1019,7 @@ export default function stealth(kit: Kit): SceneMap {
           stretchBetween(pinkBeams[0], [TOWER_SPOT[0], 2.9, TOWER_SPOT[1]], port, 0.08)
           stretchBetween(pinkBeams[1], port, aboveHost(1.0), 0.08)
         }
+        defenderBlocks(t)
       },
     },
     // T1127 Trusted Developer Utilities Proxy Execution
@@ -1120,6 +1136,7 @@ export default function stealth(kit: Kit): SceneMap {
         }
         showSparks(tool[0], 1.2, tool[1], t, 2.4)
         sensorVisits(t, 2.8, 4.6, tool[0], tool[1], true)
+        defenderNotices(t)
       },
     },
   }
