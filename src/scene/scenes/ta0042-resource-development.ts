@@ -264,5 +264,31 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
         if (t > 3.4 && t < 4.6) showCheck(0, 4.1, 6.9, t, 3.4)
       },
     },
+    // T1683 Generate Content
+    T1683: {
+      hits: [3.6],
+      run(t) {
+        view.target = [0.8, 11.2]
+        view.height = 12
+        applyPose(attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1], -1.2))
+        applyPose(defender, standing(2, 5, 0.4))
+        // 標的をだますための材料を作る。もっともらしい文章、声や映像、そして作り物の人物
+        if (t > 0.4 && t < 3.4) {
+          hammer.visible = true
+          hammer.position.set(1.7, 0.9, 12.5)
+          hammer.rotation.z = 0.3 + Math.abs(Math.cos(((t - 0.6) * Math.PI) / 0.9))
+        }
+        popIn(mail, 0.6, 1.3, 12.3, t, 1.2, 1.2)
+        mail.rotation.y = 0.4
+        popIn(documents[0], -0.4, 1.4, 12.0, t, 2.1, 1.1)
+        documents[0].rotation.y = 0.6
+        if (t > 3.0) {
+          const size = overshoot(progress(t, 3.0, 3.35))
+          impostor.visible = true
+          applyPose(impostor, standing(-1.6, 11.8, 0.6))
+          impostor.scale.multiplyScalar(size)
+        }
+      },
+    },
   }
 }

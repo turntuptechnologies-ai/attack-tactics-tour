@@ -54,6 +54,9 @@ export default function initialAccess(kit: Kit): SceneMap {
     token,
     showAlert,
     relayBot,
+    cyanBeams,
+    pulseRings,
+    popIn,
   } = kit
   return {
     // T1566 Phishing（本編）
@@ -426,6 +429,81 @@ export default function initialAccess(kit: Kit): SceneMap {
           view.actor = malware
         }
         showCross(landed[0], 2.2, landed[1], t, 5.4)
+      },
+    },
+    // T1659 Content Injection
+    T1659: {
+      hits: [3.6],
+      run(t) {
+        view.target = [1.0, 7.4]
+        view.height = 14
+        storyState(2)
+        // 従業員は、外のWebサイト（雲）を見ている。その通信（水色の線）の途中に、不正な中身を割り込ませる
+        const screen = [3.5, 1.4, 4.4]
+        const site = [-3.0, 4.6, 10.5]
+        const middle = [(screen[0] + site[0]) / 2, (screen[1] + site[1]) / 2, (screen[2] + site[2]) / 2]
+        const inject = pinkCubes[0]
+        popIn(cloud, site[0], site[1], site[2], t, 0.1, 1.4)
+        cloud.rotation.y = 0.6
+        stretchBetween(cyanBeams[0], screen, site, 0.06)
+        if (t > 0.8 && t < 2.9) {
+          if (t < 1.8) flyTo(inject, aboveAttacker(), middle, t, 0.8, 1.8, 1.5, 6)
+          else flyTo(inject, middle, screen, t, 1.9, 2.9, 0.2)
+          inject.scale.set(0.32, 0.32, 0.32)
+        }
+        if (t > 2.9) {
+          jumpMalware(t, 2.9, 3.6, screen, aboveHost(0), 0.9, MALWARE_SIZE * overshoot(progress(t, 2.9, 3.2)))
+          view.actor = malware
+        }
+        showCross(middle[0], middle[1] + 1.2, middle[2], t, 5.4)
+      },
+    },
+    // T1669 Wi-Fi Networks
+    T1669: {
+      hits: [3.8],
+      run(t) {
+        view.target = [4.5, 6.6]
+        view.height = 14
+        storyState(2)
+        // 社内の無線LAN（輪）は、壁の外まで届いている。そこへ接続して入り込む
+        const ap = [6.8, 0.8, 4.8]
+        const pose = walk(
+          [
+            [0, ATTACKER_SPOT[0], ATTACKER_SPOT[1]],
+            [0.3, ATTACKER_SPOT[0], ATTACKER_SPOT[1]],
+            [1.6, 7.6, 8.6],
+            [7, 7.6, 8.6],
+          ],
+          t,
+        )
+        applyPose(attacker, pose)
+        relayBot.visible = true
+        relayBot.scale.set(0.8, 0.8, 0.8)
+        relayBot.position.set(ap[0], 0, ap[2])
+        relayBot.rotation.y = 0.6
+        if (t < 4.6)
+          pulseRings.forEach((ring, j) => {
+            const phase = (t * 0.6 + j * 0.5) % 1
+            const scale = 1 + phase * 9
+            ring.visible = true
+            ring.scale.set(scale, 0.02, scale)
+            ring.position.set(ap[0], 0.08, ap[2])
+            ring.material.opacity = 0.5 * (1 - phase)
+          })
+        if (t > 1.9 && t < 4.6) stretchBetween(pinkBeams[0], [pose.x, 1.6, pose.z], ap, 0.07)
+        if (t > 2.6 && t < 3.4) stretchBetween(pinkBeams[1], ap, [6, 0.9, 2.9], 0.07)
+        if (t > 3.1) {
+          jumpMalware(
+            t,
+            3.1,
+            3.8,
+            [6, 1.0, 2.9],
+            aboveHost(0),
+            1.2,
+            MALWARE_SIZE * overshoot(progress(t, 3.1, 3.4)),
+          )
+          view.actor = malware
+        }
       },
     },
   }

@@ -1,6 +1,6 @@
 // TA0043 偵察（Reconnaissance）の場面。
 import type { Kit } from '../kit'
-import { progress, smooth, overshoot, walk, applyPose, stretchBetween } from '../motion'
+import { progress, smooth, overshoot, walk, applyPose, stretchBetween, lerp } from '../motion'
 import type { SceneMap } from './types'
 
 export default function reconnaissance(kit: Kit): SceneMap {
@@ -26,6 +26,9 @@ export default function reconnaissance(kit: Kit): SceneMap {
     popIn,
     showCross,
     showAlert,
+    secondAttacker,
+    truckB,
+    relayBot,
   } = kit
   return {
     // T1595 Active Scanning（本編）
@@ -277,6 +280,171 @@ export default function reconnaissance(kit: Kit): SceneMap {
           flyTo(chart, [0, 3.4, 3.0], aboveAttacker(), t, 2.6, 3.6, 3.0, 5)
           chart.scale.set(size, size, size)
           if (t >= 3.6) chart.rotation.y = 0.6
+        }
+      },
+    },
+    // T1592 Gather Victim Host Information
+    T1592: {
+      hits: [3.9],
+      run(t) {
+        view.target = [-1.5, 8.6]
+        view.height = 13
+        // 外に面した1台（黄色い箱）を詳しく調べ、機種やOS、入っているソフトを書き出す
+        const host = [YELLOW_CUBE_X[1], 2.5, 6.5]
+        const target = yellowCubes[1]
+        const pose = walk(
+          [
+            [0, ATTACKER_SPOT[0], ATTACKER_SPOT[1]],
+            [0.3, ATTACKER_SPOT[0], ATTACKER_SPOT[1]],
+            [1.5, -1.6, 9.2],
+            [7, -1.6, 9.2],
+          ],
+          t,
+        )
+        applyPose(attacker, pose)
+        applyPose(defender, standing(-3, 4.6, 0.4))
+        target.visible = true
+        target.material.color.setHex(t > 1.5 ? 0xff6fd8 : 0xf6c531)
+        target.scale.set(0.5, 0.5, 0.5)
+        target.position.y = 2.5 + Math.sin(view.time * 4) * 0.06
+        target.rotation.y = view.time
+        if (t > 1.5 && t < 3.4) {
+          attackerScan.visible = true
+          attackerScan.position.set(host[0] + Math.sin(t * 4) * 0.7, 2.4, host[2])
+          attackerScan.material.opacity = 0.35 + 0.2 * Math.sin(t * 20)
+        }
+        documents.slice(0, 3).forEach((doc, i) => {
+          const start = 1.9 + i * 0.5
+          if (t < start) return
+          const size = 0.85 * overshoot(progress(t, start, start + 0.3))
+          flyTo(
+            doc,
+            host,
+            [pose.x - 0.6 + i * 0.6, 3.0 + (i & 1) * 0.45, pose.z],
+            t,
+            start + 0.2,
+            start + 1.0,
+            1.0,
+            5,
+          )
+          doc.scale.set(size, size, size)
+          if (t >= start + 1.0) doc.rotation.y = 0.6
+        })
+      },
+    },
+    // T1597 Search Closed Sources
+    T1597: {
+      hits: [3.6],
+      run(t) {
+        view.target = [0.8, 11]
+        view.height = 13
+        applyPose(attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1], -1.2))
+        applyPose(defender, standing(2, 5, 0.4))
+        // 一般には出回らない情報を扱う売り手（トラック）。お金を払って、標的の情報を買う
+        const stall = [-1.4, 2.2, 12.6]
+        const open = overshoot(progress(t, 0.2, 0.6))
+        const fee = pinkCubes[0]
+        truckB.visible = open > 0.01
+        truckB.scale.set(open, open, open)
+        truckB.position.set(stall[0], 0, stall[2])
+        truckB.rotation.y = Math.PI / 2
+        if (t > 0.9 && t < 1.9) {
+          flyTo(fee, [ATTACKER_SPOT[0], 2.6, ATTACKER_SPOT[1]], stall, t, 0.9, 1.9, 1.2, 6)
+          fee.scale.set(0.34, 0.34, 0.34)
+        }
+        for (let i = 0; i < 2; i++) {
+          const start = 2.0 + i * 0.5
+          if (t < start) continue
+          const doc = documents[i]
+          const size = 0.9 * overshoot(progress(t, start, start + 0.3))
+          flyTo(
+            doc,
+            stall,
+            [ATTACKER_SPOT[0] - 0.4 + i * 0.8, 3.0, ATTACKER_SPOT[1]],
+            t,
+            start + 0.2,
+            start + 1.0,
+            1.2,
+            5,
+          )
+          doc.scale.set(size, size, size)
+          if (t >= start + 1.0) doc.rotation.y = 0.6
+        }
+      },
+    },
+    // T1682 Query Public AI Services
+    T1682: {
+      hits: [4.2],
+      run(t) {
+        view.target = [0.5, 11]
+        view.height = 13
+        applyPose(attacker, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1], -1.2))
+        applyPose(defender, standing(2, 5, 0.4))
+        // 公開されているAIサービス（左のロボット）に調べさせ、ばらばらの公開情報を整理させる
+        const ai = [-1.6, 12.2]
+        popIn(relayBot, ai[0], 0, ai[1], t, 0.3, 2.0)
+        relayBot.rotation.y = t > 1.2 && t < 2.6 ? t * 8 : 0.6
+        if (t > 0.8 && t < 1.4)
+          stretchBetween(pinkBeams[0], [ATTACKER_SPOT[0], 1.6, ATTACKER_SPOT[1]], [ai[0], 1.2, ai[1]], 0.07)
+        // 考えている間、公開情報（粒）が四方から吸い寄せられる
+        for (let i = 0; i < 4; i++) {
+          const p = progress(t, 1.2 + i * 0.15, 2.2 + i * 0.15)
+          if (p <= 0 || p >= 1) continue
+          const cube = pinkCubes[i]
+          const angle = i * 1.57
+          cube.visible = true
+          cube.scale.set(0.22, 0.22, 0.22)
+          cube.position.set(
+            lerp(ai[0] + Math.cos(angle) * 4, ai[0], p),
+            lerp(3.2, 1.6, p),
+            lerp(ai[1] + Math.sin(angle) * 2.5, ai[1], p),
+          )
+        }
+        documents.slice(0, 3).forEach((doc, i) => {
+          const start = 2.4 + i * 0.4
+          if (t < start) return
+          const size = 0.85 * overshoot(progress(t, start, start + 0.3))
+          flyTo(
+            doc,
+            [ai[0], 2.6, ai[1]],
+            [ATTACKER_SPOT[0] - 0.7 + i * 0.7, 3.0 + (i & 1) * 0.4, ATTACKER_SPOT[1]],
+            t,
+            start + 0.2,
+            start + 1.0,
+            1.0,
+            5,
+          )
+          doc.scale.set(size, size, size)
+          if (t >= start + 1.0) doc.rotation.y = 0.6
+        })
+      },
+    },
+    // T1681 Search Threat Vendor Data
+    T1681: {
+      hits: [3.2],
+      run(t) {
+        view.target = [2.6, 10.6]
+        view.height = 13
+        // セキュリティ企業が公開した報告書（右の台帳）を読み、自分たちの手口がどこまで知られているかを確かめて、装いを変える
+        const vendor = [6.6, 10.2]
+        const changed = t > 2.8
+        const who = changed ? secondAttacker : attacker
+        const report = documents[0]
+        database.visible = true
+        database.scale.set(0.9, 0.9, 0.9)
+        database.position.set(vendor[0], 0, vendor[1])
+        database.rotation.y = 0.6
+        attacker.visible = !changed
+        secondAttacker.visible = changed
+        applyPose(who, standing(ATTACKER_SPOT[0], ATTACKER_SPOT[1], Math.PI / 2))
+        who.position.y = Math.sin(Math.PI * progress(t, 2.8, 3.3)) * 0.5
+        view.actor = who
+        applyPose(defender, standing(2, 5, 0.4))
+        if (t > 0.6) {
+          const size = overshoot(progress(t, 0.6, 0.9))
+          flyTo(report, [vendor[0], 2.2, vendor[1]], aboveAttacker(), t, 0.9, 2.0, 1.4, 5)
+          report.scale.set(size, size, size)
+          if (t >= 2.0) report.rotation.y = 0.6
         }
       },
     },
