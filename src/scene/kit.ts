@@ -360,6 +360,19 @@ export function createKit(w: World) {
     operatorOrb.rotation.set(t * 2, t * 3, 0)
   }
 
+  /** t0 から、コードが動いているしるし（らせんを描いて上がるピンクの粒）を出す。first は、使う粒の最初の番号 */
+  function showSparks(x: number, y: number, z: number, t: number, t0: number, first = 0, count = 4) {
+    for (let i = 0; i < count; i++) {
+      const p = progress(t, t0 + i * 0.2, t0 + 1.0 + i * 0.2)
+      if (p <= 0 || p >= 1) continue
+      const cube = w.pinkCubes[first + i]
+      const size = 0.28 * (1 - p * 0.6)
+      cube.visible = true
+      cube.scale.set(size, size, size)
+      cube.position.set(x + Math.sin(i * 2.1 + p * 5) * 0.5, y + p * 2.0, z + Math.cos(i * 2.1 + p * 5) * 0.5)
+    }
+  }
+
   return {
     ...w,
     view,
@@ -385,6 +398,7 @@ export function createKit(w: World) {
     jumpMalware,
     sensorArrives,
     showOperatorOrb,
+    showSparks,
   }
 }
 
