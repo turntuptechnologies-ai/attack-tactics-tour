@@ -58,7 +58,8 @@ export default function persistence(kit: Kit): SceneMap {
     wipeThenReturn,
     DEFENDER_SPOT,
     showRipples,
-    defenderBlocks,
+    defenderLocks,
+    defenderRemoves,
   } = kit
   return {
     // T1053 Scheduled Task/Job（本編）
@@ -339,7 +340,7 @@ export default function persistence(kit: Kit): SceneMap {
           placeMalware(HOST_SPOT[0], 0, HOST_SPOT[1], MALWARE_SIZE * (1 - progress(t, 2.2, 2.5)))
         else if (t >= 3.6)
           jumpMalware(t, 3.6, 4.2, deep, aboveHost(0), 0.9, MALWARE_SIZE * overshoot(progress(t, 3.6, 3.9)))
-        defenderBlocks(t)
+        defenderRemoves(t, pinkCubes[0])
       },
     },
     // T1078 Valid Accounts
@@ -520,7 +521,7 @@ export default function persistence(kit: Kit): SceneMap {
         view.height = 10.5
         storyState(4)
         // OSが起動のたびに起こすサービス（機械の列）。そこに自分のサービスを加えておくと、消されても、起動のたびに起こしてもらえる
-        const at = (i: number) => [-1.9 + i * 0.95, 3.9 - i * 0.3]
+        const at = (i: number) => [-1.9 + i * 0.95, 3.5 - i * 0.3]
         for (let i = 0; i < 3; i++) {
           const service = bots[4 + i]
           const mine = i === 2
@@ -684,7 +685,7 @@ export default function persistence(kit: Kit): SceneMap {
           mark.scale.set(0.26, 0.26, 0.26)
           mark.position.set(x, 1.15 + Math.sin(Math.PI * p) * 0.5, z)
         }
-        defenderBlocks(t)
+        defenderLocks(t, glass)
       },
     },
     // T1556 Modify Authentication Process

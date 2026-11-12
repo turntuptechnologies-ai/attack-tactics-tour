@@ -58,7 +58,9 @@ export default function initialAccess(kit: Kit): SceneMap {
     popIn,
     showRipples,
     defenderBlocks,
-    defenderNotices,
+    defenderLocks,
+    defenderScans,
+    defenderSendsSensor,
   } = kit
   return {
     // T1566 Phishing（本編）
@@ -236,7 +238,7 @@ export default function initialAccess(kit: Kit): SceneMap {
           )
           view.actor = malware
         }
-        defenderBlocks(t)
+        defenderScans(t, truckB)
       },
     },
     // T1189 Drive-by Compromise
@@ -351,7 +353,7 @@ export default function initialAccess(kit: Kit): SceneMap {
           )
           view.actor = malware
         }
-        defenderBlocks(t)
+        defenderBlocks(t, user)
       },
     },
     // T1199 Trusted Relationship
@@ -397,7 +399,7 @@ export default function initialAccess(kit: Kit): SceneMap {
           )
           view.actor = malware
         }
-        defenderNotices(t)
+        defenderSendsSensor(t, user)
       },
     },
     // T1200 Hardware Additions
@@ -501,7 +503,7 @@ export default function initialAccess(kit: Kit): SceneMap {
           )
           view.actor = malware
         }
-        defenderBlocks(t)
+        defenderLocks(t, relayBot)
       },
     },
   }
