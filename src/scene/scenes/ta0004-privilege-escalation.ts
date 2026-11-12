@@ -35,6 +35,14 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
     pinkCubes,
     hopInPlace,
     showAlert,
+    key,
+    hammer,
+    bots,
+    yellowCubes,
+    pulseRings,
+    clock,
+    clockHand,
+    showCheck,
   } = kit
   return {
     // T1068 Exploitation for Privilege Escalation（本編）
@@ -298,6 +306,203 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
           crown.visible = true
           malware.scale.set(size, size, size)
         }
+      },
+    },
+    // T1547 Boot or Logon Autostart Execution
+    T1547: {
+      hits: [3.6],
+      run(t) {
+        view.target = [0.4, 2.6]
+        view.height = 10.5
+        storyState(5)
+        // 起動のたびに、高い権限で順番に立ち上がるもの（黄色い箱の列）。その列の最後に、自分を並べておく
+        const slot = (i: number) => [-1.6 + i * 0.7, 1.3, 2.4]
+        const mine = pinkCubes[0]
+        const boot = 2.4
+        yellowCubes.forEach((cube, i) => {
+          const at = slot(i)
+          cube.visible = true
+          cube.material.color.setHex(0xf6c531)
+          cube.scale.set(0.38, 0.38, 0.38)
+          const started = boot + i * 0.3
+          const hop = t > started && t < started + 0.35 ? Math.abs(Math.sin((t - started) * 9)) * 0.5 : 0
+          cube.position.set(at[0], at[1] + hop, at[2])
+        })
+        if (t > 0.6) {
+          flyTo(mine, aboveHost(0.9), slot(3), t, 0.6, 1.6, 1.0, 6)
+          mine.scale.set(0.38, 0.38, 0.38)
+          if (t > boot + 0.9 && t < boot + 1.25)
+            mine.position.y += Math.abs(Math.sin((t - boot - 0.9) * 9)) * 0.5
+        }
+        // 起動の合図
+        if (t > boot - 0.4 && t < boot + 1.2)
+          pulseRings.forEach((ring, j) => {
+            const phase = ((t - boot + 0.4) * 0.9 + j * 0.5) % 1
+            const scale = 1 + phase * 6
+            ring.visible = true
+            ring.scale.set(scale, 0.02, scale)
+            ring.position.set(-0.6, 0.08, 2.4)
+            ring.material.opacity = 0.5 * (1 - phase)
+          })
+        if (t > boot + 1.1) {
+          const size = lerp(MALWARE_SIZE, ADMIN_MALWARE_SIZE, overshoot(progress(t, boot + 1.1, boot + 1.5)))
+          crown.visible = true
+          malware.scale.set(size, size, size)
+        }
+      },
+    },
+    // T1037 Boot or Logon Initialization Scripts
+    T1037: {
+      hits: [3.6],
+      run(t) {
+        view.target = [0.2, 2.6]
+        view.height = 10.5
+        storyState(5)
+        // 高い権限のプログラムが、起動のときに読み上げる手順書。そこへ、自分の一行を書き足す
+        const script = documents[0]
+        const page = [-0.4, 1.7, 2.5]
+        const line = pinkCubes[0]
+        script.visible = true
+        script.scale.set(1.6, 1.6, 1.6)
+        script.position.set(page[0], page[1], page[2])
+        script.rotation.y = 0.6
+        trustedProcess.visible = true
+        trustedProcess.scale.set(1.5, 1.5, 1.5)
+        trustedProcess.position.set(-2.2, 0, 2.6)
+        trustedProcess.rotation.y = 0.9
+        if (t > 0.6) {
+          flyTo(line, aboveHost(0.9), [page[0] + 0.05, page[1] - 0.45, page[2] + 0.12], t, 0.6, 1.5, 0.8)
+          line.scale.set(0.5, 0.09, 0.09)
+          line.rotation.y = 0.6
+        }
+        // 読み上げる
+        if (t > 2.2 && t < 3.4)
+          stretchBetween(
+            cyanBeams[0],
+            [-2.2, 1.0, 2.6],
+            [page[0], lerp(page[1] + 0.5, page[1] - 0.45, progress(t, 2.2, 3.2)), page[2]],
+            0.06,
+          )
+        if (t > 3.2 && t < 3.8) stretchBetween(pinkBeams[0], [-2.2, 1.0, 2.6], aboveHost(0.8), 0.08)
+        if (t > 3.4) {
+          const size = lerp(MALWARE_SIZE, ADMIN_MALWARE_SIZE, overshoot(progress(t, 3.4, 3.8)))
+          crown.visible = true
+          malware.scale.set(size, size, size)
+        }
+      },
+    },
+    // T1543 Create or Modify System Process
+    T1543: {
+      hits: [3.8],
+      run(t) {
+        view.target = [0.2, 2.6]
+        view.height = 10.5
+        storyState(5)
+        // システムの権限で動くサービス（奥の列）。その並びに、自分のサービスを作って加える
+        const spot = [-0.2, 2.4]
+        const mine = bots[6]
+        for (let i = 0; i < 2; i++) {
+          const service = bots[4 + i]
+          service.visible = true
+          service.scale.set(1, 1, 1)
+          service.position.set(-2.6 + i * 1.2, Math.abs(Math.sin(view.time * 4 + i)) * 0.08, 2.4)
+          service.rotation.y = 0.6
+        }
+        if (t > 0.5 && t < 2.4) {
+          hammer.visible = true
+          hammer.position.set(spot[0] + 0.8, 0.9, spot[1] + 0.3)
+          hammer.rotation.z = 0.3 + Math.abs(Math.cos(((t - 0.5) * Math.PI) / 0.6))
+        }
+        if (t > 0.9) {
+          const built = t < 2.4 ? progress(t, 0.9, 2.4) * 0.9 + 0.1 : 1
+          mine.visible = true
+          mine.scale.set(1, built, 1)
+          mine.position.set(spot[0], 0, spot[1])
+          mine.rotation.y = 0.6
+        }
+        if (t > 2.8) {
+          jumpMalware(
+            t,
+            2.8,
+            3.6,
+            aboveHost(0),
+            [spot[0], 1.15, spot[1]],
+            1.0,
+            lerp(MALWARE_SIZE, ADMIN_MALWARE_SIZE, overshoot(progress(t, 3.6, 4.0))),
+          )
+          crown.visible = t > 3.6
+        }
+      },
+    },
+    // T1053 Scheduled Task/Job
+    T1053: {
+      hits: [3.6],
+      run(t) {
+        view.target = [0.2, 2.6]
+        view.height = 10.5
+        storyState(5)
+        // 高い権限のプログラムが、時刻になると予約された処理を動かす。その予約に、自分の処理を入れておく
+        const turns = progress(t, 1.8, 3.2)
+        const job = pinkCubes[0]
+        const tray = [-1.0, 1.0, 2.5]
+        trustedProcess.visible = true
+        trustedProcess.scale.set(1.5, 1.5, 1.5)
+        trustedProcess.position.set(-2.2, 0, 2.6)
+        trustedProcess.rotation.y = 0.9
+        clock.visible = true
+        clock.scale.set(0.9, 0.9, 0.9)
+        clock.position.set(-2.2, 2.6, 2.6)
+        clock.rotation.y = 0.6
+        clockHand.rotation.z = Math.PI / 2 - turns * (Math.PI / 2)
+        if (t > 0.5) {
+          flyTo(job, aboveHost(0.9), tray, t, 0.5, 1.4, 0.9, 6)
+          job.scale.set(0.34, 0.34, 0.34)
+        }
+        // 時刻が来ると、高い権限の側が取り上げて動かす
+        if (t > 3.2) {
+          stretchBetween(cyanBeams[0], [-2.2, 1.0, 2.6], tray, 0.07)
+          job.position.y = tray[1] + Math.abs(Math.sin((t - 3.2) * 8)) * 0.3
+          job.rotation.y = t * 6
+        }
+        if (t > 3.4) {
+          const size = lerp(MALWARE_SIZE, ADMIN_MALWARE_SIZE, overshoot(progress(t, 3.4, 3.8)))
+          crown.visible = true
+          malware.scale.set(size, size, size)
+        }
+      },
+    },
+    // T1078 Valid Accounts
+    T1078: {
+      hits: [3.4],
+      run(t) {
+        view.target = [0.4, 2.8]
+        view.height = 10.5
+        storyState(5)
+        // 管理者の正規のアカウント（鍵）を手に入れた。弱点を突かなくても、正面の門を鍵で開けて通れる
+        const pose = walk(
+          [
+            [0, HOST_SPOT[0], HOST_SPOT[1]],
+            [1.2, HOST_SPOT[0], HOST_SPOT[1]],
+            [2.4, 0.9, 3.0],
+            [3.2, -1.2, 3.0],
+            [7, -1.2, 3.0],
+          ],
+          t,
+        )
+        checkpoint.visible = true
+        checkpoint.position.set(0.1, 0, 3.0)
+        checkpoint.rotation.y = Math.PI / 2
+        checkpoint.scale.set(0.6, 0.6, 0.6)
+        applyPose(malware, pose)
+        malware.scale.multiplyScalar(lerp(MALWARE_SIZE, ADMIN_MALWARE_SIZE, overshoot(progress(t, 3.3, 3.7))))
+        crown.visible = t > 3.3
+        if (t >= 3.2) malware.rotation.y = 0.6
+        if (t < 3.3) {
+          flyTo(key, [3.4, 3.4, 4.2], [pose.x, 1.5, pose.z], t, 0.2, 1.1, 0.6, 6)
+          if (t >= 1.1) key.rotation.y = 0.6
+        }
+        showCheck(0.1, 2.5, 3.0, t, 2.5)
+        showAlert(0, -2, 2.2, 5, t, 5.4, 6.8)
       },
     },
   }

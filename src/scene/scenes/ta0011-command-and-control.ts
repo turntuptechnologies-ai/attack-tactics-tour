@@ -1,6 +1,6 @@
 // TA0011 コマンド＆コントロール（Command and Control）の場面。
 import type { Kit } from '../kit'
-import { progress, smooth, lerp, overshoot, arcBetween, stretchBetween } from '../motion'
+import { progress, smooth, lerp, overshoot, arcBetween, stretchBetween, walk, applyPose } from '../motion'
 import type { SceneMap } from './types'
 
 export default function commandAndControl(kit: Kit): SceneMap {
@@ -38,6 +38,15 @@ export default function commandAndControl(kit: Kit): SceneMap {
     scanPlane,
     YELLOW_CUBE_X,
     yellowCubes,
+    defender,
+    user,
+    token,
+    pulseRings,
+    documents,
+    standing,
+    flyTo,
+    showCheck,
+    showAlert,
   } = kit
   return {
     // T1071 Application Layer Protocol（本編）
@@ -392,6 +401,337 @@ export default function commandAndControl(kit: Kit): SceneMap {
               lerp(legs[j][2], legs[j + 1][2], q),
             )
           }
+      },
+    },
+    // T1092 Communication Through Removable Media
+    T1092: {
+      hits: [3.0],
+      run(t) {
+        view.target = [1.6, -1.6]
+        view.height = 15
+        storyState(12)
+        // 壁の向こうの機器は、ネットワークにつながっていない。指令と結果は、人が持ち運ぶUSBメモリ（水色の箱）に載せて受け渡す
+        const near = [1.0, -2.6]
+        const far = [4.4, -3.4]
+        const pose = walk(
+          [
+            [0, near[0], near[1]],
+            [0.8, near[0], near[1]],
+            [1.4, 1.2, -0.4],
+            [2.0, 3.8, -0.6],
+            [2.6, far[0], far[1]],
+            [3.4, far[0], far[1]],
+            [4.0, 3.8, -0.6],
+            [4.6, 1.2, -0.4],
+            [5.2, near[0], near[1]],
+            [7, near[0], near[1]],
+          ],
+          t,
+        )
+        const order = pinkCubes[0]
+        const result = documents[0]
+        user.visible = true
+        applyPose(user, pose)
+        token.visible = true
+        token.scale.set(0.35, 0.35, 0.35)
+        token.position.set(pose.x, 2.0, pose.z)
+        token.rotation.y = view.time * 2
+        // 行きは指令、帰りは結果
+        if (t < 2.8) {
+          if (t < 0.8)
+            flyTo(order, [SERVER_SPOT[0], 1.2, SERVER_SPOT[1]], [near[0], 2.5, near[1]], t, 0.2, 0.8, 0.8, 6)
+          else {
+            order.visible = true
+            order.position.set(pose.x, 2.5, pose.z)
+          }
+          order.scale.set(0.24, 0.24, 0.24)
+        }
+        if (t > 2.6) racks[4].lights.color.setHex(0xff6fd8)
+        if (t > 3.2) {
+          result.visible = true
+          result.scale.set(0.7, 0.7, 0.7)
+          result.rotation.y = 0.6
+          if (t < 5.2) result.position.set(pose.x, 2.6, pose.z)
+          else
+            arcBetween(
+              result,
+              [near[0], 2.6, near[1]],
+              [SERVER_SPOT[0] + 1.0, 0.5, SERVER_SPOT[1] + 1.6],
+              smooth(progress(t, 5.2, 5.9)),
+              0.8,
+            )
+        }
+      },
+    },
+    // T1659 Content Injection
+    T1659: {
+      hits: [3.6],
+      run(t) {
+        view.target = [-1.5, 5]
+        view.height = 22
+        storyState(12)
+        view.actor = attacker
+        showOperatorOrb(t)
+        // 侵入済みの端末は、ふつうのWebサイト（雲）と通信している。その応答を途中で差し替えて、指令や追加の道具を届ける
+        const site = [-7.5, 5.2, 10]
+        const inside = [SERVER_SPOT[0], 0.9, SERVER_SPOT[1]]
+        const middle = [(site[0] + inside[0]) / 2, (site[1] + inside[1]) / 2, (site[2] + inside[2]) / 2]
+        const inject = pinkCubes[0]
+        const tool = bots[6]
+        popIn(cloud, site[0], site[1], site[2], t, 0.1, 1.6)
+        cloud.rotation.y = 0.6
+        stretchBetween(cyanBeams[0], inside, site, 0.07)
+        if (t > 0.8 && t < 3.0) {
+          if (t < 1.9) flyTo(inject, [TOWER_SPOT[0], 2.9, TOWER_SPOT[1]], middle, t, 0.8, 1.9, 2.0, 6)
+          else flyTo(inject, middle, inside, t, 2.0, 3.0, 0.2)
+          inject.scale.set(0.36, 0.36, 0.36)
+        }
+        if (t > 3.0) {
+          const size = overshoot(progress(t, 3.0, 3.4))
+          tool.visible = true
+          tool.scale.set(size, size, size)
+          tool.position.set(SERVER_SPOT[0] + 1.3, Math.abs(Math.sin(t * 6)) * 0.15, SERVER_SPOT[1] + 0.6)
+          tool.rotation.y = 0.6
+        }
+        showCross(middle[0], middle[1] + 1.4, middle[2], t, 5.4)
+      },
+    },
+    // T1132 Data Encoding
+    T1132: {
+      hits: [3.2],
+      run(t) {
+        view.target = [0.5, 5]
+        view.height = 22
+        storyState(12)
+        view.actor = attacker
+        showOperatorOrb(t)
+        // 指令（紙）は、送る前に別の表現（箱）に変える。届いた先で、元に戻して読む
+        const [from, to] = showC2Link(t)
+        for (let i = 0; i < 3; i++) {
+          const p = ((t - 0.4) * 0.28 + i / 3) % 1
+          if (t < 0.4 + i * 0.3) continue
+          const at = [lerp(from[0], to[0], p), lerp(from[1], to[1], p) + 0.5, lerp(from[2], to[2], p)]
+          const encoded = p > 0.2 && p < 0.8
+          const item = encoded ? pinkCubes[i] : documents[i]
+          item.visible = true
+          item.position.set(at[0], at[1], at[2])
+          if (encoded) {
+            item.scale.set(0.34, 0.34, 0.34)
+            item.rotation.set(0.8, t * 2, 0.6)
+          } else {
+            item.scale.set(0.9, 0.9, 0.9)
+            item.rotation.y = 0.6
+          }
+        }
+        // 変わる場所のしるし
+        ;[0.2, 0.8].forEach((p, j) => {
+          const ring = pulseRings[j]
+          if (!ring) return
+          ring.visible = true
+          ring.scale.set(1.6, 0.02, 1.6)
+          ring.position.set(lerp(from[0], to[0], p), 0.08, lerp(from[2], to[2], p))
+          ring.material.opacity = 0.35
+        })
+      },
+    },
+    // T1001 Data Obfuscation
+    T1001: {
+      hits: [3.2],
+      run(t) {
+        view.target = [0.5, 5]
+        view.height = 22
+        storyState(12)
+        view.actor = attacker
+        showOperatorOrb(t)
+        // 指令（ピンクの粒）は、関係のないデータ（黄色い箱や紙）に混ぜて流す。どれが本物か、見分けにくい
+        const [from, to] = showC2Link(t)
+        const along = (p: number, lift: number) => [
+          lerp(from[0], to[0], p),
+          lerp(from[1], to[1], p) + lift,
+          lerp(from[2], to[2], p),
+        ]
+        if (t > 0.4) {
+          yellowCubes.forEach((junk, i) => {
+            const at = along(((t - 0.4) * 0.3 + i / 3) % 1, 0.35 + (i & 1) * 0.3)
+            junk.visible = true
+            junk.material.color.setHex(0xf6c531)
+            junk.scale.set(0.34, 0.34, 0.34)
+            junk.position.set(at[0], at[1], at[2])
+            junk.rotation.y = t * 2
+          })
+          for (let i = 0; i < 3; i++) {
+            const at = along(((t - 0.4) * 0.3 + i / 3 + 0.17) % 1, 0.5 - (i & 1) * 0.3)
+            const junk = documents[i]
+            junk.visible = true
+            junk.scale.set(0.7, 0.7, 0.7)
+            junk.position.set(at[0], at[1], at[2])
+            junk.rotation.y = 0.6
+          }
+          for (let i = 0; i < 2; i++) {
+            const at = along(((t - 0.4) * 0.3 + i / 2 + 0.08) % 1, 0.4)
+            const real = pinkCubes[i]
+            real.visible = true
+            real.scale.set(0.2, 0.2, 0.2)
+            real.position.set(at[0], at[1], at[2])
+          }
+        }
+      },
+    },
+    // T1665 Hide Infrastructure
+    T1665: {
+      hits: [3.0],
+      run(t) {
+        view.target = [0.5, 5.5]
+        view.height = 22
+        storyState(12)
+        view.actor = attacker
+        showOperatorOrb(t)
+        showC2Link(t)
+        // 調べに来た通信（水色の線）には、無害な顔（ガラスの板）を見せる。本当の指令サーバーだとは分からない
+        const tower = [TOWER_SPOT[0], 2.4, TOWER_SPOT[1]]
+        const probing = t > 1.2 && t < 3.6
+        applyPose(defender, standing(-2, 5, 2.4))
+        if (probing)
+          stretchBetween(cyanBeams[0], [-2, 1.6, 5], [tower[0] - 0.9, tower[1], tower[2] - 0.6], 0.07)
+        if (t > 0.8 && t < 4.6) {
+          glass.visible = true
+          glass.scale.set(2.2, 3.6, 0.12)
+          glass.position.set(tower[0] - 0.9, 1.9, tower[2] - 0.6)
+          glass.rotation.y = 0.9
+          glass.material.opacity = 0.6 * smooth(progress(t, 0.8, 1.2))
+        }
+        if (t < 4.6) showCheck(tower[0] - 1.2, 4.6, tower[2] - 0.8, t, 2.4)
+        showAlert(0, -2, 2.2, 5, t, 5.4, 6.8)
+      },
+    },
+    // T1104 Multi-Stage Channels
+    T1104: {
+      hits: [3.4],
+      run(t) {
+        view.target = [-0.5, 5]
+        view.height = 22
+        storyState(12)
+        view.actor = attacker
+        showOperatorOrb(t)
+        // 最初の通信先（左の中継）は、次の行き先を教えるだけ。本命の指令サーバーは、そのあとで初めて使う
+        const first = [-7.5, 0.9, 11]
+        const inside = [SERVER_SPOT[0], 0.7, SERVER_SPOT[1]]
+        const note = documents[0]
+        relayBot.visible = true
+        relayBot.scale.set(1.2, 1.2, 1.2)
+        relayBot.position.set(first[0], bobHeight(), first[2])
+        relayBot.rotation.y = 0.6
+        c2Tower.visible = t > 2.4
+        if (t > 2.4 && t < 2.8) {
+          const size = overshoot(progress(t, 2.4, 2.8))
+          c2Tower.scale.set(size, size, size)
+        }
+        if (t > 0.4 && t < 2.6) stretchBetween(pinkBeams[0], inside, first, 0.08)
+        if (t > 1.0 && t < 2.4) {
+          flyTo(note, first, [inside[0], 1.6, inside[2]], t, 1.0, 2.2, 3, 5)
+          note.scale.set(0.8, 0.8, 0.8)
+        }
+        if (t > 2.9) {
+          const [from, to] = showC2Link(t)
+          for (let i = 0; i < 3; i++) {
+            const p = ((t - 2.9) * 0.4 + i / 3) % 1
+            const cube = pinkCubes[i]
+            cube.visible = true
+            cube.scale.set(0.28, 0.28, 0.28)
+            cube.position.set(lerp(from[0], to[0], p), lerp(from[1], to[1], p), lerp(from[2], to[2], p))
+          }
+        }
+      },
+    },
+    // T1095 Non-Application Layer Protocol
+    T1095: {
+      hits: [3.0],
+      run(t) {
+        view.target = [-0.5, 5]
+        view.height = 22
+        storyState(12)
+        view.actor = attacker
+        showOperatorOrb(t)
+        // 門の検査は、Webやメールの高さだけを見ている。その下の層をくぐらせて、指令をやり取りする
+        const legs = [
+          [TOWER_SPOT[0], 0.25, TOWER_SPOT[1]],
+          [0, 0.25, 9.3],
+          [0, 0.25, 5.6],
+          [SERVER_SPOT[0], 0.5, SERVER_SPOT[1]],
+        ]
+        const drawn = progress(t, 0.5, 1.7) * 3
+        checkpoint.visible = true
+        scanPlane.visible = true
+        scanPlane.scale.set(3.8, 1.6, 0.08)
+        scanPlane.position.set(0, 2.1, 9.3)
+        scanPlane.material.opacity = 0.3 + 0.15 * Math.sin(t * 8)
+        for (let j = 0; j < 3; j++) if (drawn > j) stretchBetween(pinkBeams[j], legs[j], legs[j + 1], 0.07)
+        if (t > 1.7)
+          for (let i = 0; i < 4; i++) {
+            const along = (((t - 1.7) * 0.3 + i * 0.25) % 1) * 3
+            const j = Math.min(2, Math.floor(along))
+            const q = along - j
+            const cube = pinkCubes[i]
+            cube.visible = true
+            cube.scale.set(0.3, 0.14, 0.3)
+            cube.position.set(
+              lerp(legs[j][0], legs[j + 1][0], q),
+              lerp(legs[j][1], legs[j + 1][1], q),
+              lerp(legs[j][2], legs[j + 1][2], q),
+            )
+          }
+      },
+    },
+    // T1205 Traffic Signaling
+    T1205: {
+      hits: [3.4],
+      run(t) {
+        view.target = [-1.5, 4.5]
+        view.height = 22
+        storyState(12)
+        view.actor = attacker
+        showOperatorOrb(t)
+        // ひそませた機能（うずくまった機械）は、ふだんは通信しない。壁の3つの口を、決めた順番でたたくと目を覚ます
+        const order = [0, 2, 1]
+        const wake = 3.0
+        const sleeper = bots[6]
+        const rise = overshoot(progress(t, wake, wake + 0.4))
+        yellowCubes.forEach((port, i) => {
+          const knocked = 0.8 + order.indexOf(i) * 0.7 + 0.6
+          port.visible = true
+          port.material.color.setHex(t > knocked && t < 4.6 ? 0xff6fd8 : 0xf6c531)
+          port.scale.set(0.5, 0.5, 0.5)
+        })
+        order.forEach((portIndex, n) => {
+          const start = 0.8 + n * 0.7
+          const p = progress(t, start, start + 0.6)
+          if (p <= 0 || p >= 1) return
+          const knock = pinkCubes[n]
+          knock.visible = true
+          knock.scale.set(0.28, 0.28, 0.28)
+          arcBetween(
+            knock,
+            [TOWER_SPOT[0], 2.9, TOWER_SPOT[1]],
+            [YELLOW_CUBE_X[portIndex], 2.5, 6.6],
+            smooth(p),
+            2.2,
+          )
+        })
+        sleeper.visible = true
+        sleeper.scale.set(1.1, lerp(0.35, 1.1, rise), 1.1)
+        sleeper.position.set(
+          SERVER_SPOT[0] + 1.4,
+          t > wake ? Math.abs(Math.sin(t * 6)) * 0.15 : 0,
+          SERVER_SPOT[1] + 0.6,
+        )
+        sleeper.rotation.y = 0.6
+        if (t > wake + 0.2)
+          stretchBetween(
+            pinkBeams[0],
+            [TOWER_SPOT[0], 2.9, TOWER_SPOT[1]],
+            [SERVER_SPOT[0] + 1.4, 0.9, SERVER_SPOT[1] + 0.6],
+            0.09,
+          )
       },
     },
   }
