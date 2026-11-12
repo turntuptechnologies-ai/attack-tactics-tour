@@ -535,9 +535,14 @@ td.src {
   white-space: nowrap;
   font-variant-numeric: tabular-nums;
 }
-td.src svg {
+td.src svg,
+.src-inline svg {
   margin-left: 4px;
   vertical-align: baseline;
+}
+/* 技術名の下に出す公式ページへのリンク。狭い画面でだけ出す（このファイルの末尾） */
+.src-inline {
+  display: none;
 }
 td small {
   display: block;
@@ -583,5 +588,16 @@ footer ul {
   .tech {
     font-size: 11px;
     line-height: 1.35;
+  }
+  /* 一覧表は横に送って読むので、右端の「公式」の列は送らないと見えない。列を隠し、技術名のすぐ下にリンクを出す */
+  th.src,
+  td.src {
+    display: none;
+  }
+  .src-inline {
+    display: block;
+    width: fit-content;
+    margin-top: 3px;
+    font-size: 12px;
   }
 }
