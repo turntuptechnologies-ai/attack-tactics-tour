@@ -20,6 +20,9 @@ export type TimelineScene = {
 /** 防御側の番に切り替わる時刻（秒） */
 export const DEFENSE_AT = 4.6
 
+/** 自動で次の場面へ進むとき、暗転したまま次の技術の名前を見せておく秒数（技術の場面の前にだけ置く） */
+export const LEAD = 1.2
+
 const INTRO =
   'MITRE ATT&CK は、攻撃者の目的を15の「戦術」に整理した知識ベース。ひとつの侵入を例に、順に見ていきます。'
 const OUTRO =
@@ -52,6 +55,13 @@ export function buildTimeline(tactics: Tactic[] = TACTICS): TimelineScene[] {
   })
   out.push({ kind: 'outro', tactic: -1, duration: 7, captions: [[0, 7, '', OUTRO]] })
   return out
+}
+
+/** 本編だけを自動で一巡したときの長さ（秒）。場面の長さに、技術の場面の前に置く間を足したもの */
+export function storyLoopSeconds(timeline: TimelineScene[]): number {
+  return timeline
+    .filter((s) => s.kind !== 'extra')
+    .reduce((n, s) => n + s.duration + (s.techniqueId ? LEAD : 0), 0)
 }
 
 /** 時刻 t に出す字幕 */
