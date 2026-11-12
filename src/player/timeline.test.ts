@@ -23,13 +23,11 @@ describe('buildTimeline', () => {
     expect(timeline[timeline.length - 1].kind).toBe('outro')
   })
 
-  it('各戦術の先頭の技術が本編で、残りは専用の場面か簡易表示になる', () => {
+  it('各戦術の先頭の技術が本編で、残りは別の手口の例になる', () => {
     TACTICS.forEach((t, k) => {
       const scenes = timeline.filter((s) => s.tactic === k)
       expect(scenes.map((s) => s.techniqueId)).toEqual(t.examples.map((e) => e.id))
-      expect(scenes.map((s) => s.kind)).toEqual(
-        t.examples.map((e, j) => (j === 0 ? 'story' : e.simple == null ? 'extra' : 'simple')),
-      )
+      expect(scenes.map((s) => s.kind)).toEqual(t.examples.map((_, j) => (j === 0 ? 'story' : 'extra')))
     })
   })
 
@@ -42,7 +40,7 @@ describe('buildTimeline', () => {
   })
 
   it('本編だけを通すと約2分になる', () => {
-    const story = timeline.filter((s) => s.kind !== 'extra' && s.kind !== 'simple')
+    const story = timeline.filter((s) => s.kind !== 'extra')
     const total = story.reduce((n, s) => n + s.duration, 0)
     expect(total).toBeGreaterThan(110)
     expect(total).toBeLessThan(130)
@@ -67,7 +65,6 @@ describe('step', () => {
       i = step(timeline, i, 1, false)
     } while (i !== 0)
     expect(visited).not.toContain('extra')
-    expect(visited).not.toContain('simple')
     expect(visited.filter((k) => k === 'story')).toHaveLength(TACTICS.length)
   })
 
@@ -96,7 +93,7 @@ describe('step', () => {
 })
 
 describe('場面の検索', () => {
-  it('同じ技術が複数の戦術にあるときは、本編、専用の場面、簡易表示の順に選ぶ', () => {
+  it('同じ技術が複数の戦術にあるときは、本編の場面を優先する', () => {
     // Scheduled Task は、実行（専用の場面）が先に並ぶが、本編は永続化にある
     const scene = timeline[indexOfTechnique(timeline, 'T1053')]
     expect(scene.kind).toBe('story')
