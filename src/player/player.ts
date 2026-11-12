@@ -6,6 +6,7 @@ import { createScenes, type Scenes } from '../scene/scenes'
 import type { SceneDef } from '../scene/scenes/types'
 import { createWorld } from '../scene/world'
 import type { Caption } from '../data/types'
+import { placeLabels } from './labels'
 import { buildTimeline, captionAt, hashFor, parseHash, step, type TimelineScene } from './timeline'
 
 /** 毎フレーム位置を変える重ね表示。React を通さず、要素を直接動かす */
@@ -156,17 +157,27 @@ export class Player {
     this.renderer.setSize(w, h, false)
   }
 
-  /** 物の頭上に、ラベルを追従させる */
-  private label(el: HTMLElement, o: THREE.Object3D, above: number) {
-    if (!o.visible) {
-      el.hidden = true
-      return
-    }
-    const v = this.projected.set(o.position.x, o.position.y + above, o.position.z).project(this.kit.camera)
-    el.hidden = false
-    const x = (((v.x + 1) / 2) * this.width).toFixed(1)
-    const y = (((1 - v.y) / 2) * this.height).toFixed(1)
-    el.style.transform = `translate(-50%,-100%) translate(${x}px,${y}px)`
+  /**
+   * 物の頭上に、ラベルを追従させる。物どうしが近いときは、重ならないようにずらす。
+   * 先に渡したものほど、元の位置を優先する。show が false のものは隠す。
+   */
+  private labels(items: { el: HTMLElement; o: THREE.Object3D; above: number; show?: boolean }[]) {
+    const shown = items.filter(({ el, o, show }) => {
+      el.hidden = !o.visible || show === false
+      return !el.hidden
+    })
+    const wanted = shown.map(({ el, o, above }) => {
+      const v = this.projected.set(o.position.x, o.position.y + above, o.position.z).project(this.kit.camera)
+      return {
+        x: ((v.x + 1) / 2) * this.width,
+        y: ((1 - v.y) / 2) * this.height,
+        w: el.offsetWidth,
+        h: el.offsetHeight,
+      }
+    })
+    placeLabels(wanted, this.width, this.height).forEach((l, i) => {
+      shown[i].el.style.transform = `translate(-50%,-100%) translate(${l.x.toFixed(1)}px,${l.y.toFixed(1)}px)`
+    })
   }
 
   private draw() {
@@ -244,10 +255,12 @@ export class Player {
     this.renderer.render(kit.scene, camera)
 
     const { overlay } = this
-    this.label(overlay.attacker, kit.attacker, 2.3)
-    this.label(overlay.defender, kit.defender, 2.3)
-    this.label(overlay.malware, kit.malware, 1.1 * kit.malware.scale.y + 0.2)
-    if (side === 'd') overlay.defender.hidden = true
+    // 防御側の番は、防御者の頭上に盾が出るので、ラベルは出さない
+    this.labels([
+      { el: overlay.malware, o: kit.malware, above: 1.1 * kit.malware.scale.y + 0.2 },
+      { el: overlay.attacker, o: kit.attacker, above: 2.3 },
+      { el: overlay.defender, o: kit.defender, above: 2.3, show: side !== 'd' },
+    ])
     // 場面の変わり目は暗転でつなぐ
     overlay.fade.style.opacity = Math.max(0, 1 - Math.min(t, scene.duration - t) / 0.35).toFixed(2)
 

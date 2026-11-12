@@ -132,14 +132,29 @@ header p {
 .strip i.on {
   background: var(--attack);
 }
-.chips {
+/* 場面名とターンの表示。広い画面では舞台の上に重ねる（狭い画面での扱いは、このファイルの末尾） */
+.theater {
+  position: relative;
+}
+.hud {
   position: absolute;
-  left: 10px;
-  top: 14px;
+  z-index: 1;
+  /* 舞台の枠（3px）の内側から、左右 10px・上 14px */
+  left: 13px;
+  right: 13px;
+  top: 17px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  pointer-events: none;
+}
+.chips {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
+  min-width: 0;
   max-width: 70%;
 }
 .scene {
@@ -168,9 +183,9 @@ header p {
   border: 1px solid var(--fg);
 }
 .turn {
-  position: absolute;
-  right: 10px;
-  top: 14px;
+  flex: none;
+  margin-left: auto;
+  white-space: nowrap;
   font-family: var(--display);
   font-size: clamp(13px, 2.4vw, 20px);
   padding: 2px 10px;
@@ -422,3 +437,26 @@ footer ul {
 /* 簡易表示（戦術ごとの共通の絵で見せる技術）は、点線の細い枠にして専用の場面と区別する */
 .te.ex.simple{border:1px dashed var(--attack)}
 .lk.simple{text-decoration-style:dashed}
+
+/* 狭い画面（スマホ）では、舞台が小さく、重ねた文字どうしが被ってアニメーションも隠れる。
+   場面名とターンの表示を舞台のすぐ上に出し、舞台の上には物に付くラベルだけを残す。 */
+@media (max-width: 640px) {
+  .hud {
+    position: static;
+    /* 技術名が2行になっても舞台の位置が動かないよう、あらかじめ高さを取っておく */
+    min-height: 62px;
+    margin-bottom: 6px;
+  }
+  .chips {
+    flex: 1;
+    max-width: none;
+  }
+  /* 戦術の英語名は省いて、場面名を1行に収める（技術名の行に英語が出る） */
+  .scene small {
+    display: none;
+  }
+  .tech {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+}
