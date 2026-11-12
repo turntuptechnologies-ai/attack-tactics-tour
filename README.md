@@ -50,6 +50,7 @@ src/
 ```
 
 `scripts/attack-diff.mjs` は、公式データと手元のマトリックスを比べる道具です（下の「ATT&CK の版が上がったとき」）。
+`scripts/build-artifact.mjs` は、ビルド結果を 1 枚の HTML にまとめる道具です（下の「Artifact」）。
 
 描画の考え方は一つだけです。毎フレーム、`kit.reset()` で舞台をまるごと初期状態に戻し、
 いまの場面の `run(t)` が「時刻 t のときの状態」をゼロから組み立てます。
@@ -186,6 +187,21 @@ SNS などにリンクを貼ったときに出る画像は `public/og.jpg`（120
 3. JPEG にして `public/og.jpg` に置く。
 
 絵にする場面や時刻、文言は `src/og.ts` の先頭で変えられます。
+
+## Artifact（1 枚にまとめた版）
+
+このサイトは、もともと claude.ai の Artifact として作り始めたものです。いまはこのリポジトリが正で、Artifact は写しです。
+
+Artifact は外部のファイルを読めないので、スクリプトとスタイルを 1 枚の HTML に埋め込んだものを載せます。
+
+```sh
+npm run build:artifact   # → artifact-out/attack-tactics-tour.html
+```
+
+- スクリプトとスタイルは HTML の中に埋め込み、書体だけは Google Fonts から読み込みます（同梱の書体は外します）。
+- 配色は、OS の設定に加えて、ページの根元の `data-theme` にも従います（Artifact は、配色の切り替えをこの属性で伝えてきます）。
+  そのため `src/index.css` の暗い配色は 2 か所に同じ値を書いています。変えるときは両方を直してください。
+- できたファイルを、Artifact に載せ替えます。`artifact-out/` は Git の管理外です。
 
 ## Deploy
 
