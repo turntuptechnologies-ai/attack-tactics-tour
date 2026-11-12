@@ -421,6 +421,71 @@ export function createKit(w: World) {
     }
   }
 
+  /**
+   * ピンクの粒を、折れ線 path に沿って等間隔に流す（通信が流れている様子）。
+   * clock は進み具合で、1 増えるごとに端から端まで 1 回流れる。size は粒の大きさ（[x, y, z] でも渡せる）。
+   */
+  function flowAlong(path: Vec3[], count: number, clock: number, size: number | Vec3 = 0.28) {
+    const legs = path.length - 1
+    for (let i = 0; i < count; i++) {
+      const along = ((clock + i / count) % 1) * legs
+      const j = Math.min(legs - 1, Math.floor(along))
+      const q = along - j
+      const cube = w.pinkCubes[i]
+      cube.visible = true
+      if (typeof size === 'number') cube.scale.set(size, size, size)
+      else cube.scale.set(size[0], size[1], size[2])
+      cube.position.set(
+        lerp(path[j][0], path[j + 1][0], q),
+        lerp(path[j][1], path[j + 1][1], q),
+        lerp(path[j][2], path[j + 1][2], q),
+      )
+    }
+  }
+
+  /** 侵入した端末を中心にした円の上の点。集めた鍵などを、マルウェアのまわりに回すのに使う */
+  const aroundHost = (angle: number, radius = 1, y = 2.4) => [
+    HOST_SPOT[0] + Math.cos(angle) * radius,
+    y,
+    HOST_SPOT[1] + Math.sin(angle) * radius,
+  ]
+
+  /**
+   * 床に広がる波紋（2 本の輪）を出す。clock は波の進み具合で、1 増えるごとに 1 回広がる
+   * （たとえば (t - 1.6) * 0.9 なら、1.6 秒から始まって 1 秒に 0.9 回）。spread は広がる大きさ。
+   */
+  function showRipples(x: number, z: number, clock: number, spread: number, strength = 0.5) {
+    w.pulseRings.forEach((ring, j) => {
+      const phase = (clock + j * 0.5) % 1
+      const scale = 1 + phase * spread
+      ring.visible = true
+      ring.scale.set(scale, 0.02, scale)
+      ring.position.set(x, 0.08, z)
+      ring.material.opacity = strength * (1 - phase)
+    })
+  }
+
+  /**
+   * 紙（documents のひとつ）を、appear にぽんと出して、t0〜t1 のあいだに from から to へ山なりに飛ばす。
+   * 飛んでいる間は回り、着いたら正面を向く。arc は山の高さ、size は紙の大きさ。
+   */
+  function flyPaper(
+    paper: Object3D,
+    from: Vec3,
+    to: Vec3,
+    t: number,
+    t0: number,
+    t1: number,
+    arc: number,
+    appear: number,
+    size = 0.8,
+  ) {
+    const k = size * overshoot(progress(t, appear, appear + 0.3))
+    flyTo(paper, from, to, t, t0, t1, arc, 5)
+    paper.scale.set(k, k, k)
+    if (t >= t1) paper.rotation.y = 0.6
+  }
+
   /** 探索の見せ方。t0 から dur 秒のあいだ、マルウェアから to へ、調べる線（ピンクの線の i 本目）を伸ばす */
   function probeFromHost(i: number, to: Vec3, t: number, t0: number, dur = 0.6) {
     if (t > t0 && t < t0 + dur) stretchBetween(w.pinkBeams[i], aboveHost(0.9), to, 0.07)
@@ -429,12 +494,8 @@ export function createKit(w: World) {
   /** 探索の見せ方。t0 に、調べて分かったこと（紙の i 枚目）を from からマルウェアの頭上へ持ち帰る */
   function takeNote(i: number, from: Vec3, t: number, t0: number) {
     if (t < t0) return
-    const note = w.documents[i]
-    const size = 0.8 * overshoot(progress(t, t0, t0 + 0.3))
     const to = [HOST_SPOT[0] - 0.9 + i * 0.6, 2.8 + (i & 1) * 0.4, HOST_SPOT[1]]
-    flyTo(note, from, to, t, t0 + 0.2, t0 + 1.0, 1.0, 5)
-    note.scale.set(size, size, size)
-    if (t >= t0 + 1.0) note.rotation.y = 0.6
+    flyPaper(w.documents[i], from, to, t, t0 + 0.2, t0 + 1.0, 1.0, t0)
   }
 
   return {
@@ -467,6 +528,10 @@ export function createKit(w: World) {
     sensorVisits,
     probeFromHost,
     takeNote,
+    showRipples,
+    flyPaper,
+    flowAlong,
+    aroundHost,
   }
 }
 

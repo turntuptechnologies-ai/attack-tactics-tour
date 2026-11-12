@@ -55,8 +55,8 @@ export default function initialAccess(kit: Kit): SceneMap {
     showAlert,
     relayBot,
     cyanBeams,
-    pulseRings,
     popIn,
+    showRipples,
   } = kit
   return {
     // T1566 Phishing（本編）
@@ -481,15 +481,7 @@ export default function initialAccess(kit: Kit): SceneMap {
         relayBot.scale.set(0.8, 0.8, 0.8)
         relayBot.position.set(ap[0], 0, ap[2])
         relayBot.rotation.y = 0.6
-        if (t < 4.6)
-          pulseRings.forEach((ring, j) => {
-            const phase = (t * 0.6 + j * 0.5) % 1
-            const scale = 1 + phase * 9
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(ap[0], 0.08, ap[2])
-            ring.material.opacity = 0.5 * (1 - phase)
-          })
+        if (t < 4.6) showRipples(ap[0], ap[2], t * 0.6, 9)
         if (t > 1.9 && t < 4.6) stretchBetween(pinkBeams[0], [pose.x, 1.6, pose.z], ap, 0.07)
         if (t > 2.6 && t < 3.4) stretchBetween(pinkBeams[1], ap, [6, 0.9, 2.9], 0.07)
         if (t > 3.1) {

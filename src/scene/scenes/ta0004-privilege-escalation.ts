@@ -39,11 +39,11 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
     hammer,
     bots,
     yellowCubes,
-    pulseRings,
     clock,
     clockHand,
     showCheck,
     DEFENDER_SPOT,
+    showRipples,
   } = kit
   return {
     // T1068 Exploitation for Privilege Escalation（本編）
@@ -336,15 +336,7 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
             mine.position.y += Math.abs(Math.sin((t - boot - 0.9) * 9)) * 0.5
         }
         // 起動の合図
-        if (t > boot - 0.4 && t < boot + 1.2)
-          pulseRings.forEach((ring, j) => {
-            const phase = ((t - boot + 0.4) * 0.9 + j * 0.5) % 1
-            const scale = 1 + phase * 6
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(-0.6, 0.08, 2.4)
-            ring.material.opacity = 0.5 * (1 - phase)
-          })
+        if (t > boot - 0.4 && t < boot + 1.2) showRipples(-0.6, 2.4, (t - boot + 0.4) * 0.9, 6)
         if (t > boot + 1.1) {
           const size = lerp(MALWARE_SIZE, ADMIN_MALWARE_SIZE, overshoot(progress(t, boot + 1.1, boot + 1.5)))
           crown.visible = true

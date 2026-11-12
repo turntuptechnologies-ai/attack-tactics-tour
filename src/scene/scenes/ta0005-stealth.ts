@@ -44,7 +44,6 @@ export default function stealth(kit: Kit): SceneMap {
     TOWER_SPOT,
     YELLOW_CUBE_X,
     yellowCubes,
-    pulseRings,
     database,
     openGate,
     standing,
@@ -57,6 +56,8 @@ export default function stealth(kit: Kit): SceneMap {
     showSparks,
     sensorVisits,
     DEFENDER_SPOT,
+    showRipples,
+    flyPaper,
   } = kit
   return {
     // T1036 Masquerading（本編）
@@ -646,10 +647,16 @@ export default function stealth(kit: Kit): SceneMap {
           const start = 1.6 + i * 0.5
           if (t < start) continue
           const page = documents[i]
-          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
-          flyTo(page, [disk[0], 0.5, disk[1]], aboveHost(2.4 + i * 0.5), t, start + 0.1, start + 1.0, 0.6, 5)
-          page.scale.set(size, size, size)
-          if (t >= start + 1.0) page.rotation.y = 0.6
+          flyPaper(
+            page,
+            [disk[0], 0.5, disk[1]],
+            aboveHost(2.4 + i * 0.5),
+            t,
+            start + 0.1,
+            start + 1.0,
+            0.6,
+            start,
+          )
         }
       },
     },
@@ -696,10 +703,7 @@ export default function stealth(kit: Kit): SceneMap {
           const start = 0.2 + i * 0.7
           if (t < start) continue
           const log = documents[i]
-          const size = 0.7 * overshoot(progress(t, start, start + 0.3))
-          flyTo(log, eye, [-1.9 + i * 0.7, 0.5, 3.4], t, start + 0.1, start + 0.8, 0.5, 5)
-          log.scale.set(size, size, size)
-          if (t >= start + 0.8) log.rotation.y = 0.6
+          flyPaper(log, eye, [-1.9 + i * 0.7, 0.5, 3.4], t, start + 0.1, start + 0.8, 0.5, start, 0.7)
         }
         if (t > 0.9 && t < 1.8) {
           flyTo(exploit, aboveHost(1.2), eye, t, 0.9, 1.8, 1.2, 8)
@@ -787,15 +791,7 @@ export default function stealth(kit: Kit): SceneMap {
         const arrive = smooth(progress(t, 2.8, 3.6))
         placeSensor(0.5, lerp(9, 3.3, arrive) + Math.sin(view.time * 3) * 0.1, 3.5)
         // 電源が入る
-        if (t > 0.4 && t < 2.6)
-          pulseRings.forEach((ring, j) => {
-            const phase = ((t - 0.4) * 0.8 + j * 0.5) % 1
-            const scale = 1 + phase * 7
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(HOST_SPOT[0], 0.08, HOST_SPOT[1])
-            ring.material.opacity = 0.5 * (1 - phase)
-          })
+        if (t > 0.4 && t < 2.6) showRipples(HOST_SPOT[0], HOST_SPOT[1], (t - 0.4) * 0.8, 7)
         if (t < 0.6) placeMalware(HOST_SPOT[0], 0, HOST_SPOT[1], 0)
         else if (t < 2.8) malware.position.y = Math.abs(Math.sin((t - 0.6) * 6)) * 0.3
         else {

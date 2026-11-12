@@ -50,9 +50,9 @@ export default function impact(kit: Kit): SceneMap {
     TOWER_SPOT,
     pinkCubes,
     attackerScan,
-    pulseRings,
     documents,
     DEFENDER_SPOT,
+    showRipples,
   } = kit
   return {
     // T1486 Data Encrypted for Impact（本編）
@@ -550,15 +550,7 @@ export default function impact(kit: Kit): SceneMap {
         const looping = t > 0.8 && t < 5.2
         const off = looping && Math.floor((t - 0.8) / 0.9) % 2 === 0
         if (off) racks.forEach((rack) => rack.lights.color.setHex(0x1a1d24))
-        if (looping)
-          pulseRings.forEach((ring, j) => {
-            const phase = ((t - 0.8) / 0.9 + j * 0.5) % 1
-            const scale = 1 + phase * 16
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(0, 0.08, RACK_Z)
-            ring.material.opacity = 0.5 * (1 - phase)
-          })
+        if (looping) showRipples(0, RACK_Z, (t - 0.8) / 0.9, 16)
         employees.forEach((employee, i) => hopInPlace(employee, t, 1.0 + i * 0.2, 4.6, 0.08))
         showAlert(0, 4.8, 2.2, -3, t, 2.8, 4.5)
       },

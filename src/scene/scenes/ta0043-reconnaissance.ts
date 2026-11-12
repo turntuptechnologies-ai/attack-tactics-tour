@@ -29,6 +29,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
     secondAttacker,
     truckB,
     relayBot,
+    flyPaper,
   } = kit
   return {
     // T1595 Active Scanning（本編）
@@ -142,7 +143,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
         documents.forEach((doc, i) => {
           const start = 1.0 + i * 0.55
           if (t < start) return
-          flyTo(
+          flyPaper(
             doc,
             [centre[0] - 0.9 + i * 0.6, centre[1] - 0.2, centre[2]],
             [ATTACKER_SPOT[0] - 0.9 + i * 0.6, 2.9 + (i & 1) * 0.5, ATTACKER_SPOT[1]],
@@ -150,11 +151,9 @@ export default function reconnaissance(kit: Kit): SceneMap {
             start + 0.3,
             start + 1.3,
             1.5,
-            5,
+            start,
+            1,
           )
-          const size = overshoot(progress(t, start, start + 0.3))
-          doc.scale.set(size, size, size)
-          if (t >= start + 1.3) doc.rotation.y = 0.6
         })
       },
     },
@@ -212,8 +211,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
         documents.slice(0, 3).forEach((doc, i) => {
           const start = 1.7 + i * 0.6
           if (t < start) return
-          const size = 0.9 * overshoot(progress(t, start, start + 0.3))
-          flyTo(
+          flyPaper(
             doc,
             [site[0], 2.0, site[1]],
             [pose.x - 0.6 + i * 0.6, 3.0 + (i & 1) * 0.45, pose.z],
@@ -221,10 +219,9 @@ export default function reconnaissance(kit: Kit): SceneMap {
             start + 0.2,
             start + 1.0,
             1.2,
-            5,
+            start,
+            0.9,
           )
-          doc.scale.set(size, size, size)
-          if (t >= start + 1.0) doc.rotation.y = 0.6
         })
       },
     },
@@ -253,10 +250,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
         })
         if (t > 2.6) {
           const map = documents[0]
-          const size = overshoot(progress(t, 2.6, 2.9))
-          flyTo(map, [YELLOW_CUBE_X[1], 3.3, 6.5], aboveAttacker(), t, 2.7, 3.6, 2.0, 5)
-          map.scale.set(size, size, size)
-          if (t >= 3.6) map.rotation.y = 0.6
+          flyPaper(map, [YELLOW_CUBE_X[1], 3.3, 6.5], aboveAttacker(), t, 2.7, 3.6, 2.0, 2.6, 1)
         }
       },
     },
@@ -276,10 +270,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
         }
         if (t > 2.4) {
           const chart = documents[0]
-          const size = 1.1 * overshoot(progress(t, 2.4, 2.7))
-          flyTo(chart, [0, 3.4, 3.0], aboveAttacker(), t, 2.6, 3.6, 3.0, 5)
-          chart.scale.set(size, size, size)
-          if (t >= 3.6) chart.rotation.y = 0.6
+          flyPaper(chart, [0, 3.4, 3.0], aboveAttacker(), t, 2.6, 3.6, 3.0, 2.4, 1.1)
         }
       },
     },
@@ -316,8 +307,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
         documents.slice(0, 3).forEach((doc, i) => {
           const start = 1.9 + i * 0.5
           if (t < start) return
-          const size = 0.85 * overshoot(progress(t, start, start + 0.3))
-          flyTo(
+          flyPaper(
             doc,
             host,
             [pose.x - 0.6 + i * 0.6, 3.0 + (i & 1) * 0.45, pose.z],
@@ -325,10 +315,9 @@ export default function reconnaissance(kit: Kit): SceneMap {
             start + 0.2,
             start + 1.0,
             1.0,
-            5,
+            start,
+            0.85,
           )
-          doc.scale.set(size, size, size)
-          if (t >= start + 1.0) doc.rotation.y = 0.6
         })
       },
     },
@@ -356,8 +345,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
           const start = 2.0 + i * 0.5
           if (t < start) continue
           const doc = documents[i]
-          const size = 0.9 * overshoot(progress(t, start, start + 0.3))
-          flyTo(
+          flyPaper(
             doc,
             stall,
             [ATTACKER_SPOT[0] - 0.4 + i * 0.8, 3.0, ATTACKER_SPOT[1]],
@@ -365,10 +353,9 @@ export default function reconnaissance(kit: Kit): SceneMap {
             start + 0.2,
             start + 1.0,
             1.2,
-            5,
+            start,
+            0.9,
           )
-          doc.scale.set(size, size, size)
-          if (t >= start + 1.0) doc.rotation.y = 0.6
         }
       },
     },
@@ -403,8 +390,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
         documents.slice(0, 3).forEach((doc, i) => {
           const start = 2.4 + i * 0.4
           if (t < start) return
-          const size = 0.85 * overshoot(progress(t, start, start + 0.3))
-          flyTo(
+          flyPaper(
             doc,
             [ai[0], 2.6, ai[1]],
             [ATTACKER_SPOT[0] - 0.7 + i * 0.7, 3.0 + (i & 1) * 0.4, ATTACKER_SPOT[1]],
@@ -412,10 +398,9 @@ export default function reconnaissance(kit: Kit): SceneMap {
             start + 0.2,
             start + 1.0,
             1.0,
-            5,
+            start,
+            0.85,
           )
-          doc.scale.set(size, size, size)
-          if (t >= start + 1.0) doc.rotation.y = 0.6
         })
       },
     },
@@ -441,10 +426,7 @@ export default function reconnaissance(kit: Kit): SceneMap {
         view.actor = who
         applyPose(defender, standing(2, 5, 0.4))
         if (t > 0.6) {
-          const size = overshoot(progress(t, 0.6, 0.9))
-          flyTo(report, [vendor[0], 2.2, vendor[1]], aboveAttacker(), t, 0.9, 2.0, 1.4, 5)
-          report.scale.set(size, size, size)
-          if (t >= 2.0) report.rotation.y = 0.6
+          flyPaper(report, [vendor[0], 2.2, vendor[1]], aboveAttacker(), t, 0.9, 2.0, 1.4, 0.6, 1)
         }
       },
     },

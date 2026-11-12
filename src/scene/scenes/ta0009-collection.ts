@@ -12,7 +12,6 @@ export default function collection(kit: Kit): SceneMap {
     RACK_Z,
     racks,
     SERVER_SPOT,
-    pulseRings,
     padlock,
     documents,
     view,
@@ -35,6 +34,8 @@ export default function collection(kit: Kit): SceneMap {
     DEFENDER_SPOT,
     defender,
     standing,
+    showRipples,
+    flyPaper,
   } = kit
   return {
     // T1005 Data from Local System（本編）
@@ -158,14 +159,7 @@ export default function collection(kit: Kit): SceneMap {
         view.height = 14
         storyState(11) // Data Staged
         const centre = [-3.2, 0.3, -2.0]
-        pulseRings.forEach((ring, j) => {
-          const ph = (t * 0.5 + j * 0.5) % 1,
-            scale = 1 + ph * 4
-          ring.visible = true
-          ring.scale.set(scale, 0.02, scale)
-          ring.position.set(centre[0], 0.08, centre[2])
-          ring.material.opacity = 0.5 * (1 - ph)
-        })
+        showRipples(centre[0], centre[2], t * 0.5, 4)
         for (let i = 0; i < 2; i++) {
           const rack = racks[i],
             start = 0.5 + i * 1.2,
@@ -184,7 +178,7 @@ export default function collection(kit: Kit): SceneMap {
             if (p < 1) rack.data.rotation.y = t * 5
           }
           if (t > laterStart) {
-            flyTo(
+            flyPaper(
               doc,
               [seat.x, 2.2, seat.z],
               [centre[0] - 0.4 + i * 0.8, 0.45, centre[2] + 0.5],
@@ -192,11 +186,9 @@ export default function collection(kit: Kit): SceneMap {
               laterStart + 0.2,
               laterStart + 1.3,
               3,
-              5,
+              laterStart,
+              1,
             )
-            const size = overshoot(progress(t, laterStart, laterStart + 0.3))
-            doc.scale.set(size, size, size)
-            if (t >= laterStart + 1.3) doc.rotation.y = 0.6
           }
         }
       },
@@ -219,8 +211,7 @@ export default function collection(kit: Kit): SceneMap {
         documents.forEach((doc, i) => {
           const start = 1.2 + i * 0.5
           if (t < start) return
-          const size = 0.85 * overshoot(progress(t, start, start + 0.3))
-          flyTo(
+          flyPaper(
             doc,
             [wiki[0], 2.2, wiki[1]],
             [SERVER_SPOT[0] - 1.0 + i * 0.65, 0.45, SERVER_SPOT[1] + 1.5],
@@ -228,10 +219,9 @@ export default function collection(kit: Kit): SceneMap {
             start + 0.2,
             start + 1.2,
             2.2,
-            5,
+            start,
+            0.85,
           )
-          doc.scale.set(size, size, size)
-          if (t >= start + 1.2) doc.rotation.y = 0.6
         })
       },
     },
@@ -276,15 +266,7 @@ export default function collection(kit: Kit): SceneMap {
         // 乗っ取った端末のマイクで、周りの会話を録音する
         const mic = [-2.3, 0.8, 2.6]
         const talker = employees[1].position
-        if (t > 0.4 && t < 4.4)
-          pulseRings.forEach((ring, j) => {
-            const phase = ((t - 0.4) * 0.8 + j * 0.5) % 1
-            const scale = 1 + phase * 6
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(talker.x, 0.08, talker.z)
-            ring.material.opacity = 0.5 * (1 - phase)
-          })
+        if (t > 0.4 && t < 4.4) showRipples(talker.x, talker.z, (t - 0.4) * 0.8, 6)
         hopInPlace(employees[1], t, 0.4, 4.4, 0.06)
         for (let i = 0; i < 4; i++) {
           const start = 1.0 + i * 0.5
@@ -361,8 +343,7 @@ export default function collection(kit: Kit): SceneMap {
           if (t < start) continue
           const copy = documents[i]
           const to = pileSpot(i)
-          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
-          flyTo(
+          flyPaper(
             copy,
             [middle[0], 1.6, middle[2]],
             [to[0], 0.5, to[2] + 0.9],
@@ -370,10 +351,8 @@ export default function collection(kit: Kit): SceneMap {
             start + 0.2,
             start + 1.2,
             1.6,
-            5,
+            start,
           )
-          copy.scale.set(size, size, size)
-          if (t >= start + 1.2) copy.rotation.y = 0.6
         }
         showCross(middle[0], 2.4, middle[2], t, 5.2)
       },
@@ -407,10 +386,7 @@ export default function collection(kit: Kit): SceneMap {
           if (t < start) continue
           const page = documents[i]
           const to = pileSpot(i)
-          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
-          flyTo(page, browser, [to[0], 0.5, to[2] + 0.9], t, start + 0.2, start + 1.3, 2.4, 5)
-          page.scale.set(size, size, size)
-          if (t >= start + 1.3) page.rotation.y = 0.6
+          flyPaper(page, browser, [to[0], 0.5, to[2] + 0.9], t, start + 0.2, start + 1.3, 2.4, start)
         }
       },
     },
@@ -444,10 +420,7 @@ export default function collection(kit: Kit): SceneMap {
           if (t < start) continue
           const copy = documents[i]
           const to = pileSpot(i + 1)
-          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
-          flyTo(copy, board, [to[0], 0.5, to[2] + 0.9], t, start + 0.1, start + 1.1, 2.2, 5)
-          copy.scale.set(size, size, size)
-          if (t >= start + 1.1) copy.rotation.y = 0.6
+          flyPaper(copy, board, [to[0], 0.5, to[2] + 0.9], t, start + 0.1, start + 1.1, 2.2, start)
         }
       },
     },
@@ -506,10 +479,16 @@ export default function collection(kit: Kit): SceneMap {
           if (t < start) continue
           const config = documents[i]
           const to = pileSpot(i)
-          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
-          flyTo(config, [hub[0], 2.2, hub[2]], [to[0], 0.5, to[2] + 0.9], t, start + 0.2, start + 1.3, 1.8, 5)
-          config.scale.set(size, size, size)
-          if (t >= start + 1.3) config.rotation.y = 0.6
+          flyPaper(
+            config,
+            [hub[0], 2.2, hub[2]],
+            [to[0], 0.5, to[2] + 0.9],
+            t,
+            start + 0.2,
+            start + 1.3,
+            1.8,
+            start,
+          )
         }
         if (t > 0.6 && t < 1.5) stretchBetween(pinkBeams[0], [SERVER_SPOT[0], 1.4, SERVER_SPOT[1]], hub, 0.08)
       },
@@ -538,10 +517,7 @@ export default function collection(kit: Kit): SceneMap {
           const start = 1.0 + i * 0.5
           if (t < start) return
           const to = pileSpot(i)
-          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
-          flyTo(file, top, [to[0], 0.5, to[2] + 0.9], t, start + 0.2, start + 1.2, 1.4, 5)
-          file.scale.set(size, size, size)
-          if (t >= start + 1.2) file.rotation.y = 0.6
+          flyPaper(file, top, [to[0], 0.5, to[2] + 0.9], t, start + 0.2, start + 1.2, 1.4, start)
         })
         showAlert(0, DEFENDER_SPOT[0], 2.2, DEFENDER_SPOT[1], t, 5.2, 6.6)
       },
@@ -576,10 +552,7 @@ export default function collection(kit: Kit): SceneMap {
           if (t < start) continue
           const file = documents[i]
           const to = pileSpot(i)
-          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
-          flyTo(file, port, [to[0], 0.5, to[2] + 0.9], t, start + 0.2, start + 1.3, 2.4, 5)
-          file.scale.set(size, size, size)
-          if (t >= start + 1.3) file.rotation.y = 0.6
+          flyPaper(file, port, [to[0], 0.5, to[2] + 0.9], t, start + 0.2, start + 1.3, 2.4, start)
         }
       },
     },
@@ -612,10 +585,17 @@ export default function collection(kit: Kit): SceneMap {
         })
         hopInPlace(employees[1], t, 0.5, 2.4, 0.06)
         if (t > 2.8) {
-          const size = 0.9 * overshoot(progress(t, 2.8, 3.1))
-          flyTo(record, [-2.3, 1.6, 2.6], [SERVER_SPOT[0], 0.5, SERVER_SPOT[1] + 1.6], t, 3.0, 4.0, 2.4, 5)
-          record.scale.set(size, size, size)
-          if (t >= 4.0) record.rotation.y = 0.6
+          flyPaper(
+            record,
+            [-2.3, 1.6, 2.6],
+            [SERVER_SPOT[0], 0.5, SERVER_SPOT[1] + 1.6],
+            t,
+            3.0,
+            4.0,
+            2.4,
+            2.8,
+            0.9,
+          )
         }
       },
     },

@@ -48,6 +48,7 @@ export default function commandAndControl(kit: Kit): SceneMap {
     showCheck,
     showAlert,
     DEFENDER_SPOT,
+    flowAlong,
   } = kit
   return {
     // T1071 Application Layer Protocol（本編）
@@ -280,13 +281,7 @@ export default function commandAndControl(kit: Kit): SceneMap {
         c2Tower.position.set(spots[now][0], 0, spots[now][1])
         stretchBetween(c2Link, from, to, 0.1)
         c2Link.material.opacity = 0.45 + 0.25 * Math.sin(t * 8)
-        for (let i = 0; i < 3; i++) {
-          const p = (t * 0.6 + i / 3) % 1
-          const cube = pinkCubes[i]
-          cube.visible = true
-          cube.scale.set(0.3, 0.3, 0.3)
-          cube.position.set(lerp(from[0], to[0], p), lerp(from[1], to[1], p), lerp(from[2], to[2], p))
-        }
+        flowAlong([from, to], 3, t * 0.6, 0.3)
         // 防御側が前の居場所を止めても（×）、通信はもう別の場所へ移っている
         if (t > 4.6) {
           const old = spots[(now + 2) % 3]
@@ -311,14 +306,7 @@ export default function commandAndControl(kit: Kit): SceneMap {
         trustedProcess.rotation.y = 0.6
         trustedProcessEyes.visible = false
         if (t > 1.4) stretchBetween(cyanBeams[0], from, to, 0.09)
-        if (t > 1.8)
-          for (let i = 0; i < 4; i++) {
-            const p = ((t - 1.8) * 0.5 + i * 0.25) % 1
-            const cube = pinkCubes[i]
-            cube.visible = true
-            cube.scale.set(0.26, 0.26, 0.26)
-            cube.position.set(lerp(from[0], to[0], p), lerp(from[1], to[1], p), lerp(from[2], to[2], p))
-          }
+        if (t > 1.8) flowAlong([from, to], 4, (t - 1.8) * 0.5, 0.26)
         showCross(tool[0], 2.3, tool[1], t, 5.4)
       },
     },
@@ -347,19 +335,7 @@ export default function commandAndControl(kit: Kit): SceneMap {
         if (t > 2.6) {
           stretchBetween(pinkBeams[0], from, spare, 0.09)
           stretchBetween(pinkBeams[1], spare, to, 0.09)
-          for (let i = 0; i < 3; i++) {
-            const along = (((t - 2.6) * 0.45 + i / 3) % 1) * 2
-            const j = Math.min(1, Math.floor(along))
-            const q = along - j
-            const cube = pinkCubes[i]
-            cube.visible = true
-            cube.scale.set(0.28, 0.28, 0.28)
-            cube.position.set(
-              lerp(legs[j][0], legs[j + 1][0], q),
-              lerp(legs[j][1], legs[j + 1][1], q),
-              lerp(legs[j][2], legs[j + 1][2], q),
-            )
-          }
+          flowAlong(legs, 3, (t - 2.6) * 0.45)
         }
         if (t > 3.4 && t < 4.6) malware.position.y = Math.abs(Math.sin((t - 3.4) * 6)) * 0.3
       },
@@ -388,20 +364,7 @@ export default function commandAndControl(kit: Kit): SceneMap {
         hole.rotation.y = view.time
         if (drawn > 0) stretchBetween(c2Link, legs[0], legs[1], 0.09)
         if (drawn > 1) stretchBetween(pinkBeams[0], legs[1], legs[2], 0.09)
-        if (t > 1.6)
-          for (let i = 0; i < 4; i++) {
-            const along = (((t - 1.6) * 0.4 + i * 0.25) % 1) * 2
-            const j = Math.min(1, Math.floor(along))
-            const q = along - j
-            const cube = pinkCubes[i]
-            cube.visible = true
-            cube.scale.set(0.28, 0.28, 0.28)
-            cube.position.set(
-              lerp(legs[j][0], legs[j + 1][0], q),
-              lerp(legs[j][1], legs[j + 1][1], q),
-              lerp(legs[j][2], legs[j + 1][2], q),
-            )
-          }
+        if (t > 1.6) flowAlong(legs, 4, (t - 1.6) * 0.4)
       },
     },
     // T1092 Communication Through Removable Media
@@ -639,13 +602,7 @@ export default function commandAndControl(kit: Kit): SceneMap {
         }
         if (t > 2.9) {
           const [from, to] = showC2Link(t)
-          for (let i = 0; i < 3; i++) {
-            const p = ((t - 2.9) * 0.4 + i / 3) % 1
-            const cube = pinkCubes[i]
-            cube.visible = true
-            cube.scale.set(0.28, 0.28, 0.28)
-            cube.position.set(lerp(from[0], to[0], p), lerp(from[1], to[1], p), lerp(from[2], to[2], p))
-          }
+          flowAlong([from, to], 3, (t - 2.9) * 0.4)
         }
       },
     },
@@ -672,20 +629,7 @@ export default function commandAndControl(kit: Kit): SceneMap {
         scanPlane.position.set(0, 2.1, 9.3)
         scanPlane.material.opacity = 0.3 + 0.15 * Math.sin(t * 8)
         for (let j = 0; j < 3; j++) if (drawn > j) stretchBetween(pinkBeams[j], legs[j], legs[j + 1], 0.07)
-        if (t > 1.7)
-          for (let i = 0; i < 4; i++) {
-            const along = (((t - 1.7) * 0.3 + i * 0.25) % 1) * 3
-            const j = Math.min(2, Math.floor(along))
-            const q = along - j
-            const cube = pinkCubes[i]
-            cube.visible = true
-            cube.scale.set(0.3, 0.14, 0.3)
-            cube.position.set(
-              lerp(legs[j][0], legs[j + 1][0], q),
-              lerp(legs[j][1], legs[j + 1][1], q),
-              lerp(legs[j][2], legs[j + 1][2], q),
-            )
-          }
+        if (t > 1.7) flowAlong(legs, 4, (t - 1.7) * 0.3, [0.3, 0.14, 0.3])
       },
     },
     // T1205 Traffic Signaling

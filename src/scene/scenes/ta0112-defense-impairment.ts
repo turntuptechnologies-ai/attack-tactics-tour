@@ -25,7 +25,6 @@ export default function defenseImpairment(kit: Kit): SceneMap {
     HOST_SPOT,
     malware,
     pinkCubes,
-    pulseRings,
     documents,
     trustedProcess,
     trustedProcessEyes,
@@ -52,6 +51,8 @@ export default function defenseImpairment(kit: Kit): SceneMap {
     yellowCubes,
     cloud,
     DEFENDER_SPOT,
+    showRipples,
+    flyPaper,
   } = kit
   return {
     // T1685 Disable or Modify Tools（本編）
@@ -181,15 +182,7 @@ export default function defenseImpairment(kit: Kit): SceneMap {
         storyState(7) // Safe Mode Boot
         if (t > 0.6 && t < 1.2) stretchBetween(pinkBeams[0], aboveHost(0.9), [3.5, 0.9, 4.4], 0.1)
         employees[2].scale.y = 1 - 0.45 * (smooth(progress(t, 1.2, 1.6)) - smooth(progress(t, 2.2, 2.5)))
-        if (t > 1.2 && t < 2.6)
-          pulseRings.forEach((ring, j) => {
-            const ph = ((t - 1.2) * 0.9 + j * 0.5) % 1,
-              scale = 1 + ph * 5
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(3.5, 0.08, 4.4)
-            ring.material.opacity = 0.5 * (1 - ph)
-          })
+        if (t > 1.2 && t < 2.6) showRipples(3.5, 4.4, (t - 1.2) * 0.9, 5)
         const amount = smooth(progress(t, 1.6, 2.2)) * (1 - smooth(progress(t, 5.2, 5.8))),
           drone = drones[2]
         drone.visible = true
@@ -611,8 +604,7 @@ export default function defenseImpairment(kit: Kit): SceneMap {
           const start = 2.4 + i * 0.6
           if (t < start || t > 5.4) continue
           const page = documents[i]
-          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
-          flyTo(
+          flyPaper(
             page,
             [device[0], 1.8, device[1]],
             aboveHost(2.6 + i * 0.6),
@@ -620,10 +612,8 @@ export default function defenseImpairment(kit: Kit): SceneMap {
             start + 0.2,
             start + 1.0,
             0.9,
-            5,
+            start,
           )
-          page.scale.set(size, size, size)
-          if (t >= start + 1.0) page.rotation.y = 0.6
         }
       },
     },
