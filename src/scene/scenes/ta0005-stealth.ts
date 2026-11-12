@@ -20,6 +20,7 @@ export default function stealth(kit: Kit): SceneMap {
     storyState,
     popIn,
     showAlert,
+    documents,
   } = kit
   return {
     // T1036 Masquerading（本編）
@@ -159,6 +160,18 @@ export default function stealth(kit: Kit): SceneMap {
         const hide = smooth(progress(t, 1.7, 2.4)) * (1 - smooth(progress(t, 5.6, 6.2)))
         malware.scale.y *= 1 - 0.82 * hide
         crown.visible = hide < 0.5
+        // 持っているファイルも、机の陰に運んで見えにくくする
+        const doc = documents[0]
+        const carried = smooth(progress(t, 0.6, 1.6))
+        const size = 1 - 0.8 * hide
+        doc.visible = true
+        doc.rotation.y = 0.6
+        doc.scale.set(size, size, size)
+        doc.position.set(
+          lerp(HOST_SPOT[0] + 0.9, 3.1, carried),
+          lerp(1.5, 0.35, hide),
+          lerp(HOST_SPOT[1] + 0.3, 4.95, carried),
+        )
         applyPose(
           defender,
           walk(

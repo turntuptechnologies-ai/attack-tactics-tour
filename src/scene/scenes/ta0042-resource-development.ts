@@ -1,6 +1,6 @@
 // TA0042 リソース開発（Resource Development）の場面。
 import type { Kit } from '../kit'
-import { progress, smooth, overshoot, keyframes, applyPose } from '../motion'
+import { progress, smooth, overshoot, keyframes, applyPose, stretchBetween, lerp } from '../motion'
 import type { SceneMap } from './types'
 
 export default function resourceDevelopment(kit: Kit): SceneMap {
@@ -25,8 +25,12 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
     aboveAttacker,
     flyTo,
     popIn,
-    showCross,
     jumpMalware,
+    pinkBeams,
+    pinkCubes,
+    TOWER_SPOT,
+    scanPlane,
+    showAlert,
   } = kit
   return {
     // T1583 Acquire Infrastructure（本編）
@@ -39,16 +43,20 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
         applyPose(defender, standing(2, 5, 0.4))
         c2Tower.visible = t > 0.4
         c2Tower.scale.y = Math.max(0.01, overshoot(progress(t, 0.4, 1.6)))
-        if (t > 2) {
-          const scale = overshoot(progress(t, 2, 2.3))
-          mail.visible = true
-          mail.position.set(ATTACKER_SPOT[0], 2.7 + Math.sin(t * 4) * 0.08, ATTACKER_SPOT[1])
-          mail.rotation.set(0, t * 3, 0)
-          mail.scale.set(scale, scale, scale)
-        }
+        // 借りたサーバー（塔）に続いて、偽ドメインの置き場（雲）も確保し、どちらも手もとから操れるようにする
+        const hand = [ATTACKER_SPOT[0], 1.6, ATTACKER_SPOT[1]]
+        const domain = [-0.6, 3.0, 12.4]
+        if (t > 1.6 && t < 2.2) stretchBetween(pinkBeams[0], hand, [TOWER_SPOT[0], 2.6, TOWER_SPOT[1]], 0.08)
+        popIn(cloud, domain[0], domain[1], domain[2], t, 2.0, 1.3)
+        cloud.rotation.y = 0.6
+        if (t > 2.6 && t < 3.2) stretchBetween(pinkBeams[1], hand, domain, 0.08)
         if (t > 3.1) {
-          placeMalware(0.2, bobHeight(), 12.6, MALWARE_SIZE * overshoot(progress(t, 3.1, 3.5)))
-          malware.rotation.y = Math.PI
+          const cube = pinkCubes[0]
+          const size = 0.4 * overshoot(progress(t, 3.1, 3.4))
+          cube.visible = true
+          cube.scale.set(size, size, size)
+          cube.position.set(domain[0], domain[1] + 1.1 + Math.sin(t * 4) * 0.06, domain[2])
+          cube.rotation.y = t * 2
         }
       },
     },
@@ -132,7 +140,19 @@ export default function resourceDevelopment(kit: Kit): SceneMap {
         else
           jumpMalware(t, 1.4, 2.6, [1.0, 0, 12.4], [centre[0], centre[1] + 0.6, centre[2]], 2.5, MALWARE_SIZE)
         popIn(mail, centre[0] + 1.3, centre[1] + 1.0, centre[2], t, 2.9)
-        showCross(centre[0], centre[1] + 3.0, centre[2], t, 5.4)
+        // 防御側は止められないが、置かれた偽サイトをネット上で探し当て、入口での検知に生かす
+        if (t > 5.0 && t < 6.4) {
+          scanPlane.visible = true
+          scanPlane.rotation.y = Math.PI / 2
+          scanPlane.scale.set(3.2, 2.8, 0.08)
+          scanPlane.position.set(
+            lerp(centre[0] - 2.4, centre[0] + 2.4, progress(t, 5.0, 6.4)),
+            centre[1] + 0.6,
+            centre[2],
+          )
+          scanPlane.material.opacity = 0.4
+        }
+        showAlert(0, centre[0], centre[1] + 2.6, centre[2], t, 6.0, 7)
       },
     },
   }

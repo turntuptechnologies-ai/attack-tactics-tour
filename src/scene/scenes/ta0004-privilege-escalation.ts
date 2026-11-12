@@ -5,7 +5,6 @@ import type { SceneMap } from './types'
 
 export default function privilegeEscalation(kit: Kit): SceneMap {
   const {
-    user,
     token,
     glass,
     pinkBeams,
@@ -20,7 +19,6 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
     trustedProcess,
     trustedProcessEyes,
     view,
-    standing,
     placeMalware,
     bobHeight,
     storyState,
@@ -118,8 +116,12 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
         storyState(5) // Access Token Manipulation
         const ux = -0.8,
           uz = 2.6
-        user.visible = true
-        applyPose(user, standing(ux, uz, 0.5))
+        // 高い権限で動いている正規のプロセス。その頭上のトークンを盗む
+        trustedProcess.visible = true
+        trustedProcess.scale.set(1.6, 1.6, 1.6)
+        trustedProcess.position.set(ux, 0, uz)
+        trustedProcess.rotation.y = 0.6
+        trustedProcessEyes.visible = false
         if (t > 0.7 && t < 1.6) stretchBetween(pinkBeams[0], aboveHost(0.8), [ux, 1.0, uz], 0.08)
         if (t < 3.0) {
           flyTo(token, [ux, 2.4, uz], aboveHost(2.2), t, 1.6, 2.8, 1.2, 5)
