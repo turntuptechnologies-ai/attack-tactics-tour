@@ -2,7 +2,7 @@ import { TACTICS } from '../data/tactics'
 import { techniqueTitle } from '../player/timeline'
 
 /** 戦術ごとに、動画で描いた技術と防御側の打ち手を並べた一覧表 */
-export function TechniqueTable({ onPick }: { onPick(techniqueId: string): void }) {
+export function TechniqueTable({ onPick }: { onPick(tactic: number, techniqueId: string): void }) {
   return (
     <div className="tw">
       <table>
@@ -10,14 +10,14 @@ export function TechniqueTable({ onPick }: { onPick(techniqueId: string): void }
           <tr>
             <th>ID</th>
             <th>戦術</th>
-            <th>動画で描いた技術の例（押すと再生）</th>
+            <th>技術（押すと再生）</th>
             <th>防御側の打ち手</th>
           </tr>
         </thead>
         <tbody>
           {TACTICS.map((t, k) =>
             t.examples.map((e, j) => (
-              <tr key={e.id}>
+              <tr key={`${t.id}-${e.id}`}>
                 {j === 0 && (
                   <>
                     <td className="tid" rowSpan={t.examples.length}>
@@ -30,7 +30,11 @@ export function TechniqueTable({ onPick }: { onPick(techniqueId: string): void }
                   </>
                 )}
                 <td>
-                  <button type="button" className={j === 0 ? 'lk main' : 'lk'} onClick={() => onPick(e.id)}>
+                  <button
+                    type="button"
+                    className={j === 0 ? 'lk main' : e.simple == null ? 'lk' : 'lk simple'}
+                    onClick={() => onPick(k, e.id)}
+                  >
                     {techniqueTitle(k, e.id)}
                   </button>
                 </td>

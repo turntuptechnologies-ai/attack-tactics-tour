@@ -5,8 +5,8 @@ import { overshoot, progress } from '../scene/motion'
 import { createScenes, type Scenes } from '../scene/scenes'
 import type { SceneDef } from '../scene/scenes/types'
 import { createWorld } from '../scene/world'
-import type { Caption } from '../data/tactics'
-import { buildTimeline, captionAt, parseHash, step, type TimelineScene } from './timeline'
+import type { Caption } from '../data/types'
+import { buildTimeline, captionAt, hashFor, parseHash, step, type TimelineScene } from './timeline'
 
 /** 毎フレーム位置を変える重ね表示。React を通さず、要素を直接動かす */
 export type Overlay = {
@@ -87,9 +87,9 @@ export class Player {
     this.time = 0.02
     this.setPlaying(true)
     if (!fromUser) return
-    const id = this.timeline[index].techniqueId
+    const hash = hashFor(this.timeline, index)
     try {
-      history.replaceState(null, '', id ? `#${id}` : location.pathname + location.search)
+      history.replaceState(null, '', hash || location.pathname + location.search)
     } catch {
       // 埋め込み先によっては履歴を書き換えられない。再生には影響しない
     }
@@ -141,6 +141,7 @@ export class Player {
   private sceneDef(scene: TimelineScene): SceneDef {
     if (scene.kind === 'intro') return this.scenes.intro
     if (scene.kind === 'outro') return this.scenes.outro
+    if (scene.kind === 'simple') return this.scenes.simple(scene.tactic, scene.variant ?? 0)
     return this.scenes.techniques[scene.techniqueId!]
   }
 
