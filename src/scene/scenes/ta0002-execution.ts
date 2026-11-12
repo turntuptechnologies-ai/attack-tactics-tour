@@ -36,12 +36,12 @@ export default function execution(kit: Kit): SceneMap {
     hammer,
     truckB,
     relayBot,
-    pulseRings,
     padlock,
     cloud,
     database,
     showCheck,
     showSparks,
+    showRipples,
   } = kit
   return {
     // T1059 Command and Scripting Interpreter（本編）
@@ -623,15 +623,7 @@ export default function execution(kit: Kit): SceneMap {
         trustedProcess.rotation.y = 0.6
         // 窓口の頭ごしに
         if (t > 0.8 && t < 4.4) stretchBetween(pinkBeams[0], aboveHost(1.0), [core[0], 1.9, core[1]], 0.09)
-        if (t > 1.6 && t < 4.4)
-          pulseRings.forEach((ring, j) => {
-            const phase = ((t - 1.6) * 0.9 + j * 0.5) % 1
-            const scale = 1 + phase * 4
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(core[0], 0.08, core[1])
-            ring.material.opacity = 0.5 * (1 - phase)
-          })
+        if (t > 1.6 && t < 4.4) showRipples(core[0], core[1], (t - 1.6) * 0.9, 4)
         showSparks(core[0], 1.6, core[1], t, 2.2)
         sensorArrives(t)
       },

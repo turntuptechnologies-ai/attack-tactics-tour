@@ -46,6 +46,8 @@ export default function discovery(kit: Kit): SceneMap {
     probeFromHost,
     takeNote,
     DEFENDER_SPOT,
+    showRipples,
+    flyPaper,
   } = kit
   return {
     // T1046 Network Service Discovery（本編）
@@ -55,15 +57,7 @@ export default function discovery(kit: Kit): SceneMap {
         view.target = [0, -0.5]
         view.height = 15.5
         storyState(9) // Discovery
-        if (t < 4.6)
-          pulseRings.forEach((ring, j) => {
-            const ph = (t * 0.55 + j * 0.5) % 1,
-              scale = 1 + ph * 26
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(HOST_SPOT[0], 0.08, HOST_SPOT[1])
-            ring.material.opacity = 0.5 * (1 - ph)
-          })
+        if (t < 4.6) showRipples(HOST_SPOT[0], HOST_SPOT[1], t * 0.55, 26)
         rackMarks.forEach((m, i) => {
           const start = 1.4 + i * 0.35
           if (t < start) return
@@ -230,8 +224,7 @@ export default function discovery(kit: Kit): SceneMap {
         documents.slice(0, 3).forEach((doc, i) => {
           const start = 1.2 + i * 0.6
           if (t < start) return
-          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
-          flyTo(
+          flyPaper(
             doc,
             [pc[0], 1.6, pc[2]],
             [HOST_SPOT[0] - 0.7 + i * 0.7, 2.7 + (i & 1) * 0.4, HOST_SPOT[1]],
@@ -239,10 +232,8 @@ export default function discovery(kit: Kit): SceneMap {
             start + 0.2,
             start + 1.0,
             1.0,
-            5,
+            start,
           )
-          doc.scale.set(size, size, size)
-          if (t >= start + 1.0) doc.rotation.y = 0.6
         })
       },
     },
@@ -301,10 +292,7 @@ export default function discovery(kit: Kit): SceneMap {
         if (t > 1.0 && t < 1.8) stretchBetween(pinkBeams[0], aboveHost(1.0), at, 0.07)
         if (t > 1.6) {
           const note = documents[0]
-          const size = 0.8 * overshoot(progress(t, 1.6, 1.9))
-          flyTo(note, [at[0], at[1] - 0.9, at[2]], aboveHost(2.8), t, 1.8, 2.6, 0.8, 5)
-          note.scale.set(size, size, size)
-          if (t >= 2.6) note.rotation.y = 0.6
+          flyPaper(note, [at[0], at[1] - 0.9, at[2]], aboveHost(2.8), t, 1.8, 2.6, 0.8, 1.6)
         }
       },
     },
@@ -527,14 +515,7 @@ export default function discovery(kit: Kit): SceneMap {
           )
           attackerScan.rotation.y = angle
           attackerScan.material.opacity = 0.4
-          pulseRings.forEach((ring, j) => {
-            const phase = ((t - 0.5) * 0.7 + j * 0.5) % 1
-            const scale = 1 + phase * 3
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(HOST_SPOT[0], 0.08, HOST_SPOT[1])
-            ring.material.opacity = 0.4 * (1 - phase)
-          })
+          showRipples(HOST_SPOT[0], HOST_SPOT[1], (t - 0.5) * 0.7, 3, 0.4)
         }
         if (t > 2.9 && t < 4.6) {
           showCheck(HOST_SPOT[0], 3.6, HOST_SPOT[1], t, 2.9)
@@ -911,15 +892,7 @@ export default function discovery(kit: Kit): SceneMap {
         database.position.set(names[0], 0, names[2])
         database.rotation.y = 0.6
         // まず自分の住所
-        if (t > 0.5 && t < 4.6)
-          pulseRings.forEach((ring, j) => {
-            const phase = ((t - 0.5) * 0.7 + j * 0.5) % 1
-            const scale = 1 + phase * 3
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(HOST_SPOT[0], 0.08, HOST_SPOT[1])
-            ring.material.opacity = 0.4 * (1 - phase)
-          })
+        if (t > 0.5 && t < 4.6) showRipples(HOST_SPOT[0], HOST_SPOT[1], (t - 0.5) * 0.7, 3, 0.4)
         if (t > 1.2 && t < 4.6) stretchBetween(cyanBeams[0], aboveHost(0.6), exit, 0.05)
         if (t > 1.9 && t < 4.6) stretchBetween(cyanBeams[1], aboveHost(0.6), names, 0.05)
         takeNote(0, aboveHost(0.6), t, 0.9)

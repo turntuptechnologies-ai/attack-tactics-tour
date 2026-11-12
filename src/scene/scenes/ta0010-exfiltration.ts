@@ -22,7 +22,6 @@ export default function exfiltration(kit: Kit): SceneMap {
     showC2Link,
     pinkCubes,
     relayBot,
-    pulseRings,
     bobHeight,
     glass,
     popIn,
@@ -30,6 +29,7 @@ export default function exfiltration(kit: Kit): SceneMap {
     malware,
     documents,
     flyTo,
+    showRipples,
   } = kit
   return {
     // T1041 Exfiltration Over C2 Channel（本編）
@@ -221,15 +221,7 @@ export default function exfiltration(kit: Kit): SceneMap {
         relayBot.scale.set(1.2, 1.2, 1.2)
         relayBot.position.set(receiver[0], bobHeight(), receiver[1])
         relayBot.rotation.y = -0.6
-        if (t > 0.4 && t < 4.4)
-          pulseRings.forEach((ring, j) => {
-            const phase = ((t - 0.4) * 0.6 + j * 0.5) % 1
-            const scale = 1 + phase * 10
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(SERVER_SPOT[0], 0.08, SERVER_SPOT[1])
-            ring.material.opacity = 0.5 * (1 - phase)
-          })
+        if (t > 0.4 && t < 4.4) showRipples(SERVER_SPOT[0], SERVER_SPOT[1], (t - 0.4) * 0.6, 10)
         for (let i = 0; i < 3; i++) {
           const start = 0.8 + i * 0.7
           const p = progress(t, start, start + 1.5)

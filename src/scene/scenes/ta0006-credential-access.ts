@@ -38,6 +38,8 @@ export default function credentialAccess(kit: Kit): SceneMap {
     attackerScan,
     documents,
     trustedProcess,
+    flyPaper,
+    aroundHost,
   } = kit
   return {
     // T1003 OS Credential Dumping（本編）
@@ -58,7 +60,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
           const size = 0.8 * overshoot(progress(t, start, start + 0.3))
           spareKey.scale.set(size, size, size)
           const ang = t * 2 + j * 2.09,
-            point = [HOST_SPOT[0] + Math.cos(ang) * 1.0, 2.3, HOST_SPOT[1] + Math.sin(ang) * 1.0]
+            point = aroundHost(ang, 1, 2.3)
           if (t < laterStart) spareKey.position.set(seat.x, 2.4 + Math.sin(t * 5 + j) * 0.08, seat.z)
           else if (t < laterStart + 0.9)
             arcBetween(
@@ -235,16 +237,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
           if (t < start) return
           const angle = t * 2 + j * 2.09
           const size = 0.75 * overshoot(progress(t, start, start + 0.3))
-          flyTo(
-            spareKey,
-            [vault[0], 1.7, vault[1]],
-            [HOST_SPOT[0] + Math.cos(angle), 2.4, HOST_SPOT[1] + Math.sin(angle)],
-            t,
-            start,
-            start + 0.8,
-            1.4,
-            6,
-          )
+          flyTo(spareKey, [vault[0], 1.7, vault[1]], aroundHost(angle), t, start, start + 0.8, 1.4, 6)
           spareKey.scale.set(size, size, size)
           if (t >= start + 0.8) spareKey.rotation.y = t * 3 + j
         })
@@ -336,16 +329,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
           if (t < start) return
           const angle = t * 2 + j * 2.09
           const size = 0.75 * overshoot(progress(t, start, start + 0.3))
-          flyTo(
-            spareKey,
-            [lockAt[0], 1.0, lockAt[2]],
-            [HOST_SPOT[0] + Math.cos(angle), 2.4, HOST_SPOT[1] + Math.sin(angle)],
-            t,
-            start,
-            start + 0.9,
-            1.4,
-            6,
-          )
+          flyTo(spareKey, [lockAt[0], 1.0, lockAt[2]], aroundHost(angle), t, start, start + 0.9, 1.4, 6)
           spareKey.scale.set(size, size, size)
           if (t >= start + 0.9) spareKey.rotation.y = t * 3 + j
         })
@@ -440,16 +424,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
         if (t > 2.5) {
           const angle = t * 2
           const size = 0.75 * overshoot(progress(t, 2.5, 2.8))
-          flyTo(
-            copied,
-            [gate[0], 2.0, gate[1]],
-            [HOST_SPOT[0] + Math.cos(angle), 2.4, HOST_SPOT[1] + Math.sin(angle)],
-            t,
-            2.6,
-            3.4,
-            1.2,
-            6,
-          )
+          flyTo(copied, [gate[0], 2.0, gate[1]], aroundHost(angle), t, 2.6, 3.4, 1.2, 6)
           copied.scale.set(size, size, size)
           if (t >= 3.4) copied.rotation.y = t * 3
         }
@@ -611,8 +586,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
           const start = 1.1 + i * 0.4
           if (t < start) continue
           const ticket = documents[i]
-          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
-          flyTo(
+          flyPaper(
             ticket,
             [issuer[0], 1.8, issuer[1]],
             [bench[0] - 0.3 + i * 0.6, bench[1], bench[2]],
@@ -620,10 +594,8 @@ export default function credentialAccess(kit: Kit): SceneMap {
             start + 0.1,
             start + 0.9,
             1.0,
-            5,
+            start,
           )
-          ticket.scale.set(size, size, size)
-          if (t >= start + 0.9) ticket.rotation.y = 0.6
           if (i === 0 && t > 3.4) ticket.visible = false
         }
         if (t > 2.3 && t < 3.5) {
@@ -634,16 +606,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
         if (t > 3.4) {
           const angle = t * 2
           const size = 0.8 * overshoot(progress(t, 3.4, 3.7))
-          flyTo(
-            cracked,
-            [bench[0] - 0.3, bench[1], bench[2]],
-            [HOST_SPOT[0] + Math.cos(angle), 2.4, HOST_SPOT[1] + Math.sin(angle)],
-            t,
-            3.6,
-            4.3,
-            1.0,
-            6,
-          )
+          flyTo(cracked, [bench[0] - 0.3, bench[1], bench[2]], aroundHost(angle), t, 3.6, 4.3, 1.0, 6)
           cracked.scale.set(size, size, size)
           if (t >= 4.3) cracked.rotation.y = t * 3
         }
@@ -680,16 +643,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
           if (t < found) return
           const angle = t * 2 + i * 2.09
           const size = 0.7 * overshoot(progress(t, found, found + 0.3))
-          flyTo(
-            spareKey,
-            [spot[0], 1.3, spot[2]],
-            [HOST_SPOT[0] + Math.cos(angle), 2.4, HOST_SPOT[1] + Math.sin(angle)],
-            t,
-            found + 0.2,
-            found + 1.0,
-            1.2,
-            6,
-          )
+          flyTo(spareKey, [spot[0], 1.3, spot[2]], aroundHost(angle), t, found + 0.2, found + 1.0, 1.2, 6)
           spareKey.scale.set(size, size, size)
           if (t >= found + 1.0) spareKey.rotation.y = t * 3 + i
         })

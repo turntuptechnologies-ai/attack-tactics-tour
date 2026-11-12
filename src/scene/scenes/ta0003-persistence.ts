@@ -22,7 +22,6 @@ export default function persistence(kit: Kit): SceneMap {
     spareKeys,
     pinkCubes,
     c2Link,
-    pulseRings,
     clock,
     clockHand,
     view,
@@ -58,6 +57,7 @@ export default function persistence(kit: Kit): SceneMap {
     showSparks,
     wipeThenReturn,
     DEFENDER_SPOT,
+    showRipples,
   } = kit
   return {
     // T1053 Scheduled Task/Job（本編）
@@ -174,15 +174,7 @@ export default function persistence(kit: Kit): SceneMap {
         if (t >= 1.3) cube.rotation.y = view.time * 2
         employees[2].scale.y = 1 - 0.45 * (smooth(progress(t, 1.8, 2.2)) - smooth(progress(t, 2.9, 3.1)))
         showAlert(0, 3.5, 2.2, 3.5, t, 2.9, 3.6)
-        if (t > 2.9 && t < 4.0)
-          pulseRings.forEach((ring, j) => {
-            const ph = ((t - 2.9) * 0.9 + j * 0.5) % 1,
-              scale = 1 + ph * 6
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(3.5, 0.08, 4.4)
-            ring.material.opacity = 0.5 * (1 - ph)
-          })
+        if (t > 2.9 && t < 4.0) showRipples(3.5, 4.4, (t - 2.9) * 0.9, 6)
         if (t >= 1.8 && t < 3.3)
           placeMalware(HOST_SPOT[0], 0, HOST_SPOT[1], MALWARE_SIZE * (1 - progress(t, 1.8, 2.1)))
         else if (t >= 3.3)
@@ -338,15 +330,7 @@ export default function persistence(kit: Kit): SceneMap {
         flyTo(piece, aboveHost(1.2), deep, t, 0.5, 1.4, 1.0, 6)
         piece.scale.set(0.3, 0.3, 0.3)
         // OSごと入れ直されても（輪）、深い層に残した仕掛けから戻ってくる
-        if (t > 2.0 && t < 3.4)
-          pulseRings.forEach((ring, j) => {
-            const phase = ((t - 2.0) * 0.9 + j * 0.5) % 1
-            const scale = 1 + phase * 5
-            ring.visible = true
-            ring.scale.set(scale, 0.02, scale)
-            ring.position.set(HOST_SPOT[0], 0.08, HOST_SPOT[1])
-            ring.material.opacity = 0.5 * (1 - phase)
-          })
+        if (t > 2.0 && t < 3.4) showRipples(HOST_SPOT[0], HOST_SPOT[1], (t - 2.0) * 0.9, 5)
         if (t >= 2.2 && t < 3.6)
           placeMalware(HOST_SPOT[0], 0, HOST_SPOT[1], MALWARE_SIZE * (1 - progress(t, 2.2, 2.5)))
         else if (t >= 3.6)
