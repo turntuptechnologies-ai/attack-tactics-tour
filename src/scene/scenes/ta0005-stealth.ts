@@ -21,6 +21,11 @@ export default function stealth(kit: Kit): SceneMap {
     popIn,
     showAlert,
     documents,
+    trustedProcess,
+    trustedProcessEyes,
+    placeSensor,
+    aboveHost,
+    flyTo,
   } = kit
   return {
     // T1036 Masquerading（本編）
@@ -241,6 +246,48 @@ export default function stealth(kit: Kit): SceneMap {
             )
           }
         }
+      },
+    },
+    // T1218 System Binary Proxy Execution
+    T1218: {
+      hits: [3.6],
+      run(t) {
+        view.target = [0.8, 3.2]
+        view.height = 10
+        storyState(6)
+        // OSに付属する署名済みのプログラム。これに不正な処理を渡して、代わりに実行させる
+        const px = -0.8
+        const pz = 2.6
+        const cube = pinkCubes[0]
+        trustedProcess.visible = true
+        trustedProcess.scale.set(1.6, 1.6, 1.6)
+        trustedProcess.position.set(px, t > 2.2 && t < 4.4 ? Math.abs(Math.sin((t - 2.2) * 6)) * 0.2 : 0, pz)
+        trustedProcess.rotation.y = 0.6
+        trustedProcessEyes.visible = false
+        if (t < 2.2) {
+          flyTo(cube, aboveHost(2.2), [px, 1.6, pz], t, 0.8, 2.0, 1.3, 6)
+          cube.scale.set(0.34, 0.34, 0.34)
+        }
+        for (let i = 1; i < 5; i++) {
+          const p = progress(t, 2.2 + i * 0.2, 3.2 + i * 0.2)
+          if (p <= 0 || p >= 1) continue
+          const spark = pinkCubes[i]
+          const size = 0.28 * (1 - p * 0.6)
+          spark.visible = true
+          spark.scale.set(size, size, size)
+          spark.position.set(
+            px + Math.sin(i * 2.1 + p * 5) * 0.5,
+            1.2 + p * 2.0,
+            pz + Math.cos(i * 2.1 + p * 5) * 0.5,
+          )
+        }
+        // 見張りが調べに来ても、動いているのは信頼されたプログラムなので、通り過ぎる
+        const near = smooth(progress(t, 2.6, 3.2)) * (1 - smooth(progress(t, 3.9, 4.4)))
+        placeSensor(
+          lerp(0.5, px, near),
+          lerp(3.3, 3.9, near) + Math.sin(view.time * 3) * 0.1,
+          lerp(3.5, pz, near),
+        )
       },
     },
   }

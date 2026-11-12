@@ -210,5 +210,46 @@ export default function execution(kit: Kit): SceneMap {
         sensorArrives(t)
       },
     },
+    // T1610 Deploy Container
+    T1610: {
+      hits: [3.2],
+      run(t) {
+        view.target = [0.9, 3.2]
+        view.height = 10
+        storyState(3)
+        // となりに新しいコンテナ（箱）を立ち上げ、その中で不正な処理を動かす
+        const box = [-0.4, 2.6]
+        const up = overshoot(progress(t, 1.0, 1.5))
+        if (t > 0.5 && t < 1.1) stretchBetween(pinkBeams[0], aboveHost(0.8), [box[0], 0.8, box[1]], 0.09)
+        if (up > 0.02) {
+          glass.visible = true
+          glass.scale.set(1.8 * up, 1.8 * up, 1.8 * up)
+          glass.position.set(box[0], 0.92 * up, box[1])
+          glass.material.opacity = 0.4
+        }
+        if (t > 1.7) {
+          const bot = bots[4]
+          const size = 1.2 * overshoot(progress(t, 1.7, 2.0))
+          bot.visible = true
+          bot.scale.set(size, size, size)
+          bot.position.set(box[0], t > 2.2 ? Math.abs(Math.sin((t - 2.2) * 6)) * 0.25 : 0, box[1])
+          bot.rotation.y = 0.6
+        }
+        for (let i = 0; i < 4; i++) {
+          const p = progress(t, 2.4 + i * 0.2, 3.4 + i * 0.2)
+          if (p <= 0 || p >= 1) continue
+          const cube = pinkCubes[i]
+          const size = 0.26 * (1 - p * 0.6)
+          cube.visible = true
+          cube.scale.set(size, size, size)
+          cube.position.set(
+            box[0] + Math.sin(i * 2.1 + p * 5) * 0.45,
+            0.7 + p * 1.9,
+            box[1] + Math.cos(i * 2.1 + p * 5) * 0.45,
+          )
+        }
+        sensorArrives(t)
+      },
+    },
   }
 }

@@ -50,6 +50,9 @@ export default function initialAccess(kit: Kit): SceneMap {
     showCross,
     showCheck,
     jumpMalware,
+    user,
+    token,
+    showAlert,
   } = kit
   return {
     // T1566 Phishing（本編）
@@ -296,6 +299,51 @@ export default function initialAccess(kit: Kit): SceneMap {
           gateGuard.position.set(6.5, 2.5 + (1 - bounce(progress(t, 4.8, 5.5))) * 6, 7.6)
         }
         showCross(6.5, 4.2, 7.6, t, 5.6)
+      },
+    },
+    // T1091 Replication Through Removable Media
+    T1091: {
+      hits: [4.2],
+      run(t) {
+        view.target = [2.2, 7.0]
+        view.height = 13
+        storyState(2)
+        // 門の外に落としておいたUSBメモリを、従業員が拾って持ち込み、自分の端末に挿す
+        const usb = [1.4, 0.3, 8.6]
+        const pose = walk(
+          [
+            [0, 0.6, 5.2],
+            [0.5, 0.6, 5.2],
+            [1.5, 1.2, 8.2],
+            [2.0, 1.2, 8.2],
+            [2.7, 0.8, 6.5],
+            [3.4, 2.6, 4.4],
+            [7, 2.6, 4.4],
+          ],
+          t,
+          0,
+        )
+        user.visible = true
+        applyPose(user, pose)
+        openGate(progress(t, 0.3, 0.7) - progress(t, 2.9, 3.3))
+        token.visible = t < 3.6
+        token.scale.set(0.35, 0.35, 0.35)
+        token.rotation.y = view.time * 2
+        if (t < 1.8) token.position.set(usb[0], usb[1] + Math.sin(view.time * 4) * 0.05, usb[2])
+        else token.position.set(pose.x, pose.y + 2.0, pose.z)
+        showAlert(0, pose.x, 2.9, pose.z, t, 1.5, 2.0)
+        if (t > 3.6) {
+          jumpMalware(
+            t,
+            3.6,
+            4.2,
+            [2.9, 1.0, 4.5],
+            aboveHost(0),
+            0.9,
+            MALWARE_SIZE * overshoot(progress(t, 3.6, 3.9)),
+          )
+          view.actor = malware
+        }
       },
     },
   }

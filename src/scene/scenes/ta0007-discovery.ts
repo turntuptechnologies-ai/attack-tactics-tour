@@ -25,6 +25,8 @@ export default function discovery(kit: Kit): SceneMap {
     aboveHost,
     popIn,
     showAlert,
+    scanPlane,
+    flyTo,
   } = kit
   return {
     // T1046 Network Service Discovery（本編）
@@ -189,6 +191,40 @@ export default function discovery(kit: Kit): SceneMap {
         trustedProcess.rotation.y = 0.6
         trustedProcessEyes.visible = false
         showAlert(0, trustedProcess.position.x, 2.0, trustedProcess.position.z, t, 3.7, 4.6)
+      },
+    },
+    // T1082 System Information Discovery
+    T1082: {
+      hits: [3.4],
+      run(t) {
+        view.target = [2.2, 3.4]
+        view.height = 9.5
+        storyState(9)
+        // 入り込んだ端末そのものを調べ、OSや機器の構成を書き出す
+        const pc = [3.5, 1.0, 4.4]
+        if (t > 0.6 && t < 2.8) {
+          scanPlane.visible = true
+          scanPlane.scale.set(1.8, 1.6, 0.08)
+          scanPlane.position.set(pc[0], pc[1] + 0.2, lerp(5.2, 3.6, (progress(t, 0.6, 2.8) * 2) % 1))
+          scanPlane.material.opacity = 0.4
+        }
+        documents.slice(0, 3).forEach((doc, i) => {
+          const start = 1.2 + i * 0.6
+          if (t < start) return
+          const size = 0.8 * overshoot(progress(t, start, start + 0.3))
+          flyTo(
+            doc,
+            [pc[0], 1.6, pc[2]],
+            [HOST_SPOT[0] - 0.7 + i * 0.7, 2.7 + (i & 1) * 0.4, HOST_SPOT[1]],
+            t,
+            start + 0.2,
+            start + 1.0,
+            1.0,
+            5,
+          )
+          doc.scale.set(size, size, size)
+          if (t >= start + 1.0) doc.rotation.y = 0.6
+        })
       },
     },
   }

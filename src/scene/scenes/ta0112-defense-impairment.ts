@@ -26,6 +26,9 @@ export default function defenseImpairment(kit: Kit): SceneMap {
     aboveHost,
     showCross,
     showCheck,
+    padlock,
+    flyTo,
+    showAlert,
   } = kit
   return {
     // T1685 Disable or Modify Tools（本編）
@@ -177,6 +180,34 @@ export default function defenseImpairment(kit: Kit): SceneMap {
           glass.material.opacity = 0.45
         } // the placeSensor never loads: frozen, boxed in
         if (t > 2.6 && t < 4.6) malware.position.y = Math.abs(Math.sin((t - 2.6) * 5)) * 0.4
+      },
+    },
+    // T1222 File and Directory Permissions Modification
+    T1222: {
+      hits: [3.2],
+      run(t) {
+        view.target = [0.9, 3.0]
+        view.height = 9.5
+        storyState(7)
+        // 鍵のかかったファイル。権限を書き換えて鍵を外し、読み書きできるようにする
+        const at = [0, 1.7, 2.3]
+        const file = documents[0]
+        const open = smooth(progress(t, 1.6, 2.2))
+        file.visible = true
+        if (t < 2.4) {
+          file.scale.set(1.6, 1.6, 1.6)
+          file.position.set(at[0], at[1], at[2])
+        } else {
+          flyTo(file, at, aboveHost(2.7), t, 2.4, 3.2, 1.0)
+          file.scale.set(1.2, 1.2, 1.2)
+        }
+        file.rotation.y = 0.6
+        padlock.visible = open < 0.98
+        padlock.scale.set(0.7, 0.7, 0.7)
+        padlock.rotation.set(0, 0.6, open * 1.2)
+        padlock.position.set(at[0] + open * 0.9, lerp(at[1] + 1.1, 0.3, open * open), at[2])
+        if (t > 0.9 && t < 1.7) stretchBetween(pinkBeams[0], aboveHost(0.8), [at[0], at[1] + 1.1, at[2]], 0.1)
+        showAlert(0, -2, 2.6, 5, t, 5.0, 7)
       },
     },
   }

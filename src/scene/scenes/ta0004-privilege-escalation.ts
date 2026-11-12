@@ -26,6 +26,8 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
     flyTo,
     showCross,
     jumpMalware,
+    documents,
+    database,
   } = kit
   return {
     // T1068 Exploitation for Privilege Escalation（本編）
@@ -194,6 +196,35 @@ export default function privilegeEscalation(kit: Kit): SceneMap {
           )
           crown.visible = t > 3.1
         }
+      },
+    },
+    // T1484 Domain or Tenant Policy Modification
+    T1484: {
+      hits: [3.4],
+      run(t) {
+        view.target = [0.4, 2.6]
+        view.height = 11
+        storyState(5)
+        // 組織全体の決まり（ポリシー）を収めた台帳を書き換え、自分に強い権限が配られるようにする
+        const book = [-1.0, 2.2]
+        const rule = documents[0]
+        database.visible = true
+        database.scale.set(0.9, 0.9, 0.9)
+        database.position.set(book[0], 0, book[1])
+        database.rotation.y = 0.6
+        rule.visible = true
+        rule.scale.set(1.2, 1.2, 1.2)
+        rule.position.set(book[0], 2.2 + Math.sin(view.time * 3) * 0.05, book[1])
+        rule.rotation.set(0, 0.6 + smooth(progress(t, 1.6, 2.4)) * Math.PI * 2, 0)
+        if (t > 0.8 && t < 1.7) stretchBetween(pinkBeams[0], aboveHost(0.8), [book[0], 2.2, book[1]], 0.09)
+        // 書き換えられた決まりが、こんどは正規の仕組みとして配られてくる
+        if (t > 2.4 && t < 3.2) stretchBetween(pinkBeams[1], [book[0], 2.2, book[1]], aboveHost(1.6), 0.07)
+        if (t > 3.0) {
+          const size = lerp(MALWARE_SIZE, ADMIN_MALWARE_SIZE, overshoot(progress(t, 3.0, 3.4)))
+          crown.visible = true
+          malware.scale.set(size, size, size)
+        }
+        showCross(book[0], 3.3, book[1], t, 5.4)
       },
     },
   }

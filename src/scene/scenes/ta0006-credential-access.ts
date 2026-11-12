@@ -24,6 +24,7 @@ export default function credentialAccess(kit: Kit): SceneMap {
     showCross,
     showCheck,
     hopInPlace,
+    database,
   } = kit
   return {
     // T1003 OS Credential Dumping（本編）
@@ -195,6 +196,45 @@ export default function credentialAccess(kit: Kit): SceneMap {
           key.position.set(middle[0], 3.2 + Math.sin(t * 5) * 0.08, middle[2])
           key.rotation.y = t * 3
         }
+      },
+    },
+    // T1555 Credentials from Password Stores
+    T1555: {
+      hits: [3.4],
+      run(t) {
+        view.target = [1.0, 3.0]
+        view.height = 10
+        storyState(8)
+        // パスワードの保管庫。こじ開けて、中に保存されていた鍵をまとめて取り出す
+        const vault = [-0.6, 2.4]
+        const open = smooth(progress(t, 1.2, 1.8))
+        database.visible = true
+        database.scale.set(0.9, 0.9, 0.9)
+        database.position.set(vault[0], 0, vault[1])
+        database.rotation.y = 0.6
+        padlock.visible = open < 0.98
+        padlock.scale.set(0.7, 0.7, 0.7)
+        padlock.rotation.set(0, 0.6, open * 1.2)
+        padlock.position.set(vault[0] + open * 0.9, lerp(2.0, 0.3, open * open), vault[1])
+        if (t > 0.6 && t < 1.3) stretchBetween(pinkBeams[0], aboveHost(0.8), [vault[0], 2.0, vault[1]], 0.1)
+        spareKeys.forEach((spareKey, j) => {
+          const start = 1.8 + j * 0.4
+          if (t < start) return
+          const angle = t * 2 + j * 2.09
+          const size = 0.75 * overshoot(progress(t, start, start + 0.3))
+          flyTo(
+            spareKey,
+            [vault[0], 1.7, vault[1]],
+            [HOST_SPOT[0] + Math.cos(angle), 2.4, HOST_SPOT[1] + Math.sin(angle)],
+            t,
+            start,
+            start + 0.8,
+            1.4,
+            6,
+          )
+          spareKey.scale.set(size, size, size)
+          if (t >= start + 0.8) spareKey.rotation.y = t * 3 + j
+        })
       },
     },
   }

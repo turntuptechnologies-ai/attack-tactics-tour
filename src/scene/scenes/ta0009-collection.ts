@@ -1,6 +1,6 @@
 // TA0009 収集（Collection）の場面。
 import type { Kit } from '../kit'
-import { progress, smooth, lerp, overshoot, arcBetween } from '../motion'
+import { progress, smooth, lerp, overshoot, arcBetween, stretchBetween } from '../motion'
 import type { SceneMap } from './types'
 
 export default function collection(kit: Kit): SceneMap {
@@ -20,6 +20,8 @@ export default function collection(kit: Kit): SceneMap {
     storyState,
     flyTo,
     popIn,
+    pinkBeams,
+    database,
   } = kit
   return {
     // T1005 Data from Local System（本編）
@@ -180,6 +182,40 @@ export default function collection(kit: Kit): SceneMap {
             if (t >= laterStart + 1.3) doc.rotation.y = 0.6
           }
         }
+      },
+    },
+    // T1213 Data from Information Repositories
+    T1213: {
+      hits: [4.0],
+      run(t) {
+        view.target = [-1.6, 0.4]
+        view.height = 13
+        storyState(11)
+        // 社内の情報共有の場（文書管理やWiki）。そこから価値のある文書を集める
+        const wiki = [-4.6, 0.6]
+        database.visible = true
+        database.scale.set(1.1, 1.1, 1.1)
+        database.position.set(wiki[0], 0, wiki[1])
+        database.rotation.y = 0.6
+        if (t > 0.5 && t < 1.2)
+          stretchBetween(pinkBeams[0], [SERVER_SPOT[0], 1.2, SERVER_SPOT[1]], [wiki[0], 1.2, wiki[1]], 0.08)
+        documents.forEach((doc, i) => {
+          const start = 1.2 + i * 0.5
+          if (t < start) return
+          const size = 0.85 * overshoot(progress(t, start, start + 0.3))
+          flyTo(
+            doc,
+            [wiki[0], 2.2, wiki[1]],
+            [SERVER_SPOT[0] - 1.0 + i * 0.65, 0.45, SERVER_SPOT[1] + 1.5],
+            t,
+            start + 0.2,
+            start + 1.2,
+            2.2,
+            5,
+          )
+          doc.scale.set(size, size, size)
+          if (t >= start + 1.2) doc.rotation.y = 0.6
+        })
       },
     },
   }

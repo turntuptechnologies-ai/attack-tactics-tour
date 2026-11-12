@@ -37,6 +37,7 @@ export default function persistence(kit: Kit): SceneMap {
     showCross,
     showAlert,
     jumpMalware,
+    hopInPlace,
   } = kit
   return {
     // T1053 Scheduled Task/Job（本編）
@@ -248,6 +249,58 @@ export default function persistence(kit: Kit): SceneMap {
             ),
           )
           showCross(ux + 0.4, 3.4, uz, t, 5.4)
+        }
+      },
+    },
+    // T1176 Software Extensions
+    T1176: {
+      hits: [4.2],
+      run(t) {
+        view.target = [2.5, 3.8]
+        view.height = 9.5
+        storyState(4)
+        // 従業員のブラウザ（画面）に、拡張機能として取り付く
+        const screen = [3.5, 1.35, 4.45]
+        const piece = pinkCubes[0]
+        const size = 0.3 * (1 - smooth(progress(t, 5.9, 6.3)))
+        flyTo(piece, aboveHost(1.2), screen, t, 0.5, 1.4, 1.4, 6)
+        piece.scale.set(size, size, size)
+        piece.visible = size > 0.01
+        if (t >= 1.4) piece.rotation.y = 0
+        // マルウェア本体が見つかって駆除されても…
+        const near = smooth(progress(t, 1.9, 2.5)) * (1 - smooth(progress(t, 3.0, 3.4)))
+        placeSensor(
+          lerp(0.5, HOST_SPOT[0], near),
+          lerp(3.3, 2.7, near) + Math.sin(view.time * 3) * 0.1,
+          lerp(3.5, HOST_SPOT[1], near),
+        )
+        if (t > 2.5 && t < 2.9) {
+          const ray = cyanBeams[2]
+          ray.visible = true
+          ray.rotation.set(0, 0, 0)
+          ray.position.set(HOST_SPOT[0], 1.6, HOST_SPOT[1])
+          ray.scale.set(0.3, 1.8, 0.3)
+        }
+        // …ブラウザを使うたびに、拡張機能から戻ってくる
+        hopInPlace(employees[2], t, 3.3, 3.9, 0.15)
+        if (t >= 2.6 && t < 3.6)
+          placeMalware(HOST_SPOT[0], 0, HOST_SPOT[1], MALWARE_SIZE * (1 - progress(t, 2.6, 2.9)))
+        else if (t >= 3.6)
+          jumpMalware(t, 3.6, 4.2, screen, aboveHost(0), 0.9, MALWARE_SIZE * overshoot(progress(t, 3.6, 3.9)))
+        if (t > 4.6) {
+          applyPose(
+            defender,
+            walk(
+              [
+                [4.6, -2, 5],
+                [5.6, 2.2, 4.9],
+                [7, 2.2, 4.9],
+              ],
+              t,
+              0.4,
+            ),
+          )
+          showCross(screen[0], 2.3, screen[2], t, 5.6)
         }
       },
     },
