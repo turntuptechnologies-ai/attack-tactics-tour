@@ -34,14 +34,21 @@ export function techniqueTitle(tactic: number, id: string): string {
   return found ? `${id} ${found.name}` : id
 }
 
-/** 導入 → 戦術ごとに（本編の技術、ほかの技術…） → まとめ、の順に並べる */
+/**
+ * 導入 → 戦術ごとの技術 → まとめ、の順に並べる。
+ * 戦術の中は、マトリックスの列の上から下の順（光るマスを目で追えるように、画面の並びに合わせる）。
+ * 本編は、各戦術の examples の先頭の技術。列のどこにあってもよい。
+ */
 export function buildTimeline(tactics: Tactic[] = TACTICS): TimelineScene[] {
   const out: TimelineScene[] = [{ kind: 'intro', tactic: -1, duration: 5, captions: [[0, 5, '', INTRO]] }]
   tactics.forEach((tactic, k) => {
-    tactic.examples.forEach((e, j) => {
+    const row = new Map((MATRIX[k] ?? []).map((x, i) => [x.id, i]))
+    const rowOf = (id: string) => row.get(id) ?? Infinity
+    const inColumnOrder = [...tactic.examples].sort((a, b) => rowOf(a.id) - rowOf(b.id))
+    inColumnOrder.forEach((e) => {
       const duration = e.duration ?? 7
       out.push({
-        kind: j === 0 ? 'story' : 'extra',
+        kind: e === tactic.examples[0] ? 'story' : 'extra',
         tactic: k,
         techniqueId: e.id,
         title: techniqueTitle(k, e.id),

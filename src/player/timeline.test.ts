@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { GROUPS } from '../data/groups'
 import { MATRIX } from '../data/matrix'
 import { TACTICS } from '../data/tactics'
 import {
@@ -26,12 +27,33 @@ describe('buildTimeline', () => {
     expect(timeline[timeline.length - 1].kind).toBe('outro')
   })
 
-  it('各戦術の先頭の技術が本編で、残りは別の手口の例になる', () => {
+  it('戦術の中は、マトリックスの列の上から下の順に並ぶ', () => {
+    TACTICS.forEach((_, k) => {
+      const scenes = timeline.filter((s) => s.tactic === k)
+      expect(scenes.map((s) => s.techniqueId)).toEqual(MATRIX[k].map((x) => x.id))
+    })
+    // 戦術は左から右
+    const tactics = timeline.filter((s) => s.techniqueId).map((s) => s.tactic)
+    expect(tactics).toEqual([...tactics].sort((a, b) => a - b))
+  })
+
+  it('各戦術の examples の先頭の技術だけが本編で、残りは別の手口の例になる', () => {
     TACTICS.forEach((t, k) => {
       const scenes = timeline.filter((s) => s.tactic === k)
-      expect(scenes.map((s) => s.techniqueId)).toEqual(t.examples.map((e) => e.id))
-      expect(scenes.map((s) => s.kind)).toEqual(t.examples.map((_, j) => (j === 0 ? 'story' : 'extra')))
+      expect(scenes.filter((s) => s.kind === 'story').map((s) => s.techniqueId)).toEqual([t.examples[0].id])
+      expect(scenes.every((s) => s.kind === 'story' || s.kind === 'extra')).toBe(true)
     })
+  })
+
+  it('攻撃グループで見るときも、光るマスを列ごとに上から下へたどる', () => {
+    for (const g of GROUPS) {
+      const used = new Set(g.techniques)
+      const lit = MATRIX.flatMap((col, k) => col.filter((x) => used.has(x.id)).map((x) => `${k}/${x.id}`))
+      const played = playlistOf(timeline, g.techniques).map(
+        (i) => `${timeline[i].tactic}/${timeline[i].techniqueId}`,
+      )
+      expect(played, g.name).toEqual(lit)
+    }
   })
 
   it('字幕は場面の最初から最後までを切れ目なく覆う', () => {
